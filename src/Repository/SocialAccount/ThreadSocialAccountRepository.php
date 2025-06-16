@@ -4,11 +4,10 @@ namespace App\Repository\SocialAccount;
 
 use App\Entity\SocialAccount\ThreadSocialAccount;
 use App\Repository\AbstractRepository;
-use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
- * @extends ServiceEntityRepository<ThreadSocialAccount>
+ * @extends AbstractRepository<ThreadSocialAccount>
  */
 class ThreadSocialAccountRepository extends AbstractRepository
 {

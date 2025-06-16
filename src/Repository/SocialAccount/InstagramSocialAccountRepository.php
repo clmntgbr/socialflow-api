@@ -4,11 +4,10 @@ namespace App\Repository\SocialAccount;
 
 use App\Entity\SocialAccount\InstagramSocialAccount;
 use App\Repository\AbstractRepository;
-use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
- * @extends ServiceEntityRepository<InstagramSocialAccount>
+ * @extends AbstractRepository<InstagramSocialAccount>
  */
 class InstagramSocialAccountRepository extends AbstractRepository
 {

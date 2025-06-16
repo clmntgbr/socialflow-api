@@ -33,9 +33,37 @@ abstract class AbstractRepository extends ServiceEntityRepository
     /**
      * @param T $entity
      */
-    public function save(object $entity): void
+    public function save(object $entity, bool $persist = false): void
     {
-        $this->getEntityManager()->persist($entity);
+        if ($persist) {
+            $this->getEntityManager()->persist($entity);
+        }
+
         $this->getEntityManager()->flush();
+    }
+
+    /**
+     * @param T $entity
+     *
+     * @return T
+     */
+    public function update(object $entity, array $data): object
+    {
+        foreach ($data as $key => $value) {
+            $method = 'set'.ucfirst($key);
+            if (method_exists($entity, $method)) {
+                $entity->$method($value);
+                continue;
+            }
+
+            $method = 'add'.ucfirst($key);
+            if (method_exists($entity, $method)) {
+                $entity->$method($value);
+            }
+        }
+
+        $this->save($entity);
+
+        return $entity;
     }
 }

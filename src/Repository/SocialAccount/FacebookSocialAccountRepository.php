@@ -4,11 +4,10 @@ namespace App\Repository\SocialAccount;
 
 use App\Entity\SocialAccount\FacebookSocialAccount;
 use App\Repository\AbstractRepository;
-use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
- * @extends ServiceEntityRepository<FacebookSocialAccount>
+ * @extends AbstractRepository<FacebookSocialAccount>
  */
 class FacebookSocialAccountRepository extends AbstractRepository
 {

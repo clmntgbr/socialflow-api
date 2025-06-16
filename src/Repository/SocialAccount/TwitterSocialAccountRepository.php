@@ -4,11 +4,10 @@ namespace App\Repository\SocialAccount;
 
 use App\Entity\SocialAccount\TwitterSocialAccount;
 use App\Repository\AbstractRepository;
-use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
- * @extends ServiceEntityRepository<TwitterSocialAccount>
+ * @extends AbstractRepository<TwitterSocialAccount>
  */
 class TwitterSocialAccountRepository extends AbstractRepository
 {

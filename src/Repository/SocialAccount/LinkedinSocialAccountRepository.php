@@ -4,11 +4,10 @@ namespace App\Repository\SocialAccount;
 
 use App\Entity\SocialAccount\LinkedinSocialAccount;
 use App\Repository\AbstractRepository;
-use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
- * @extends ServiceEntityRepository<LinkedinSocialAccount>
+ * @extends AbstractRepository<LinkedinSocialAccount>
  */
 class LinkedinSocialAccountRepository extends AbstractRepository
 {

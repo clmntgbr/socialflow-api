@@ -69,6 +69,8 @@ db:
 	$(PHP) php bin/console doctrine:schema:update -f
 	$(PHP) php bin/console hautelook:fixtures:load -n
 
+jwt:
+	$(PHP) php bin/console lexik:jwt:generate-keypair --skip-if-exists
 migration:
 	$(PHP) php bin/console make:migration
 
