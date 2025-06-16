@@ -7,9 +7,11 @@ DOCKER_COMPOSE = docker compose -p $(PROJECT_NAME)
 
 CONTAINER_PHP := $(shell docker container ls -f "name=$(PROJECT_NAME)-php" -q)
 CONTAINER_DB := $(shell docker container ls -f "name=$(PROJECT_NAME)-database" -q)
+CONTAINER_QA := $(shell docker container ls -f "name=$(PROJECT_NAME)-qa" -q)
 
 PHP := docker exec -ti $(CONTAINER_PHP)
 DATABASE := docker exec -ti $(CONTAINER_DB)
+QA := docker exec -ti $(CONTAINER_QA)
 
 ## Kill all containers
 kill:
@@ -62,10 +64,46 @@ fabric:
 	$(PHP) php bin/console messenger:setup-transports
 
 db: 
-	$(PHP) php bin/console doctrine:database:drop -f
+	$(PHP) php bin/console doctrine:database:drop -f --if-exists
 	$(PHP) php bin/console doctrine:database:create
 	$(PHP) php bin/console doctrine:schema:update -f
 	$(PHP) php bin/console hautelook:fixtures:load -n
 
-fixtures:
+migration:
+	$(PHP) php bin/console make:migration
+
+migrate:
+	$(PHP) php bin/console doctrine:migration:migrate
+
+fixture:
 	$(PHP) php bin/console hautelook:fixtures:load -n
+
+schema:
+	$(PHP) php bin/console doctrine:schema:update -f
+
+regenerate:
+	$(PHP) php bin/console make:entity --regenerate App
+
+entity:
+	$(PHP) php bin/console make:entity
+
+message:
+	$(PHP) php bin/console make:message
+
+command:
+	$(PHP) php bin/console make:command
+
+dotenv:
+	$(PHP) php bin/console debug:dotenv
+
+php-cs-fixer:
+	$(QA) ./php-cs-fixer fix src --rules=@Symfony --verbose --diff
+
+php-stan:
+	$(QA) ./vendor/bin/phpstan analyse src -l $(or $(level), 5)
+
+consume:
+	$(PHP) php bin/console messenger:consume async async_low -vv
+
+ngrok: 
+	ngrok http --url=choice-pretty-leech.ngrok-free.app --host-header=localhost https://localhost:443
