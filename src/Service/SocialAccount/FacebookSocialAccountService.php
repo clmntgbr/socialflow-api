@@ -38,11 +38,10 @@ class FacebookSocialAccountService implements SocialAccountServiceInterface
     ) {
     }
 
-    public function getConnectUrl(User $user, string $callback): string
+    public function getConnectUrl(User $user): string
     {
         $user = $this->userRepository->update($user, [
             'state' => Uuid::v4(),
-            'callback' => $callback,
         ]);
 
         $params = [
@@ -87,13 +86,13 @@ class FacebookSocialAccountService implements SocialAccountServiceInterface
         $accessToken = $this->getAccessToken($getSocialAccountCallback->code);
 
         if (null === $accessToken) {
-            return new RedirectResponse(sprintf('%s?error=true&message=eee', $this->frontUrl));
+            return new RedirectResponse(sprintf('%s?error=true&message=1', $this->frontUrl));
         }
 
         $accounts = $this->getAccounts($accessToken);
 
         if (empty($accounts)) {
-            return new RedirectResponse(sprintf('%s?error=true&message=eee', $this->frontUrl));
+            return new RedirectResponse(sprintf('%s?error=true&message=2', $this->frontUrl));
         }
 
         $facebookIds = [];

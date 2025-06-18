@@ -20,7 +20,7 @@ class ThreadSocialAccountService implements SocialAccountServiceInterface
     ) {
     }
 
-    public function getConnectUrl(User $user, string $callback): string
+    public function getConnectUrl(User $user): string
     {
         return '';
     }

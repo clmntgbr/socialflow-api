@@ -44,9 +44,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: Types::STRING, nullable: true)]
     private ?string $state;
 
-    #[ORM\Column(type: Types::STRING, nullable: true)]
-    private ?string $callback;
-
     #[ORM\ManyToOne(targetEntity: Organization::class)]
     #[ORM\JoinColumn(nullable: true)]
     private ?Organization $activeOrganization = null;
@@ -148,18 +145,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setState(?string $state): static
     {
         $this->state = $state;
-
-        return $this;
-    }
-
-    public function getCallback(): ?string
-    {
-        return $this->callback;
-    }
-
-    public function setCallback(?string $callback): static
-    {
-        $this->callback = $callback;
 
         return $this;
     }

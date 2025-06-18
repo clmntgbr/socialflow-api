@@ -61,6 +61,8 @@ final class CreateOrUpdateFacebookAccountHandler
             ->setFollowing($message->facebookAccount->following)
             ->setLink($message->facebookAccount->link)
             ->setWebsite($message->facebookAccount->website)
+            ->setEmail($message->facebookAccount->email)
+            ->setAvatarUrl($message->facebookAccount->picture)
             ->setToken($message->facebookToken->token);
 
         $this->facebookSocialAccountRepository->save($facebookAccount, true);

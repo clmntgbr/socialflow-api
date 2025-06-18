@@ -40,6 +40,7 @@ use Symfony\Component\Uid\Uuid;
     SearchFilter::class,
     properties: [
         'id' => 'exact',
+        'status.value' => 'exact',
     ]
 )]
 class SocialAccount

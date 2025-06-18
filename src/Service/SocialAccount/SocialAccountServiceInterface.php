@@ -16,7 +16,7 @@ interface SocialAccountServiceInterface
     public const THREAD_CALLBACK_URL = '/social-account/thread/callback';
     public const LINKEDIN_CALLBACK_URL = '/social-account/linkedin/callback';
 
-    public function getConnectUrl(User $user, string $callback): string;
+    public function getConnectUrl(User $user): string;
 
     public function getScopes(): array;
 

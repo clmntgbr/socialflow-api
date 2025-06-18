@@ -9,6 +9,7 @@ use App\Entity\SocialAccount\SocialAccount;
 use App\Entity\User;
 use App\Repository\SocialAccount\SocialAccountRepository;
 use App\Repository\UserRepository;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
 #[AsMessageHandler]
@@ -16,6 +17,7 @@ final class RemoveSocialAccountHandler
 {
     public function __construct(
         private SocialAccountRepository $socialAccountRepository,
+        private LoggerInterface $logger
     ) {
     }
 
@@ -28,7 +30,8 @@ final class RemoveSocialAccountHandler
         ]);
 
         if (null === $socialAccount) {
-            throw new \Exception(sprintf('Social account does not exist with id [%s]', (string) $message->socialAccountId));
+            $this->logger->warning(sprintf('Social account does not exist with id [%s] and status [%s]', (string) $message->socialAccountId, $message->status->getValue()));
+            return;
         }
 
         $this->socialAccountRepository->delete($socialAccount);

@@ -105,10 +105,7 @@ php-stan:
 	$(QA) ./vendor/bin/phpstan analyse src -l $(or $(level), 5)
 
 consume:
-	$(PHP) php bin/console messenger:consume async async_low -vv
+	$(PHP) php bin/console messenger:consume async -vv
 
 ngrok: 
 	ngrok http --url=choice-pretty-leech.ngrok-free.app --host-header=localhost https://localhost:443
-
-remove:
-	$(PHP) php bin/console social-accounts:find-to-validate:remove

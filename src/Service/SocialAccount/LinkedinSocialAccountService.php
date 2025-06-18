@@ -9,7 +9,7 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 
 class LinkedinSocialAccountService implements SocialAccountServiceInterface
 {
-    public function getConnectUrl(User $user, string $callback): string
+    public function getConnectUrl(User $user): string
     {
         return '';
     }
