@@ -2,8 +2,10 @@
 
 namespace App\Service\SocialAccount;
 
+use App\Dto\AccessToken\AbstractToken;
 use App\Dto\SocialAccount\GetSocialAccountCallback;
 use App\Entity\User;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 
 interface SocialAccountServiceInterface
 {
@@ -18,11 +20,13 @@ interface SocialAccountServiceInterface
 
     public function getScopes(): array;
 
-    public function create(GetSocialAccountCallback $getSocialAccountCallback);
+    public function create(GetSocialAccountCallback $getSocialAccountCallback): RedirectResponse;
 
     public function delete();
 
-    public function getToken(string $code);
+    public function getAccessToken(string $code): ?AbstractToken;
 
-    public function getAccount();
+    public function getLongAccessToken(string $token): ?AbstractToken;
+
+    public function getAccounts(AbstractToken $token): array;
 }

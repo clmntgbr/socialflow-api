@@ -2,19 +2,24 @@
 
 namespace App\EventListener;
 
+use App\Application\Command\CreateOrganization;
 use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Attribute\AsDoctrineListener;
+use Doctrine\ORM\Event\PostPersistEventArgs;
 use Doctrine\ORM\Event\PrePersistEventArgs;
 use Doctrine\ORM\Event\PreUpdateEventArgs;
 use Doctrine\ORM\Events;
+use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 #[AsDoctrineListener(event: Events::prePersist)]
 #[AsDoctrineListener(event: Events::preUpdate)]
+#[AsDoctrineListener(event: Events::postPersist)]
 readonly class UserEvent
 {
     public function __construct(
         private UserPasswordHasherInterface $userPasswordHasher,
+        private MessageBusInterface $bus,
     ) {
     }
 
@@ -26,6 +31,16 @@ readonly class UserEvent
         }
 
         $this->hashPassword($entity);
+    }
+
+    public function postPersist(PostPersistEventArgs $postPersistEventArgs): void
+    {
+        $entity = $postPersistEventArgs->getObject();
+        if (!$entity instanceof User) {
+            return;
+        }
+
+        $this->createOrganization($entity);
     }
 
     public function preUpdate(PreUpdateEventArgs $preUpdateEventArgs): void
@@ -46,5 +61,12 @@ readonly class UserEvent
         }
 
         $user->eraseCredentials();
+    }
+
+    private function createOrganization(User $user): void
+    {
+        $this->bus->dispatch(new CreateOrganization(
+            userId: $user->getId(),
+        ));
     }
 }

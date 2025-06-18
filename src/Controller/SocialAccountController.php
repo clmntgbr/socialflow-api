@@ -8,6 +8,7 @@ use App\Entity\User;
 use App\Service\SocialAccount\SocialAccountServiceFactory;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\MapQueryString;
 use Symfony\Component\Routing\Attribute\Route;
@@ -53,15 +54,9 @@ class SocialAccountController extends AbstractController
         #[MapQueryString()] GetSocialAccountCallback $getSocialAccountCallback,
         #[CurrentUser()] ?User $user,
         string $provider,
-    ): JsonResponse {
+    ): RedirectResponse {
         $service = $this->socialAccountServiceFactory->get($provider);
 
-        $service->create($getSocialAccountCallback);
-
-        return new JsonResponse(
-            data: $this->serializer->serialize(['url' => $url], 'json'),
-            status: Response::HTTP_OK,
-            json: true
-        );
+        return $service->create($getSocialAccountCallback);
     }
 }

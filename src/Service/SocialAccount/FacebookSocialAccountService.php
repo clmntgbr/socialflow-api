@@ -2,18 +2,19 @@
 
 namespace App\Service\SocialAccount;
 
+use App\Application\Command\CreateOrUpdateFacebookAccount;
 use App\Dto\AccessToken\AbstractToken;
 use App\Dto\AccessToken\FacebookToken;
+use App\Dto\SocialAccount\FacebookAccount;
 use App\Dto\SocialAccount\GetSocialAccountCallback;
 use App\Entity\User;
 use App\Exception\SocialAccountException;
 use App\Repository\UserRepository;
-use Exception;
 use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\Messenger\MessageBusInterface;
+use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Uid\Uuid;
-use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
-use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 class FacebookSocialAccountService implements SocialAccountServiceInterface
@@ -22,11 +23,14 @@ class FacebookSocialAccountService implements SocialAccountServiceInterface
     private const FACEBOOK_LOGIN_URL = 'https://www.facebook.com/v21.0';
     private const FACEBOOK_CONNECT_URL = self::FACEBOOK_LOGIN_URL.'/dialog/oauth';
     private const FACEBOOK_ACCESS_TOKEN = self::FACEBOOK_API_URL.'/oauth/access_token';
+    private const FACEBOOK_ACCOUNT = self::FACEBOOK_API_URL.'/me';
 
     public function __construct(
         private UserRepository $userRepository,
         private HttpClientInterface $httpClient,
         private SerializerInterface $serializer,
+        private DenormalizerInterface $denormalizer,
+        private MessageBusInterface $bus,
         private string $apiUrl,
         private string $frontUrl,
         private string $facebookClientId,
@@ -71,23 +75,93 @@ class FacebookSocialAccountService implements SocialAccountServiceInterface
         ];
     }
 
-    public function create(GetSocialAccountCallback $getSocialAccountCallback)
+    public function create(GetSocialAccountCallback $getSocialAccountCallback): RedirectResponse
     {
+        /** @var ?User $user */
         $user = $this->userRepository->findOneBy(['state' => $getSocialAccountCallback->state]);
 
         if (null === $user) {
             return new RedirectResponse(sprintf('%s', $this->frontUrl));
         }
 
-        $accessToken = $this->getToken($getSocialAccountCallback->code);
-        dd($accessToken);
+        $accessToken = $this->getAccessToken($getSocialAccountCallback->code);
+
+        if (null === $accessToken) {
+            return new RedirectResponse(sprintf('%s?error=true&message=eee', $this->frontUrl));
+        }
+
+        $accounts = $this->getAccounts($accessToken);
+
+        if (empty($accounts)) {
+            return new RedirectResponse(sprintf('%s?error=true&message=eee', $this->frontUrl));
+        }
+
+        $facebookIds = [];
+        foreach ($accounts as $facebookAccount) {
+            $longAccessToken = $this->getLongAccessToken($facebookAccount->token);
+
+            if (null === $longAccessToken) {
+                continue;
+            }
+
+            $facebookId = Uuid::v4();
+            $facebookIds[] = (string) $facebookId;
+
+            $this->bus->dispatch(new CreateOrUpdateFacebookAccount(
+                accountId: $facebookId,
+                organizationId: $user->getActiveOrganization()->getId(),
+                userId: $user->getId(),
+                facebookToken: $longAccessToken,
+                facebookAccount: $facebookAccount,
+            ));
+        }
+
+        $query = http_build_query(['social_accounts' => $facebookIds]);
+
+        return new RedirectResponse($this->frontUrl.'?'.$query);
     }
 
     public function delete()
     {
     }
 
-    public function getToken(string $code): AbstractToken
+    public function getLongAccessToken(string $token): ?AbstractToken
+    {
+        $params = [
+            'grant_type' => 'fb_exchange_token',
+            'client_id' => $this->facebookClientId,
+            'client_secret' => $this->facebookClientSecret,
+            'fb_exchange_token' => $token,
+            'redirect_uri' => $this->apiUrl.SocialAccountServiceInterface::FACEBOOK_CALLBACK_URL,
+        ];
+
+        $url = self::FACEBOOK_ACCESS_TOKEN.'?'.http_build_query($params);
+
+        try {
+            $response = $this->httpClient->request('GET', $url, [
+                'timeout' => 30,
+                'headers' => [
+                    'Accept' => 'application/json',
+                ],
+            ]);
+
+            $statusCode = $response->getStatusCode();
+            if (200 !== $statusCode) {
+                throw new SocialAccountException("Facebook API returned status code {$statusCode}", $statusCode);
+            }
+
+            $content = $response->toArray();
+            if (empty($content)) {
+                throw new SocialAccountException('Empty response from Facebook API');
+            }
+
+            return $this->denormalizer->denormalize($content, FacebookToken::class);
+        } catch (\Exception) {
+            return null;
+        }
+    }
+
+    public function getAccessToken(string $code): ?AbstractToken
     {
         $params = [
             'client_id' => $this->facebookClientId,
@@ -107,29 +181,57 @@ class FacebookSocialAccountService implements SocialAccountServiceInterface
             ]);
 
             $statusCode = $response->getStatusCode();
-            if ($statusCode !== 200) {
-                throw new SocialAccountException(
-                    "Facebook API returned status code {$statusCode}",
-                    $statusCode
-                );
+            if (200 !== $statusCode) {
+                throw new SocialAccountException("Facebook API returned status code {$statusCode}", $statusCode);
             }
 
-            $content = $response->getContent();
+            $content = $response->toArray();
             if (empty($content)) {
                 throw new SocialAccountException('Empty response from Facebook API');
             }
 
-            return $this->serializer->deserialize($response->getContent(), FacebookToken::class, 'json');
-        } catch (TransportExceptionInterface $e) {
-            throw new SocialAccountException(message: 'Network error while contacting Facebook API: ' . $e->getMessage(), previous: $e);
-        } catch (ClientExceptionInterface $e) {
-            throw new SocialAccountException(message: 'Facebook API error: ' . $e->getMessage(), previous: $e);
-        } catch (Exception $e) {
-            throw new SocialAccountException(message: 'Failed to parse Facebook API response: ' . $e->getMessage(), previous: $e);
+            return $this->denormalizer->denormalize($content, FacebookToken::class);
+        } catch (\Exception) {
+            return null;
         }
     }
 
-    public function getAccount()
+    /**
+     * @param FacebookToken $accessToken
+     *
+     * @return FacebookAccount[]
+     */
+    public function getAccounts(AbstractToken $accessToken): array
     {
+        $params = [
+            'fields' => 'accounts{name,access_token,followers_count,fan_count,bio,emails,id,link,page_token,picture{url},website},email',
+            'access_token' => $accessToken->token,
+        ];
+
+        $url = self::FACEBOOK_ACCOUNT.'?'.http_build_query($params);
+
+        try {
+            $response = $this->httpClient->request('GET', $url, [
+                'timeout' => 30,
+                'headers' => [
+                    'Accept' => 'application/json',
+                ],
+            ]);
+
+            $statusCode = $response->getStatusCode();
+            if (200 !== $statusCode) {
+                throw new SocialAccountException("Facebook API returned status code {$statusCode}", $statusCode);
+            }
+
+            $accounts = $response->toArray()['accounts']['data'] ?? [];
+
+            if (empty($accounts)) {
+                return [];
+            }
+
+            return $this->denormalizer->denormalize($accounts, FacebookAccount::class.'[]');
+        } catch (\Exception) {
+            return [];
+        }
     }
 }

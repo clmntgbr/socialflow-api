@@ -4,8 +4,11 @@ namespace App\Entity;
 
 use App\Entity\Trait\UuidTrait;
 use App\Repository\UserRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Gedmo\Timestampable\Traits\TimestampableEntity;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Serializer\Attribute\Groups;
@@ -17,6 +20,7 @@ use Symfony\Component\Uid\Uuid;
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     use UuidTrait;
+    use TimestampableEntity;
 
     #[ORM\Column(length: 180)]
     #[Groups(['user.read'])]
@@ -43,9 +47,17 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: Types::STRING, nullable: true)]
     private ?string $callback;
 
+    #[ORM\ManyToOne(targetEntity: Organization::class)]
+    #[ORM\JoinColumn(nullable: true)]
+    private ?Organization $activeOrganization = null;
+
+    #[ORM\ManyToMany(targetEntity: Organization::class, mappedBy: 'users', cascade: ['persist', 'remove'])]
+    private Collection $organizations;
+
     public function __construct()
     {
         $this->id = Uuid::v4();
+        $this->organizations = new ArrayCollection();
     }
 
     public function getEmail(): ?string
@@ -148,6 +160,45 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setCallback(?string $callback): static
     {
         $this->callback = $callback;
+
+        return $this;
+    }
+
+    public function getActiveOrganization(): ?Organization
+    {
+        return $this->activeOrganization;
+    }
+
+    public function setActiveOrganization(?Organization $activeOrganization): static
+    {
+        $this->activeOrganization = $activeOrganization;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Organization>
+     */
+    public function getOrganizations(): Collection
+    {
+        return $this->organizations;
+    }
+
+    public function addOrganization(Organization $organization): static
+    {
+        if (!$this->organizations->contains($organization)) {
+            $this->organizations->add($organization);
+            $organization->addUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeOrganization(Organization $organization): static
+    {
+        if ($this->organizations->removeElement($organization)) {
+            $organization->removeUser($this);
+        }
 
         return $this;
     }

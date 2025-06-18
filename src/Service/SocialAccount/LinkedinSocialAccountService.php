@@ -2,8 +2,10 @@
 
 namespace App\Service\SocialAccount;
 
+use App\Dto\AccessToken\AbstractToken;
 use App\Dto\SocialAccount\GetSocialAccountCallback;
 use App\Entity\User;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 
 class LinkedinSocialAccountService implements SocialAccountServiceInterface
 {
@@ -21,19 +23,27 @@ class LinkedinSocialAccountService implements SocialAccountServiceInterface
         ];
     }
 
-    public function create(GetSocialAccountCallback $getSocialAccountCallback)
+    public function create(GetSocialAccountCallback $getSocialAccountCallback): RedirectResponse
     {
+        return new RedirectResponse('');
     }
 
     public function delete()
     {
     }
 
-    public function getToken(string $code)
+    public function getAccessToken(string $code): ?AbstractToken
     {
+        return null;
     }
 
-    public function getAccount()
+    public function getLongAccessToken(string $token): ?AbstractToken
     {
+        return null;
+    }
+
+    public function getAccounts(AbstractToken $token): array
+    {
+        return [];
     }
 }

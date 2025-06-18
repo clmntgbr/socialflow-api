@@ -109,3 +109,6 @@ consume:
 
 ngrok: 
 	ngrok http --url=choice-pretty-leech.ngrok-free.app --host-header=localhost https://localhost:443
+
+remove:
+	$(PHP) php bin/console social-accounts:find-to-validate:remove

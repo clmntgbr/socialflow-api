@@ -19,4 +19,11 @@ trait UuidTrait
     {
         return $this->id;
     }
+
+    public function setId(Uuid $uuid): self
+    {
+        $this->id = $uuid;
+
+        return $this;
+    }
 }
