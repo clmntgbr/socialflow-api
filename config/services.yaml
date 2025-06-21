@@ -9,6 +9,10 @@ services:
             string $frontUrl: '%env(resolve:FRONT_URL)%'
             string $facebookClientId: '%env(resolve:FACEBOOK_CLIENT_ID)%'
             string $facebookClientSecret: '%env(resolve:FACEBOOK_CLIENT_SECRET)%'
+            string $twitterClientId: '%env(resolve:TWITTER_CLIENT_ID)%'
+            string $twitterClientSecret: '%env(resolve:TWITTER_CLIENT_SECRET)%'
+            string $twitterApiKey: '%env(resolve:TWITTER_API_KEY)%'
+            string $twitterApiSecret: '%env(resolve:TWITTER_API_SECRET)%'
     App\:
         resource: '../src/'
         exclude:

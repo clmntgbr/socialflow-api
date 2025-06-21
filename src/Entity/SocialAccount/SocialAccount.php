@@ -76,11 +76,15 @@ class SocialAccount
 
     #[ORM\Column(type: Types::INTEGER)]
     #[Groups(['social_account.read'])]
-    private int $follower = 0;
+    private int $followers = 0;
 
     #[ORM\Column(type: Types::INTEGER)]
     #[Groups(['social_account.read'])]
-    private int $following = 0;
+    private int $followings = 0;
+
+    #[ORM\Column(type: Types::INTEGER)]
+    #[Groups(['social_account.read'])]
+    private int $likes = 0;
 
     #[ORM\Column(type: Types::STRING, nullable: true)]
     #[Groups(['social_account.read'])]
@@ -97,7 +101,7 @@ class SocialAccount
     public function __construct()
     {
         $this->id = Uuid::v4();
-        $this->status = new SocialAccountStatus(value: EnumSocialAccountStatus::TO_VALIDATE->getValue());
+        $this->status = new SocialAccountStatus(value: EnumSocialAccountStatus::PENDING_VALIDATION->getValue());
     }
 
     public function getSocialAccountId(): ?string
@@ -206,33 +210,9 @@ class SocialAccount
         return $this->status;
     }
 
-    public function setStatus(SocialAccountStatus $status): static
+    public function setStatus(string $status): static
     {
-        $this->status = $status;
-
-        return $this;
-    }
-
-    public function getFollower(): ?int
-    {
-        return $this->follower;
-    }
-
-    public function setFollower(int $follower): static
-    {
-        $this->follower = $follower;
-
-        return $this;
-    }
-
-    public function getFollowing(): ?int
-    {
-        return $this->following;
-    }
-
-    public function setFollowing(int $following): static
-    {
-        $this->following = $following;
+        $this->status = new SocialAccountStatus(value: $status);
 
         return $this;
     }
@@ -245,6 +225,42 @@ class SocialAccount
     public function setWebsite(?string $website): static
     {
         $this->website = $website;
+
+        return $this;
+    }
+
+    public function getFollowers(): ?int
+    {
+        return $this->followers;
+    }
+
+    public function setFollowers(int $followers): static
+    {
+        $this->followers = $followers;
+
+        return $this;
+    }
+
+    public function getFollowings(): ?int
+    {
+        return $this->followings;
+    }
+
+    public function setFollowings(int $followings): static
+    {
+        $this->followings = $followings;
+
+        return $this;
+    }
+
+    public function getLikes(): ?int
+    {
+        return $this->likes;
+    }
+
+    public function setLikes(int $likes): static
+    {
+        $this->likes = $likes;
 
         return $this;
     }

@@ -24,7 +24,7 @@ class SocialAccountController extends AbstractController
     ) {
     }
 
-    #[Route('/social-account/{provider}/connect-url',
+    #[Route('/social_account/{provider}/connect_url',
         name: 'social_account_connect_url',
         methods: ['GET'],
         requirements: ['provider' => 'facebook|linkedin|twitter|thread|youtube|instagram']
@@ -45,14 +45,13 @@ class SocialAccountController extends AbstractController
         );
     }
 
-    #[Route('/social-account/{provider}/callback',
+    #[Route('/social_account/{provider}/callback',
         name: 'social_account_callback',
         methods: ['GET'],
         requirements: ['provider' => 'facebook|linkedin|twitter|thread|youtube|instagram']
     )]
     public function getCallback(
         #[MapQueryString()] GetSocialAccountCallback $getSocialAccountCallback,
-        #[CurrentUser()] ?User $user,
         string $provider,
     ): RedirectResponse {
         $service = $this->socialAccountServiceFactory->get($provider);

@@ -7,7 +7,6 @@ use App\Repository\SocialAccount\FacebookSocialAccountRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Attribute\Groups;
-use Symfony\Component\Uid\Uuid;
 
 #[ORM\Entity(repositoryClass: FacebookSocialAccountRepository::class)]
 #[ApiResource(
@@ -22,13 +21,12 @@ class FacebookSocialAccount extends SocialAccount
     #[Groups(['social_account.read'])]
     public function getType(): string
     {
-        return 'facebook_social_account';
+        return 'facebook';
     }
 
-    public function __construct(Uuid $uuid)
+    public function __construct()
     {
         parent::__construct();
-        $this->setId($uuid);
     }
 
     public function getLink(): ?string
@@ -36,7 +34,7 @@ class FacebookSocialAccount extends SocialAccount
         return $this->link;
     }
 
-    public function setLink(?string $link): static
+    public function setLink(?string $link): self
     {
         $this->link = $link;
 

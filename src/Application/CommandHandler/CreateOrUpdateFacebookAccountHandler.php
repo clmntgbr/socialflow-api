@@ -10,11 +10,11 @@ use App\Enum\SocialAccountStatus;
 use App\Repository\OrganizationRepository;
 use App\Repository\SocialAccount\FacebookSocialAccountRepository;
 use App\Repository\UserRepository;
-use Symfony\Component\Console\Messenger\RunCommandMessage;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use Symfony\Component\Messenger\Bridge\Amqp\Transport\AmqpStamp;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Messenger\Stamp\DelayStamp;
+use Symfony\Component\Uid\Uuid;
 
 #[AsMessageHandler]
 final class CreateOrUpdateFacebookAccountHandler
@@ -27,7 +27,7 @@ final class CreateOrUpdateFacebookAccountHandler
     ) {
     }
 
-    public function __invoke(CreateOrUpdateFacebookAccount $message): void
+    public function __invoke(CreateOrUpdateFacebookAccount $message): ?Uuid
     {
         /** @var ?User $user */
         $user = $this->userRepository->findOneBy(['id' => (string) $message->userId]);
@@ -43,23 +43,16 @@ final class CreateOrUpdateFacebookAccountHandler
             throw new \Exception(sprintf('Organization does not exist with id [%s]', (string) $message->organizationId));
         }
 
-        /** @var ?FacebookSocialAccount $facebookAccount */
-        $facebookAccount = $this->facebookSocialAccountRepository->findOneBy([
-            'organization' => $organization,
-            'socialAccountId' => $message->facebookAccount->id,
-        ]);
-
-        if (null === $facebookAccount) {
-            $facebookAccount = new FacebookSocialAccount($message->accountId);
-        }
+        $facebookAccount = $this->getFacebookAccount($message, $organization);
 
         $facebookAccount
+            ->setLink($message->facebookAccount->link)
+            ->setId($message->accountId)
             ->setUsername($message->facebookAccount->username)
             ->setSocialAccountId($message->facebookAccount->id)
             ->setOrganization($organization)
-            ->setFollower($message->facebookAccount->follower)
-            ->setFollowing($message->facebookAccount->following)
-            ->setLink($message->facebookAccount->link)
+            ->setFollowers($message->facebookAccount->followers)
+            ->setFollowings($message->facebookAccount->followings)
             ->setWebsite($message->facebookAccount->website)
             ->setEmail($message->facebookAccount->email)
             ->setAvatarUrl($message->facebookAccount->picture)
@@ -67,9 +60,30 @@ final class CreateOrUpdateFacebookAccountHandler
 
         $this->facebookSocialAccountRepository->save($facebookAccount, true);
 
-        $this->messageBus->dispatch(new RemoveSocialAccount(socialAccountId: $facebookAccount->getId(), status: SocialAccountStatus::TO_VALIDATE), [
+        if ($facebookAccount->getStatus()->getValue() !== SocialAccountStatus::PENDING_VALIDATION->getValue()) {
+            return null;
+        }
+
+        $this->messageBus->dispatch(new RemoveSocialAccount(socialAccountId: $facebookAccount->getId(), status: SocialAccountStatus::PENDING_VALIDATION), [
             new DelayStamp(3600000),
             new AmqpStamp('async'),
         ]);
+        
+        return $facebookAccount->getId();
+    }
+
+    private function getFacebookAccount(CreateOrUpdateFacebookAccount $message, Organization $organization): FacebookSocialAccount
+    {
+        /** @var ?TwitterSocialAccount $twitterAccount */
+        $facebookAccount = $this->facebookSocialAccountRepository->findOneBy([
+            'organization' => $organization,
+            'socialAccountId' => $message->facebookAccount->id,
+        ]);
+
+        if (null === $facebookAccount) {
+            return new FacebookSocialAccount($message->accountId);
+        }
+
+        return $facebookAccount;
     }
 }

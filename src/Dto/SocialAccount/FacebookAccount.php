@@ -33,11 +33,11 @@ class FacebookAccount extends AbstractAccount
 
     #[Assert\Type('int')]
     #[SerializedName('followers_count')]
-    public int $follower;
+    public int $followers;
 
     #[Assert\Type('int')]
     #[SerializedName('fan_count')]
-    public int $following;
+    public int $followings;
 
     #[Assert\Type('string')]
     #[SerializedName('link')]

@@ -9,6 +9,7 @@
         "php": ">=8.3.15",
         "ext-ctype": "*",
         "ext-iconv": "*",
+        "abraham/twitteroauth": "^7.0",
         "api-platform/doctrine-orm": ">=4.0.13",
         "api-platform/symfony": ">=4.0.13",
         "doctrine/dbal": ">=4.2.1",

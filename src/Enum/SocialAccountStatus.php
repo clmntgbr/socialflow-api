@@ -4,9 +4,9 @@ namespace App\Enum;
 
 enum SocialAccountStatus: string
 {
+    case PENDING_VALIDATION = 'pending_validation';
     case ACTIVE = 'active';
-    case TO_VALIDATE = 'to_validate';
-    case DESACTIVATED = 'desactivated';
+    case EXPIRED = 'expired';
 
     public function getValue(): string
     {

@@ -2,8 +2,11 @@
 
 namespace App\Service\SocialAccount;
 
-use App\Dto\AccessToken\AbstractToken;
+use App\Dto\SocialAccount\GetAccounts\AbstractGetAccounts;
 use App\Dto\SocialAccount\GetSocialAccountCallback;
+use App\Dto\Token\AccessToken\AbstractAccessToken;
+use App\Dto\Token\AccessTokenParameters\AbstractAccessTokenParameters;
+use App\Dto\Token\AccessTokenParameters\LinkedinAccessTokenParameters;
 use App\Entity\User;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 
@@ -32,18 +35,21 @@ class LinkedinSocialAccountService implements SocialAccountServiceInterface
     {
     }
 
-    public function getAccessToken(string $code): ?AbstractToken
+    /**
+     * @param LinkedinAccessTokenParameters $params
+     */
+    public function getAccessToken(AbstractAccessTokenParameters $params): AbstractAccessToken
     {
-        return null;
+        throw new \RuntimeException('Method not implemented.');
     }
 
-    public function getLongAccessToken(string $token): ?AbstractToken
+    public function getLongAccessToken(string $token): AbstractAccessToken
     {
-        return null;
+        throw new \RuntimeException('Method not implemented.');
     }
 
-    public function getAccounts(AbstractToken $token): array
+    public function getAccounts(AbstractAccessToken $token): AbstractGetAccounts
     {
-        return [];
+        throw new \RuntimeException('Method not implemented.');
     }
 }

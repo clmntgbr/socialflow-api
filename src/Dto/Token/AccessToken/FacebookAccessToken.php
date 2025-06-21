@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Dto\AccessToken;
+namespace App\Dto\Token\AccessToken;
 
 use Symfony\Component\Serializer\Attribute\SerializedName;
 use Symfony\Component\Validator\Constraints as Assert;
 
-class FacebookToken extends AbstractToken
+class FacebookAccessToken extends AbstractAccessToken
 {
     #[Assert\NotBlank()]
     #[Assert\Type('string')]

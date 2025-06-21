@@ -16,6 +16,6 @@ class YoutubeSocialAccount extends SocialAccount
     #[Groups(['social_account.read'])]
     public function getType(): string
     {
-        return 'youtube_social_account';
+        return 'youtube';
     }
 }

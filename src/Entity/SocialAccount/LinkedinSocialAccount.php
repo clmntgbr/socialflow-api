@@ -16,6 +16,6 @@ class LinkedinSocialAccount extends SocialAccount
     #[Groups(['social_account.read'])]
     public function getType(): string
     {
-        return 'linkedin_social_account';
+        return 'linkedin';
     }
 }

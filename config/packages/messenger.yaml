@@ -14,5 +14,6 @@ framework:
             sync: 'sync://'
         routing:
             App\Application\Command\CreateOrUpdateFacebookAccount: sync
+            App\Application\Command\CreateOrUpdateTwitterAccount: sync
             App\Application\Command\CreateOrganization: sync
             App\Application\Command\RemoveSocialAccount: async

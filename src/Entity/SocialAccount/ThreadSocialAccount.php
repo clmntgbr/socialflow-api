@@ -16,6 +16,6 @@ class ThreadSocialAccount extends SocialAccount
     #[Groups(['social_account.read'])]
     public function getType(): string
     {
-        return 'thread_social_account';
+        return 'thread';
     }
 }

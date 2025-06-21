@@ -16,6 +16,6 @@ class InstagramSocialAccount extends SocialAccount
     #[Groups(['social_account.read'])]
     public function getType(): string
     {
-        return 'instagram_social_account';
+        return 'instagram';
     }
 }
