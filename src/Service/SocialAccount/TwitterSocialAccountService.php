@@ -19,6 +19,7 @@ use App\Exception\SocialAccountException;
 use App\Repository\UserRepository;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\Messenger\MessageBusInterface;
+use Symfony\Component\Messenger\Stamp\HandledStamp;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Uid\Uuid;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
@@ -131,9 +132,7 @@ class TwitterSocialAccountService implements SocialAccountServiceInterface
             }
 
             $twitterId = Uuid::v4();
-            $twitterIds[] = (string) $twitterId;
-
-            $this->bus->dispatch(new CreateOrUpdateTwitterAccount(
+            $envelope = $this->bus->dispatch(new CreateOrUpdateTwitterAccount(
                 accountId: $twitterId,
                 organizationId: $user->getActiveOrganization()->getId(),
                 userId: $user->getId(),
@@ -141,12 +140,20 @@ class TwitterSocialAccountService implements SocialAccountServiceInterface
                 twitterToken: $accessToken,
             ));
 
+            /** @var HandledStamp|null $stamp */
+            $stamp = $envelope->last(HandledStamp::class);
+            $twitterIds[] = (string) $stamp?->getResult();
+
+            $twitterIds = array_filter($twitterIds);
+            
+            if (empty($twitterIds)) {
+                return new RedirectResponse($this->frontUrl);
+            }
+
             $query = http_build_query(['ids' => $twitterIds]);
 
             return new RedirectResponse($this->frontUrl.'?'.$query);
-        } catch (\Exception $exception) {
-            dd($exception->getMessage());
-
+        } catch (\Exception) {
             return new RedirectResponse(sprintf('%s?error=true&message=3', $this->frontUrl));
         }
     }

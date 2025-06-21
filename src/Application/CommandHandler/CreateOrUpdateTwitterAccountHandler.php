@@ -86,7 +86,10 @@ final class CreateOrUpdateTwitterAccountHandler
             return new TwitterSocialAccount($message->accountId);
         }
 
-        $twitterAccount->setStatus(SocialAccountStatus::ACTIVE->getValue());
+        if ($twitterAccount->getStatus()->getValue() === SocialAccountStatus::EXPIRED->getValue()) {
+            $twitterAccount->setStatus(SocialAccountStatus::ACTIVE->getValue());
+        }
+
         return $twitterAccount;
     }
 }

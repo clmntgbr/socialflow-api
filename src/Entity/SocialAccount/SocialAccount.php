@@ -64,10 +64,10 @@ class SocialAccount
     #[Groups(['social_account.read'])]
     private ?string $avatarUrl = null;
 
-    #[ORM\Column(type: Types::STRING, nullable: true)]
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $token = null;
 
-    #[ORM\Column(type: Types::STRING, nullable: true)]
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $refreshToken = null;
 
     #[ORM\Column(type: Types::BOOLEAN)]

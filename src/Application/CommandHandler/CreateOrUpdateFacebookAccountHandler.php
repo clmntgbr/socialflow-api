@@ -74,7 +74,7 @@ final class CreateOrUpdateFacebookAccountHandler
 
     private function getFacebookAccount(CreateOrUpdateFacebookAccount $message, Organization $organization): FacebookSocialAccount
     {
-        /** @var ?TwitterSocialAccount $twitterAccount */
+        /** @var ?FacebookSocialAccount $facebookAccount */
         $facebookAccount = $this->facebookSocialAccountRepository->findOneBy([
             'organization' => $organization,
             'socialAccountId' => $message->facebookAccount->id,
@@ -82,6 +82,10 @@ final class CreateOrUpdateFacebookAccountHandler
 
         if (null === $facebookAccount) {
             return new FacebookSocialAccount($message->accountId);
+        }
+
+        if ($facebookAccount->getStatus()->getValue() === SocialAccountStatus::EXPIRED->getValue()) {
+            $facebookAccount->setStatus(SocialAccountStatus::ACTIVE->getValue());
         }
 
         return $facebookAccount;
