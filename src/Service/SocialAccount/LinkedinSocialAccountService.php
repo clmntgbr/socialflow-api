@@ -3,6 +3,7 @@
 namespace App\Service\SocialAccount;
 
 use App\Application\Command\CreateOrUpdateLinkedinAccount;
+use App\Denormalizer\Denormalizer;
 use App\Dto\SocialAccount\GetAccounts\AbstractGetAccounts;
 use App\Dto\SocialAccount\GetAccounts\LinkedinGetAccounts;
 use App\Dto\SocialAccount\GetSocialAccountCallback;
@@ -17,7 +18,6 @@ use App\Repository\UserRepository;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Messenger\Stamp\HandledStamp;
-use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Uid\Uuid;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
@@ -34,7 +34,7 @@ class LinkedinSocialAccountService implements SocialAccountServiceInterface
         private UserRepository $userRepository,
         private HttpClientInterface $httpClient,
         private SerializerInterface $serializer,
-        private DenormalizerInterface $denormalizer,
+        private Denormalizer $denormalizer,
         private MessageBusInterface $bus,
         private string $linkedinClientId,
         private string $linkedinClientSecret,
@@ -42,10 +42,10 @@ class LinkedinSocialAccountService implements SocialAccountServiceInterface
         private string $frontUrl,
     ) {
     }
-    
+
     public function getConnectUrl(User $user): string
     {
-         $user = $this->userRepository->update($user, [
+        $user = $this->userRepository->update($user, [
             'state' => Uuid::v4(),
         ]);
 
@@ -108,7 +108,7 @@ class LinkedinSocialAccountService implements SocialAccountServiceInterface
             $linkedinIds[] = (string) $stamp?->getResult();
 
             $linkedinIds = array_filter($linkedinIds);
-            
+
             if (empty($linkedinIds)) {
                 return new RedirectResponse($this->frontUrl);
             }
@@ -180,13 +180,13 @@ class LinkedinSocialAccountService implements SocialAccountServiceInterface
      */
     public function getAccounts(AbstractAccessToken $token): AbstractGetAccounts
     {
-       $url = self::LINKEDIN_ACCOUNT;
+        $url = self::LINKEDIN_ACCOUNT;
 
-       try {
+        try {
             $response = $this->httpClient->request('GET', $url, [
                 'timeout' => 30,
                 'headers' => [
-                    'Authorization' => $token->tokenType.' '.$token->accessToken,
+                    'Authorization' => $token->tokenType.' '.$token->token,
                     'Connection' => 'Keep-Alive',
                     'Accept' => 'application / json',
                 ],

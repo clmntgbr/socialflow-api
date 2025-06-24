@@ -145,7 +145,7 @@ class TwitterSocialAccountService implements SocialAccountServiceInterface
             $twitterIds[] = (string) $stamp?->getResult();
 
             $twitterIds = array_filter($twitterIds);
-            
+
             if (empty($twitterIds)) {
                 return new RedirectResponse($this->frontUrl);
             }

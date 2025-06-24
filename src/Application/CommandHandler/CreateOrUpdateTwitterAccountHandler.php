@@ -6,7 +6,6 @@ use App\Application\Command\CreateOrUpdateTwitterAccount;
 use App\Application\Command\RemoveSocialAccount;
 use App\Entity\Organization;
 use App\Entity\SocialAccount\TwitterSocialAccount;
-use App\Entity\ValueObject\SocialAccountStatus as ValueObjectSocialAccountStatus;
 use App\Enum\SocialAccountStatus;
 use App\Repository\OrganizationRepository;
 use App\Repository\SocialAccount\TwitterSocialAccountRepository;
@@ -70,7 +69,7 @@ final class CreateOrUpdateTwitterAccountHandler
             new DelayStamp(3600000),
             new AmqpStamp('async'),
         ]);
-        
+
         return $twitterAccount->getId();
     }
 

@@ -171,6 +171,10 @@ class SocialAccount
 
     public function setRefreshToken(?string $refreshToken): static
     {
+        if (null === $refreshToken) {
+            return $this;
+        }
+
         $this->refreshToken = $refreshToken;
 
         return $this;

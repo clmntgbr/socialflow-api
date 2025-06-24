@@ -5,7 +5,7 @@ namespace App\Dto\Token\AccessToken;
 use Symfony\Component\Serializer\Attribute\SerializedName;
 use Symfony\Component\Validator\Constraints as Assert;
 
-class LinkedinAccessToken extends AbstractAccessToken
+class YoutubeAccessToken extends AbstractAccessToken
 {
     #[Assert\NotBlank()]
     #[Assert\Type('string')]
@@ -22,10 +22,9 @@ class LinkedinAccessToken extends AbstractAccessToken
     #[SerializedName('expires_in')]
     public ?int $expiresIn;
 
-    #[Assert\NotBlank()]
     #[Assert\Type('string')]
-    #[SerializedName('scope')]
-    public ?string $scope;
+    #[SerializedName('refresh_token')]
+    public ?string $refreshToken = null;
 
     #[Assert\NotBlank()]
     #[Assert\Type('string')]

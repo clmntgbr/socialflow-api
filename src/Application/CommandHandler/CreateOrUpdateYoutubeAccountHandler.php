@@ -1,0 +1,93 @@
+<?php
+
+namespace App\Application\CommandHandler;
+
+use App\Application\Command\CreateOrUpdateYoutubeAccount;
+use App\Application\Command\RemoveSocialAccount;
+use App\Entity\Organization;
+use App\Entity\SocialAccount\YoutubeSocialAccount;
+use App\Enum\SocialAccountStatus;
+use App\Repository\OrganizationRepository;
+use App\Repository\SocialAccount\YoutubeSocialAccountRepository;
+use App\Repository\UserRepository;
+use Symfony\Component\Messenger\Attribute\AsMessageHandler;
+use Symfony\Component\Messenger\Bridge\Amqp\Transport\AmqpStamp;
+use Symfony\Component\Messenger\MessageBusInterface;
+use Symfony\Component\Messenger\Stamp\DelayStamp;
+use Symfony\Component\Uid\Uuid;
+
+#[AsMessageHandler]
+final class CreateOrUpdateYoutubeAccountHandler
+{
+    public function __construct(
+        private UserRepository $userRepository,
+        private OrganizationRepository $organizationRepository,
+        private YoutubeSocialAccountRepository $youtubeSocialAccountRepository,
+        private MessageBusInterface $messageBus,
+    ) {
+    }
+
+    public function __invoke(CreateOrUpdateYoutubeAccount $message): ?Uuid
+    {
+        /** @var ?User $user */
+        $user = $this->userRepository->findOneBy(['id' => (string) $message->userId]);
+
+        if (null === $user) {
+            throw new \Exception(sprintf('User does not exist with id [%s]', (string) $message->userId));
+        }
+
+        /** @var ?Organization $organization */
+        $organization = $this->organizationRepository->findOneBy(['id' => (string) $message->organizationId]);
+
+        if (null === $organization) {
+            throw new \Exception(sprintf('Organization does not exist with id [%s]', (string) $message->organizationId));
+        }
+
+        $youtubeAccount = $this->getYoutubeAccount($message, $organization);
+
+        $youtubeAccount
+            ->setDescription($message->youtubeAccount->description)
+            ->setName($message->youtubeAccount->name)
+            ->setId($message->accountId)
+            ->setUsername($message->youtubeAccount->username)
+            ->setSocialAccountId($message->youtubeAccount->id)
+            ->setOrganization($organization)
+            ->setFollowers($message->youtubeAccount->publicMetrics->followers)
+            ->setAvatarUrl($message->youtubeAccount->picture)
+            ->setIsVerified($message->youtubeAccount->verified)
+            ->setToken($message->youtubeToken->token)
+            ->setRefreshToken($message->youtubeToken->refreshToken);
+
+        $this->youtubeSocialAccountRepository->save($youtubeAccount, true);
+
+        if ($youtubeAccount->getStatus()->getValue() !== SocialAccountStatus::PENDING_VALIDATION->getValue()) {
+            return null;
+        }
+
+        $this->messageBus->dispatch(new RemoveSocialAccount(socialAccountId: $youtubeAccount->getId(), status: SocialAccountStatus::PENDING_VALIDATION), [
+            new DelayStamp(3600000),
+            new AmqpStamp('async'),
+        ]);
+
+        return $youtubeAccount->getId();
+    }
+
+    private function getYoutubeAccount(CreateOrUpdateYoutubeAccount $message, Organization $organization): YoutubeSocialAccount
+    {
+        /** @var ?YoutubeSocialAccount $youtubeAccount */
+        $youtubeAccount = $this->youtubeSocialAccountRepository->findOneBy([
+            'organization' => $organization,
+            'socialAccountId' => $message->youtubeAccount->id,
+        ]);
+
+        if (null === $youtubeAccount) {
+            return new YoutubeSocialAccount($message->accountId);
+        }
+
+        if ($youtubeAccount->getStatus()->getValue() === SocialAccountStatus::EXPIRED->getValue()) {
+            $youtubeAccount->setStatus(SocialAccountStatus::ACTIVE->getValue());
+        }
+
+        return $youtubeAccount;
+    }
+}

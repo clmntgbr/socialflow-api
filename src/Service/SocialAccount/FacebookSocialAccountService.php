@@ -3,6 +3,7 @@
 namespace App\Service\SocialAccount;
 
 use App\Application\Command\CreateOrUpdateFacebookAccount;
+use App\Denormalizer\Denormalizer;
 use App\Dto\SocialAccount\FacebookAccount;
 use App\Dto\SocialAccount\GetAccounts\AbstractGetAccounts;
 use App\Dto\SocialAccount\GetAccounts\FacebookGetAccounts;
@@ -18,7 +19,6 @@ use App\Repository\UserRepository;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Messenger\Stamp\HandledStamp;
-use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Uid\Uuid;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
@@ -35,7 +35,7 @@ class FacebookSocialAccountService implements SocialAccountServiceInterface
         private UserRepository $userRepository,
         private HttpClientInterface $httpClient,
         private SerializerInterface $serializer,
-        private DenormalizerInterface $denormalizer,
+        private Denormalizer $denormalizer,
         private MessageBusInterface $bus,
         private string $apiUrl,
         private string $frontUrl,
@@ -126,17 +126,19 @@ class FacebookSocialAccountService implements SocialAccountServiceInterface
             }
 
             $facebookIds = array_filter($facebookIds);
-            
+
             if (empty($facebookIds)) {
                 return new RedirectResponse($this->frontUrl);
             }
 
             $query = http_build_query(['ids' => $facebookIds]);
+
             return new RedirectResponse($this->frontUrl.'?'.$query);
         } catch (\Exception) {
             return new RedirectResponse(sprintf('%s?error=true&message=3', $this->frontUrl));
         }
     }
+
     public function delete()
     {
     }

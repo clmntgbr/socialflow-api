@@ -68,7 +68,7 @@ final class CreateOrUpdateFacebookAccountHandler
             new DelayStamp(3600000),
             new AmqpStamp('async'),
         ]);
-        
+
         return $facebookAccount->getId();
     }
 

@@ -17,7 +17,7 @@ class LinkedinSocialAccount extends SocialAccount
     #[ORM\Column(type: Types::STRING)]
     #[Groups(['social_account.read'])]
     private string $name;
-    
+
     #[Groups(['social_account.read'])]
     public function getType(): string
     {

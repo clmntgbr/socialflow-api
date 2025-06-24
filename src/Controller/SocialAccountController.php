@@ -9,12 +9,12 @@ use App\Service\SocialAccount\SocialAccountServiceFactory;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\MapQueryString;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\CurrentUser;
 use Symfony\Component\Serializer\SerializerInterface;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 #[Route('/api', name: 'api_')]
 class SocialAccountController extends AbstractController
@@ -22,6 +22,8 @@ class SocialAccountController extends AbstractController
     public function __construct(
         private readonly SocialAccountServiceFactory $socialAccountServiceFactory,
         private readonly SerializerInterface $serializer,
+        private readonly ValidatorInterface $validator,
+        private string $frontUrl,
     ) {
     }
 
@@ -56,6 +58,15 @@ class SocialAccountController extends AbstractController
         string $provider,
     ): RedirectResponse {
         $service = $this->socialAccountServiceFactory->get($provider);
+
+        $errors = $this->validator->validate(
+            value: $getSocialAccountCallback,
+            groups: [$provider]
+        );
+
+        if ($errors->count() > 0) {
+            return new RedirectResponse(sprintf('%s?error=true&message=3', $this->frontUrl));
+        }
 
         return $service->create($getSocialAccountCallback);
     }
