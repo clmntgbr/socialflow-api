@@ -134,7 +134,7 @@ class FacebookSocialAccountService implements SocialAccountServiceInterface
             $query = http_build_query(['ids' => $facebookIds]);
 
             return new RedirectResponse($this->frontUrl.'?'.$query);
-        } catch (\Exception) {
+        } catch (\Exception $exception) {
             return new RedirectResponse(sprintf('%s?error=true&message=3', $this->frontUrl));
         }
     }
@@ -182,6 +182,11 @@ class FacebookSocialAccountService implements SocialAccountServiceInterface
         } catch (\Exception) {
             throw new SocialAccountException('Failed to retrieve long access token from Facebook API');
         }
+    }
+
+    public function getAccessTokenFromRefreshToken(string $token): AbstractAccessToken
+    {
+        throw new \RuntimeException('Method not implemented.');
     }
 
     /**
@@ -260,7 +265,7 @@ class FacebookSocialAccountService implements SocialAccountServiceInterface
             }
 
             return new FacebookGetAccounts(facebookAccounts: $this->denormalizer->denormalize($accounts, FacebookAccount::class.'[]'));
-        } catch (\Exception) {
+        } catch (\Exception $exception) {
             throw new SocialAccountException('Failed to retrieve accounts from Facebook API');
         }
     }

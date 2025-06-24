@@ -123,7 +123,6 @@ class YoutubeSocialAccountService implements SocialAccountServiceInterface
 
             return new RedirectResponse($this->frontUrl.'?'.$query);
         } catch (\Exception $exception) {
-            dd($exception->getMessage());
             return new RedirectResponse(sprintf('%s?error=true&message=3', $this->frontUrl));
         }
 
@@ -174,6 +173,11 @@ class YoutubeSocialAccountService implements SocialAccountServiceInterface
     }
 
     public function getLongAccessToken(string $token): AbstractAccessToken
+    {
+        throw new \RuntimeException('Method not implemented.');
+    }
+
+    public function getAccessTokenFromRefreshToken(string $token): AbstractAccessToken
     {
         throw new \RuntimeException('Method not implemented.');
     }

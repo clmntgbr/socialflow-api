@@ -11,6 +11,8 @@ use App\Entity\Trait\UuidTrait;
 use App\Entity\ValueObject\SocialAccountStatus;
 use App\Enum\SocialAccountStatus as EnumSocialAccountStatus;
 use App\Repository\SocialAccount\SocialAccountRepository;
+use DateTime;
+use DateTimeImmutable;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\Embedded;
@@ -89,6 +91,10 @@ class SocialAccount
     #[ORM\Column(type: Types::STRING, nullable: true)]
     #[Groups(['social_account.read'])]
     private ?string $website = null;
+
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
+    #[Groups(['social_account.read'])]
+    private ?DateTime $expireAt = null;
 
     #[Embedded(class: SocialAccountStatus::class, columnPrefix: false)]
     #[Groups(['social_account.read'])]
@@ -180,6 +186,18 @@ class SocialAccount
         return $this;
     }
 
+    public function setRefreshTokenAndExpireAt(?string $refreshToken, DateTime $expireAt): static
+    {
+        if (null === $refreshToken) {
+            return $this;
+        }
+
+        $this->refreshToken = $refreshToken;
+        $this->expireAt = $expireAt;
+
+        return $this;
+    }
+
     public function isVerified(): ?bool
     {
         return $this->isVerified;
@@ -265,6 +283,18 @@ class SocialAccount
     public function setLikes(int $likes): static
     {
         $this->likes = $likes;
+
+        return $this;
+    }
+
+    public function getExpireAt(): ?\DateTime
+    {
+        return $this->expireAt;
+    }
+
+    public function setExpireAt(?\DateTime $expireAt): static
+    {
+        $this->expireAt = $expireAt;
 
         return $this;
     }

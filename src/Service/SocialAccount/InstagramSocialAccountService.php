@@ -35,17 +35,23 @@ class InstagramSocialAccountService implements SocialAccountServiceInterface
 
     public function create(GetSocialAccountCallback $getSocialAccountCallback): RedirectResponse
     {
-        return new RedirectResponse('');
+        throw new \RuntimeException('Method not implemented.');
     }
 
     public function delete()
     {
+        throw new \RuntimeException('Method not implemented.');
     }
 
     /**
      * @param InstagramAccessTokenParameters $params
      */
     public function getAccessToken(AbstractAccessTokenParameters $params): AbstractAccessToken
+    {
+        throw new \RuntimeException('Method not implemented.');
+    }
+
+    public function getAccessTokenFromRefreshToken(string $token): AbstractAccessToken
     {
         throw new \RuntimeException('Method not implemented.');
     }

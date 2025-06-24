@@ -173,6 +173,11 @@ class LinkedinSocialAccountService implements SocialAccountServiceInterface
         throw new \RuntimeException('Method not implemented.');
     }
 
+    public function getAccessTokenFromRefreshToken(string $token): AbstractAccessToken
+    {
+        throw new \RuntimeException('Method not implemented.');
+    }
+
     /**
      * @param LinkedinAccessToken $token
      *

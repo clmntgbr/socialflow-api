@@ -20,33 +20,25 @@ class Denormalizer
     /**
      * @param class-string<T> $type
      *
-     * @return T
+     * @return T|array<T>
      *
      * @throws \InvalidArgumentException
      * @throws ValidationException
      */
-    public function denormalize(array $data, string $type): object
+    public function denormalize(array $data, string $type): object|array
     {
-        if (!class_exists($type) && !interface_exists($type)) {
-            throw new \InvalidArgumentException(sprintf('Class or interface %s does not exist', $type));
+        $typeCheck = str_replace('[]', '', $type);
+        if (!class_exists($typeCheck) && !interface_exists($typeCheck)) {
+            throw new \InvalidArgumentException(sprintf('Class or interface %s does not exist', $typeCheck));
         }
 
         $object = $this->denormalizer->denormalize($data, $type);
-
-        if (!is_object($object)) {
-            throw new \InvalidArgumentException(sprintf('Denormalizer returned %s instead of object', gettype($object)));
-        }
-
-        if (!is_a($object, $type)) {
-            throw new \InvalidArgumentException(sprintf('Expected instance of %s, got %s', $type, get_class($object)));
-        }
 
         $violations = $this->validator->validate($object);
         if (count($violations) > 0) {
             throw new ValidationException($violations);
         }
 
-        /* @var T $object */
         return $object;
     }
 }

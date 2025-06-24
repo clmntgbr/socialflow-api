@@ -19,16 +19,11 @@ interface SocialAccountServiceInterface
     public const LINKEDIN_CALLBACK_URL = '/social_account/linkedin/callback';
 
     public function getConnectUrl(User $user): string;
-
     public function getScopes(): array;
-
     public function create(GetSocialAccountCallback $getSocialAccountCallback): RedirectResponse;
-
     public function delete();
-
     public function getAccessToken(AbstractAccessTokenParameters $params): AbstractAccessToken;
-
     public function getLongAccessToken(string $token): AbstractAccessToken;
-
+    public function getAccessTokenFromRefreshToken(string $token): AbstractAccessToken;
     public function getAccounts(AbstractAccessToken $token): AbstractGetAccounts;
 }

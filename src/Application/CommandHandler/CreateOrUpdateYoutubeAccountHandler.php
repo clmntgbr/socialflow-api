@@ -45,6 +45,9 @@ final class CreateOrUpdateYoutubeAccountHandler
 
         $youtubeAccount = $this->getYoutubeAccount($message, $organization);
 
+        $date = new \DateTime();
+        $date->modify(sprintf('+%s seconds', $message->youtubeToken->expiresIn));
+
         $youtubeAccount
             ->setDescription($message->youtubeAccount->description)
             ->setName($message->youtubeAccount->name)
@@ -56,7 +59,7 @@ final class CreateOrUpdateYoutubeAccountHandler
             ->setAvatarUrl($message->youtubeAccount->picture)
             ->setIsVerified($message->youtubeAccount->verified)
             ->setToken($message->youtubeToken->token)
-            ->setRefreshToken($message->youtubeToken->refreshToken);
+            ->setRefreshTokenAndExpireAt($message->youtubeToken->refreshToken, $date);
 
         $this->youtubeSocialAccountRepository->save($youtubeAccount, true);
 

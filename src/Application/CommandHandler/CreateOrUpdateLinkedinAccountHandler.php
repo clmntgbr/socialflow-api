@@ -45,6 +45,9 @@ final class CreateOrUpdateLinkedinAccountHandler
 
         $linkedinAccount = $this->getlinkedinAccount($message, $organization);
 
+        $date = new \DateTime();
+        $date->modify(sprintf('+%s seconds', $message->linkedinToken->expiresIn));
+
         $linkedinAccount
             ->setUsername($message->linkedinAccount->name)
             ->setSocialAccountId($message->linkedinAccount->id)
@@ -53,6 +56,7 @@ final class CreateOrUpdateLinkedinAccountHandler
             ->setIsVerified($message->linkedinAccount->verified)
             ->setEmail($message->linkedinAccount->email)
             ->setAvatarUrl($message->linkedinAccount->picture)
+            ->setExpireAt($date)
             ->setToken($message->linkedinToken->token);
 
         $this->LinkedinSocialAccountRepository->save($linkedinAccount, true);

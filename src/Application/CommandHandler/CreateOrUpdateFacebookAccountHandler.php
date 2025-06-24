@@ -45,6 +45,9 @@ final class CreateOrUpdateFacebookAccountHandler
 
         $facebookAccount = $this->getFacebookAccount($message, $organization);
 
+        $date = new \DateTime();
+        $date->modify('+60 days');
+
         $facebookAccount
             ->setLink($message->facebookAccount->link)
             ->setId($message->accountId)
@@ -56,6 +59,7 @@ final class CreateOrUpdateFacebookAccountHandler
             ->setWebsite($message->facebookAccount->website)
             ->setEmail($message->facebookAccount->email)
             ->setAvatarUrl($message->facebookAccount->picture)
+            ->setExpireAt($date)
             ->setToken($message->facebookToken->token);
 
         $this->facebookSocialAccountRepository->save($facebookAccount, true);
