@@ -56,12 +56,7 @@ class Cluster
         $this->posts = new ArrayCollection();
     }
 
-    public function erasePosts()
-    {
-        $this->posts = new ArrayCollection();
-    }
-
-    public function addPosts(array $posts)
+    public function initializePosts(array $posts)
     {
         $this->posts = new ArrayCollection($posts);
     }

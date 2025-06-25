@@ -38,8 +38,6 @@ class ClusterProcessor implements ProcessorInterface
             return $data;
         }
 
-        $data->erasePosts();
-
         $request = $context['request'] ?? null;
         $payload = json_decode($request->getContent(), true);
 
@@ -49,7 +47,7 @@ class ClusterProcessor implements ProcessorInterface
             context: ['cluster' => $data]
         );
 
-        $data->addPosts($posts);
+        $data->initializePosts($posts);
         return $this->persistProcessor->process($data, $operation, $uriVariables, $context);
     }
 
