@@ -25,7 +25,7 @@ class InstagramSocialAccountService implements SocialAccountServiceInterface
 
     public function getConnectUrl(User $user): string
     {
-        return '';
+        throw new \RuntimeException('Method not implemented.');
     }
 
     public function getScopes(): array

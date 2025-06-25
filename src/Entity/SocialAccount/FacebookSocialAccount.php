@@ -12,7 +12,7 @@ use Symfony\Component\Serializer\Attribute\Groups;
 #[ApiResource(
     operations: []
 )]
-class FacebookSocialAccount extends SocialAccount
+class FacebookSocialAccount extends SocialAccount implements SocialAccountInterface
 {
     #[ORM\Column(type: Types::STRING, nullable: true)]
     #[Groups(['social_account.read'])]

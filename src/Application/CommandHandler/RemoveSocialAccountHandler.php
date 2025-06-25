@@ -22,7 +22,7 @@ final class RemoveSocialAccountHandler
         /** @var ?SocialAccount $socialAccount */
         $socialAccount = $this->socialAccountRepository->findOneBy([
             'id' => (string) $message->socialAccountId,
-            'status.value' => $message->status->getValue(),
+            'status' => $message->status->getValue(),
         ]);
 
         if (null === $socialAccount) {

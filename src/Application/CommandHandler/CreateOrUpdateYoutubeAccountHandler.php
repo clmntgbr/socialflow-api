@@ -63,7 +63,7 @@ final class CreateOrUpdateYoutubeAccountHandler
 
         $this->youtubeSocialAccountRepository->save($youtubeAccount, true);
 
-        if ($youtubeAccount->getStatus()->getValue() !== SocialAccountStatus::PENDING_VALIDATION->getValue()) {
+        if ($youtubeAccount->getStatus() !== SocialAccountStatus::PENDING_VALIDATION->getValue()) {
             return null;
         }
 
@@ -87,7 +87,7 @@ final class CreateOrUpdateYoutubeAccountHandler
             return new YoutubeSocialAccount($message->accountId);
         }
 
-        if ($youtubeAccount->getStatus()->getValue() === SocialAccountStatus::EXPIRED->getValue()) {
+        if ($youtubeAccount->getStatus() === SocialAccountStatus::EXPIRED->getValue()) {
             $youtubeAccount->setStatus(SocialAccountStatus::ACTIVE->getValue());
         }
 

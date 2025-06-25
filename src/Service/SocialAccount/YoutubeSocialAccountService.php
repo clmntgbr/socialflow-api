@@ -3,6 +3,7 @@
 namespace App\Service\SocialAccount;
 
 use App\Application\Command\CreateOrUpdateYoutubeAccount;
+use App\Denormalizer\Denormalizer;
 use App\Dto\SocialAccount\GetAccounts\AbstractGetAccounts;
 use App\Dto\SocialAccount\GetAccounts\YoutubeGetAccounts;
 use App\Dto\SocialAccount\GetSocialAccountCallback;
@@ -17,7 +18,6 @@ use App\Repository\UserRepository;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Messenger\Stamp\HandledStamp;
-use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
 use Symfony\Component\Uid\Uuid;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
@@ -33,7 +33,7 @@ class YoutubeSocialAccountService implements SocialAccountServiceInterface
     public function __construct(
         private HttpClientInterface $httpClient,
         private UserRepository $userRepository,
-        private DenormalizerInterface $denormalizer,
+        private Denormalizer $denormalizer,
         private MessageBusInterface $bus,
         private string $youtubeClientId,
         private string $youtubeClientSecret,

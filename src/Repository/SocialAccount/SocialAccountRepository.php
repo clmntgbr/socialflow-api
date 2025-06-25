@@ -25,7 +25,7 @@ class SocialAccountRepository extends AbstractRepository
     {
         $qb = $this
             ->createQueryBuilder('sa')
-            ->where('sa.status.value = :status')
+            ->where('sa.status = :status')
             ->andWhere('sa.id > :lastId')
             ->orderBy('sa.id', 'ASC')
             ->setMaxResults(100);
@@ -35,7 +35,7 @@ class SocialAccountRepository extends AbstractRepository
         do {
             $parameters = [
                 'lastId' => $lastId ?? new NilUuid(),
-                'status' => SocialAccountStatus::TO_VALIDATE->getValue(),
+                'status' => SocialAccountStatus::PENDING_VALIDATION->getValue(),
             ];
 
             /** @var SocialAccount[] $results */

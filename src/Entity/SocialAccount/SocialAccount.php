@@ -7,15 +7,14 @@ use ApiPlatform\Metadata\ApiFilter;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\GetCollection;
 use App\Entity\Organization;
+use App\Entity\Post\Cluster;
 use App\Entity\Trait\UuidTrait;
-use App\Entity\ValueObject\SocialAccountStatus;
-use App\Enum\SocialAccountStatus as EnumSocialAccountStatus;
+use App\Enum\SocialAccountStatus;
 use App\Repository\SocialAccount\SocialAccountRepository;
-use DateTime;
-use DateTimeImmutable;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
-use Doctrine\ORM\Mapping\Embedded;
 use Gedmo\Timestampable\Traits\TimestampableEntity;
 use Symfony\Component\Serializer\Attribute\Groups;
 use Symfony\Component\Uid\Uuid;
@@ -24,12 +23,12 @@ use Symfony\Component\Uid\Uuid;
 #[ORM\InheritanceType('SINGLE_TABLE')]
 #[ORM\DiscriminatorColumn(name: 'type', type: 'string')]
 #[ORM\DiscriminatorMap([
-    'linkedin_social_account' => 'LinkedinSocialAccount',
-    'twitter_social_account' => 'TwitterSocialAccount',
-    'facebook_social_account' => 'FacebookSocialAccount',
-    'youtube_social_account' => 'YoutubeSocialAccount',
-    'thread_social_account' => 'ThreadSocialAccount',
-    'instagram_social_account' => 'InstagramSocialAccount',
+    'linkedin' => 'LinkedinSocialAccount',
+    'twitter' => 'TwitterSocialAccount',
+    'facebook' => 'FacebookSocialAccount',
+    'youtube' => 'YoutubeSocialAccount',
+    'thread' => 'ThreadSocialAccount',
+    'instagram' => 'InstagramSocialAccount',
 ])]
 #[ApiResource(
     operations: [
@@ -42,10 +41,11 @@ use Symfony\Component\Uid\Uuid;
     SearchFilter::class,
     properties: [
         'id' => 'exact',
-        'status.value' => 'exact',
+        'status' => 'exact',
+        'type' => 'exact',
     ]
 )]
-class SocialAccount
+class SocialAccount implements SocialAccountInterface
 {
     use UuidTrait;
     use TimestampableEntity;
@@ -94,20 +94,29 @@ class SocialAccount
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     #[Groups(['social_account.read'])]
-    private ?DateTime $expireAt = null;
+    private ?\DateTime $expireAt = null;
 
-    #[Embedded(class: SocialAccountStatus::class, columnPrefix: false)]
+    #[ORM\Column(type: Types::STRING)]
     #[Groups(['social_account.read'])]
-    private SocialAccountStatus $status;
+    private string $status;
 
     #[ORM\ManyToOne(targetEntity: Organization::class, inversedBy: 'socialAccounts')]
     #[ORM\JoinColumn(nullable: false)]
-    private ?Organization $organization = null;
+    private Organization $organization;
+
+    #[ORM\OneToMany(targetEntity: Cluster::class, mappedBy: 'socialAccount', cascade: ['remove'])]
+    private Collection $clusters;
 
     public function __construct()
     {
         $this->id = Uuid::v4();
-        $this->status = new SocialAccountStatus(value: EnumSocialAccountStatus::PENDING_VALIDATION->getValue());
+        $this->status = SocialAccountStatus::PENDING_VALIDATION->getValue();
+        $this->clusters = new ArrayCollection();
+    }
+
+    public function getType(): string
+    {
+        return '';
     }
 
     public function getSocialAccountId(): ?string
@@ -186,7 +195,7 @@ class SocialAccount
         return $this;
     }
 
-    public function setRefreshTokenAndExpireAt(?string $refreshToken, DateTime $expireAt): static
+    public function setRefreshTokenAndExpireAt(?string $refreshToken, \DateTime $expireAt): static
     {
         if (null === $refreshToken) {
             return $this;
@@ -225,18 +234,6 @@ class SocialAccount
     public function getToken(): ?string
     {
         return $this->token;
-    }
-
-    public function getStatus(): SocialAccountStatus
-    {
-        return $this->status;
-    }
-
-    public function setStatus(string $status): static
-    {
-        $this->status = new SocialAccountStatus(value: $status);
-
-        return $this;
     }
 
     public function getWebsite(): ?string
@@ -295,6 +292,48 @@ class SocialAccount
     public function setExpireAt(?\DateTime $expireAt): static
     {
         $this->expireAt = $expireAt;
+
+        return $this;
+    }
+
+    public function getStatus(): ?string
+    {
+        return $this->status;
+    }
+
+    public function setStatus(string $status): static
+    {
+        $this->status = $status;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Cluster>
+     */
+    public function getClusters(): Collection
+    {
+        return $this->clusters;
+    }
+
+    public function addCluster(Cluster $cluster): static
+    {
+        if (!$this->clusters->contains($cluster)) {
+            $this->clusters->add($cluster);
+            $cluster->setSocialAccount($this);
+        }
+
+        return $this;
+    }
+
+    public function removeCluster(Cluster $cluster): static
+    {
+        if ($this->clusters->removeElement($cluster)) {
+            // set the owning side to null (unless already changed)
+            if ($cluster->getSocialAccount() === $this) {
+                $cluster->setSocialAccount(null);
+            }
+        }
 
         return $this;
     }

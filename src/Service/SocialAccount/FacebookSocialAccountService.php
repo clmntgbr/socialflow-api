@@ -135,6 +135,7 @@ class FacebookSocialAccountService implements SocialAccountServiceInterface
 
             return new RedirectResponse($this->frontUrl.'?'.$query);
         } catch (\Exception $exception) {
+            dd($exception->getMessage());
             return new RedirectResponse(sprintf('%s?error=true&message=3', $this->frontUrl));
         }
     }

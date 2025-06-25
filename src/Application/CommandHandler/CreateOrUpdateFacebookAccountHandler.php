@@ -64,7 +64,7 @@ final class CreateOrUpdateFacebookAccountHandler
 
         $this->facebookSocialAccountRepository->save($facebookAccount, true);
 
-        if ($facebookAccount->getStatus()->getValue() !== SocialAccountStatus::PENDING_VALIDATION->getValue()) {
+        if ($facebookAccount->getStatus() !== SocialAccountStatus::PENDING_VALIDATION->getValue()) {
             return null;
         }
 
@@ -88,7 +88,7 @@ final class CreateOrUpdateFacebookAccountHandler
             return new FacebookSocialAccount($message->accountId);
         }
 
-        if ($facebookAccount->getStatus()->getValue() === SocialAccountStatus::EXPIRED->getValue()) {
+        if ($facebookAccount->getStatus() === SocialAccountStatus::EXPIRED->getValue()) {
             $facebookAccount->setStatus(SocialAccountStatus::ACTIVE->getValue());
         }
 

@@ -13,7 +13,7 @@ use Symfony\Component\Uid\Uuid;
 #[ApiResource(
     operations: []
 )]
-class TwitterSocialAccount extends SocialAccount
+class TwitterSocialAccount extends SocialAccount implements SocialAccountInterface
 {
     #[ORM\Column(type: Types::STRING, nullable: true)]
     private ?string $tokenSecret = null;

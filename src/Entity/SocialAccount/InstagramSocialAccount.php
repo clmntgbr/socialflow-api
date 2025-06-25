@@ -11,7 +11,7 @@ use Symfony\Component\Serializer\Attribute\Groups;
 #[ApiResource(
     operations: []
 )]
-class InstagramSocialAccount extends SocialAccount
+class InstagramSocialAccount extends SocialAccount implements SocialAccountInterface
 {
     #[Groups(['social_account.read'])]
     public function getType(): string

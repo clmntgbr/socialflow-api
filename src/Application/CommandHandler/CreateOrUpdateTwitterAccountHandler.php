@@ -61,7 +61,7 @@ final class CreateOrUpdateTwitterAccountHandler
 
         $this->twitterSocialAccountRepository->save($twitterAccount, true);
 
-        if ($twitterAccount->getStatus()->getValue() !== SocialAccountStatus::PENDING_VALIDATION->getValue()) {
+        if ($twitterAccount->getStatus() !== SocialAccountStatus::PENDING_VALIDATION->getValue()) {
             return null;
         }
 
@@ -85,7 +85,7 @@ final class CreateOrUpdateTwitterAccountHandler
             return new TwitterSocialAccount($message->accountId);
         }
 
-        if ($twitterAccount->getStatus()->getValue() === SocialAccountStatus::EXPIRED->getValue()) {
+        if ($twitterAccount->getStatus() === SocialAccountStatus::EXPIRED->getValue()) {
             $twitterAccount->setStatus(SocialAccountStatus::ACTIVE->getValue());
         }
 

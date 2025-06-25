@@ -61,7 +61,7 @@ final class CreateOrUpdateLinkedinAccountHandler
 
         $this->LinkedinSocialAccountRepository->save($linkedinAccount, true);
 
-        if ($linkedinAccount->getStatus()->getValue() !== SocialAccountStatus::PENDING_VALIDATION->getValue()) {
+        if ($linkedinAccount->getStatus() !== SocialAccountStatus::PENDING_VALIDATION->getValue()) {
             return null;
         }
 
@@ -85,7 +85,7 @@ final class CreateOrUpdateLinkedinAccountHandler
             return new LinkedinSocialAccount($message->accountId);
         }
 
-        if ($linkedinAccount->getStatus()->getValue() === SocialAccountStatus::EXPIRED->getValue()) {
+        if ($linkedinAccount->getStatus() === SocialAccountStatus::EXPIRED->getValue()) {
             $linkedinAccount->setStatus(SocialAccountStatus::ACTIVE->getValue());
         }
 

@@ -10,6 +10,7 @@ use App\Entity\Organization;
 use App\Entity\User;
 use Doctrine\ORM\QueryBuilder;
 use Symfony\Bundle\SecurityBundle\Security;
+use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
 
 final readonly class OrganizationExtension implements QueryCollectionExtensionInterface, QueryItemExtensionInterface
 {
@@ -45,7 +46,7 @@ final readonly class OrganizationExtension implements QueryCollectionExtensionIn
 
         $user = $this->security->getUser();
         if (!$user instanceof User) {
-            throw new \Exception('You have to be authenticated.', 403);
+            throw new UnauthorizedHttpException('You have to be authenticated.');
         }
 
         $rootAlias = $queryBuilder->getRootAliases()[0];
