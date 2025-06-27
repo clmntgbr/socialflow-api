@@ -17,7 +17,7 @@ use Symfony\Component\Messenger\Stamp\DelayStamp;
 use Symfony\Component\Uid\Uuid;
 
 #[AsMessageHandler]
-final class CreateOrUpdateTwitterAccountHandler
+final class CreateOrUpdateTwitterAccountHandler extends CreateOrUpdateAccountHandlerAbstract
 {
     public function __construct(
         private UserRepository $userRepository,
@@ -25,6 +25,7 @@ final class CreateOrUpdateTwitterAccountHandler
         private TwitterSocialAccountRepository $twitterSocialAccountRepository,
         private MessageBusInterface $messageBus,
     ) {
+        parent::__construct($twitterSocialAccountRepository);
     }
 
     public function __invoke(CreateOrUpdateTwitterAccount $message): ?Uuid
@@ -43,7 +44,12 @@ final class CreateOrUpdateTwitterAccountHandler
             throw new \Exception(sprintf('Organization does not exist with id [%s]', (string) $message->organizationId));
         }
 
-        $twitterAccount = $this->getTwitterAccount($message, $organization);
+        /** @var TwitterSocialAccount $twitterAccount */
+        $twitterAccount = $this->getAccount(
+            socialAccountId: $message->twitterAccount->id,
+            organization: $organization,
+            class: TwitterSocialAccount::class
+        );
 
         $twitterAccount
             ->setUsername($message->twitterAccount->username)
@@ -71,24 +77,5 @@ final class CreateOrUpdateTwitterAccountHandler
         ]);
 
         return $twitterAccount->getId();
-    }
-
-    private function getTwitterAccount(CreateOrUpdateTwitterAccount $message, Organization $organization): TwitterSocialAccount
-    {
-        /** @var ?TwitterSocialAccount $twitterAccount */
-        $twitterAccount = $this->twitterSocialAccountRepository->findOneBy([
-            'organization' => $organization,
-            'socialAccountId' => $message->twitterAccount->id,
-        ]);
-
-        if (null === $twitterAccount) {
-            return new TwitterSocialAccount($message->accountId);
-        }
-
-        if ($twitterAccount->getStatus() === SocialAccountStatus::EXPIRED->getValue()) {
-            $twitterAccount->setStatus(SocialAccountStatus::ACTIVE->getValue());
-        }
-
-        return $twitterAccount;
     }
 }

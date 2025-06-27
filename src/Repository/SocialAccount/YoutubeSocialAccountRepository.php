@@ -9,7 +9,7 @@ use Doctrine\Persistence\ManagerRegistry;
 /**
  * @extends AbstractRepository<YoutubeSocialAccount>
  */
-class YoutubeSocialAccountRepository extends AbstractRepository
+class YoutubeSocialAccountRepository extends AbstractRepository implements SocialAccountRepositoryInterface
 {
     public function __construct(ManagerRegistry $registry)
     {

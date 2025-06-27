@@ -9,7 +9,7 @@ use Doctrine\Persistence\ManagerRegistry;
 /**
  * @extends AbstractRepository<TwitterSocialAccount>
  */
-class TwitterSocialAccountRepository extends AbstractRepository
+class TwitterSocialAccountRepository extends AbstractRepository implements SocialAccountRepositoryInterface
 {
     public function __construct(ManagerRegistry $registry)
     {

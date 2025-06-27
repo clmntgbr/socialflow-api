@@ -94,9 +94,7 @@ class LinkedinSocialAccountService implements SocialAccountServiceInterface
                 throw new SocialAccountException('Failed to retrieve accounts from Linkedin API');
             }
 
-            $linkedinId = Uuid::v4();
             $envelope = $this->bus->dispatch(new CreateOrUpdateLinkedinAccount(
-                accountId: $linkedinId,
                 organizationId: $user->getActiveOrganization()->getId(),
                 userId: $user->getId(),
                 linkedinAccount: $accounts->linkedinAccount,

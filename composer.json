@@ -95,5 +95,8 @@
             "require": "7.2.*",
             "docker": true
         }
+    },
+    "require-dev": {
+        "phpstan/phpstan": "^2.1"
     }
 }

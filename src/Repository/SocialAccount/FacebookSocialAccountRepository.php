@@ -9,7 +9,7 @@ use Doctrine\Persistence\ManagerRegistry;
 /**
  * @extends AbstractRepository<FacebookSocialAccount>
  */
-class FacebookSocialAccountRepository extends AbstractRepository
+class FacebookSocialAccountRepository extends AbstractRepository implements SocialAccountRepositoryInterface
 {
     public function __construct(ManagerRegistry $registry)
     {

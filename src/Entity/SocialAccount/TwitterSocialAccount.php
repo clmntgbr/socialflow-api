@@ -7,7 +7,6 @@ use App\Repository\SocialAccount\TwitterSocialAccountRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Attribute\Groups;
-use Symfony\Component\Uid\Uuid;
 
 #[ORM\Entity(repositoryClass: TwitterSocialAccountRepository::class)]
 #[ApiResource(
@@ -26,10 +25,9 @@ class TwitterSocialAccount extends SocialAccount implements SocialAccountInterfa
     #[Groups(['social_account.read'])]
     private int $tweets = 0;
 
-    public function __construct(Uuid $uuid)
+    public function __construct()
     {
         parent::__construct();
-        $this->setId($uuid);
     }
 
     #[Groups(['social_account.read'])]

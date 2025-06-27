@@ -6,6 +6,7 @@ use App\Application\Command\CreateOrUpdateFacebookAccount;
 use App\Application\Command\RemoveSocialAccount;
 use App\Entity\Organization;
 use App\Entity\SocialAccount\FacebookSocialAccount;
+use App\Entity\User;
 use App\Enum\SocialAccountStatus;
 use App\Repository\OrganizationRepository;
 use App\Repository\SocialAccount\FacebookSocialAccountRepository;
@@ -17,7 +18,7 @@ use Symfony\Component\Messenger\Stamp\DelayStamp;
 use Symfony\Component\Uid\Uuid;
 
 #[AsMessageHandler]
-final class CreateOrUpdateFacebookAccountHandler
+final class CreateOrUpdateFacebookAccountHandler extends CreateOrUpdateAccountHandlerAbstract
 {
     public function __construct(
         private UserRepository $userRepository,
@@ -25,6 +26,7 @@ final class CreateOrUpdateFacebookAccountHandler
         private FacebookSocialAccountRepository $facebookSocialAccountRepository,
         private MessageBusInterface $messageBus,
     ) {
+        parent::__construct($facebookSocialAccountRepository);
     }
 
     public function __invoke(CreateOrUpdateFacebookAccount $message): ?Uuid
@@ -43,14 +45,18 @@ final class CreateOrUpdateFacebookAccountHandler
             throw new \Exception(sprintf('Organization does not exist with id [%s]', (string) $message->organizationId));
         }
 
-        $facebookAccount = $this->getFacebookAccount($message, $organization);
+        /** @var FacebookSocialAccount $facebookAccount */
+        $facebookAccount = $this->getAccount(
+            socialAccountId: $message->facebookAccount->id,
+            organization: $organization,
+            class: FacebookSocialAccount::class
+        );
 
         $date = new \DateTime();
         $date->modify('+60 days');
 
         $facebookAccount
             ->setLink($message->facebookAccount->link)
-            ->setId($message->accountId)
             ->setUsername($message->facebookAccount->username)
             ->setSocialAccountId($message->facebookAccount->id)
             ->setOrganization($organization)
@@ -74,24 +80,5 @@ final class CreateOrUpdateFacebookAccountHandler
         ]);
 
         return $facebookAccount->getId();
-    }
-
-    private function getFacebookAccount(CreateOrUpdateFacebookAccount $message, Organization $organization): FacebookSocialAccount
-    {
-        /** @var ?FacebookSocialAccount $facebookAccount */
-        $facebookAccount = $this->facebookSocialAccountRepository->findOneBy([
-            'organization' => $organization,
-            'socialAccountId' => $message->facebookAccount->id,
-        ]);
-
-        if (null === $facebookAccount) {
-            return new FacebookSocialAccount($message->accountId);
-        }
-
-        if ($facebookAccount->getStatus() === SocialAccountStatus::EXPIRED->getValue()) {
-            $facebookAccount->setStatus(SocialAccountStatus::ACTIVE->getValue());
-        }
-
-        return $facebookAccount;
     }
 }

@@ -17,7 +17,7 @@ use Symfony\Component\Messenger\Stamp\DelayStamp;
 use Symfony\Component\Uid\Uuid;
 
 #[AsMessageHandler]
-final class CreateOrUpdateLinkedinAccountHandler
+final class CreateOrUpdateLinkedinAccountHandler extends CreateOrUpdateAccountHandlerAbstract
 {
     public function __construct(
         private UserRepository $userRepository,
@@ -25,6 +25,7 @@ final class CreateOrUpdateLinkedinAccountHandler
         private LinkedinSocialAccountRepository $LinkedinSocialAccountRepository,
         private MessageBusInterface $messageBus,
     ) {
+        parent::__construct($LinkedinSocialAccountRepository);
     }
 
     public function __invoke(CreateOrUpdateLinkedinAccount $message): ?Uuid
@@ -43,7 +44,12 @@ final class CreateOrUpdateLinkedinAccountHandler
             throw new \Exception(sprintf('Organization does not exist with id [%s]', (string) $message->organizationId));
         }
 
-        $linkedinAccount = $this->getlinkedinAccount($message, $organization);
+        /** @var LinkedinSocialAccount $linkedinAccount */
+        $linkedinAccount = $this->getAccount(
+            socialAccountId: $message->linkedinAccount->id,
+            organization: $organization,
+            class: LinkedinSocialAccount::class
+        );
 
         $date = new \DateTime();
         $date->modify(sprintf('+%s seconds', $message->linkedinToken->expiresIn));
@@ -71,24 +77,5 @@ final class CreateOrUpdateLinkedinAccountHandler
         ]);
 
         return $linkedinAccount->getId();
-    }
-
-    private function getLinkedinAccount(CreateOrUpdateLinkedinAccount $message, Organization $organization): LinkedinSocialAccount
-    {
-        /** @var ?LinkedinSocialAccount $linkedinAccount */
-        $linkedinAccount = $this->LinkedinSocialAccountRepository->findOneBy([
-            'organization' => $organization,
-            'socialAccountId' => $message->linkedinAccount->id,
-        ]);
-
-        if (null === $linkedinAccount) {
-            return new LinkedinSocialAccount($message->accountId);
-        }
-
-        if ($linkedinAccount->getStatus() === SocialAccountStatus::EXPIRED->getValue()) {
-            $linkedinAccount->setStatus(SocialAccountStatus::ACTIVE->getValue());
-        }
-
-        return $linkedinAccount;
     }
 }

@@ -11,7 +11,7 @@ use Symfony\Component\Uid\NilUuid;
 /**
  * @extends AbstractRepository<SocialAccount>
  */
-class SocialAccountRepository extends AbstractRepository
+class SocialAccountRepository extends AbstractRepository implements SocialAccountRepositoryInterface
 {
     public function __construct(ManagerRegistry $registry)
     {

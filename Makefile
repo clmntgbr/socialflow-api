@@ -102,7 +102,7 @@ php-cs-fixer:
 	$(QA) ./php-cs-fixer fix src --rules=@Symfony --verbose --diff
 
 php-stan:
-	$(QA) ./vendor/bin/phpstan analyse src -l $(or $(level), 5)
+	$(PHP) ./vendor/bin/phpstan analyse src -l $(or $(level), 5)
 
 consume:
 	$(PHP) php bin/console messenger:consume async -vv

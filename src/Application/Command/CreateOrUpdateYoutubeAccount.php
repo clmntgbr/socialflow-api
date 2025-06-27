@@ -6,10 +6,9 @@ use App\Dto\SocialAccount\YoutubeAccount;
 use App\Dto\Token\AccessToken\YoutubeAccessToken;
 use Symfony\Component\Uid\Uuid;
 
-final class CreateOrUpdateYoutubeAccount
+final class CreateOrUpdateYoutubeAccount implements CreateOrUpdateAccountInterface
 {
     public function __construct(
-        public Uuid $accountId,
         public Uuid $userId,
         public Uuid $organizationId,
         public YoutubeAccount $youtubeAccount,

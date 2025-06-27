@@ -17,7 +17,7 @@ use Symfony\Component\Messenger\Stamp\DelayStamp;
 use Symfony\Component\Uid\Uuid;
 
 #[AsMessageHandler]
-final class CreateOrUpdateYoutubeAccountHandler
+final class CreateOrUpdateYoutubeAccountHandler extends CreateOrUpdateAccountHandlerAbstract
 {
     public function __construct(
         private UserRepository $userRepository,
@@ -25,6 +25,7 @@ final class CreateOrUpdateYoutubeAccountHandler
         private YoutubeSocialAccountRepository $youtubeSocialAccountRepository,
         private MessageBusInterface $messageBus,
     ) {
+        parent::__construct($youtubeSocialAccountRepository);
     }
 
     public function __invoke(CreateOrUpdateYoutubeAccount $message): ?Uuid
@@ -43,7 +44,11 @@ final class CreateOrUpdateYoutubeAccountHandler
             throw new \Exception(sprintf('Organization does not exist with id [%s]', (string) $message->organizationId));
         }
 
-        $youtubeAccount = $this->getYoutubeAccount($message, $organization);
+        /** @var YoutubeSocialAccount $youtubeAccount */
+        $youtubeAccount = $this->getAccount(
+            socialAccountId: $message->youtubeAccount->id,
+            organization: $organization, class: YoutubeSocialAccount::class
+        );
 
         $date = new \DateTime();
         $date->modify(sprintf('+%s seconds', $message->youtubeToken->expiresIn));
@@ -51,7 +56,6 @@ final class CreateOrUpdateYoutubeAccountHandler
         $youtubeAccount
             ->setDescription($message->youtubeAccount->description)
             ->setName($message->youtubeAccount->name)
-            ->setId($message->accountId)
             ->setUsername($message->youtubeAccount->username)
             ->setSocialAccountId($message->youtubeAccount->id)
             ->setOrganization($organization)
@@ -73,24 +77,5 @@ final class CreateOrUpdateYoutubeAccountHandler
         ]);
 
         return $youtubeAccount->getId();
-    }
-
-    private function getYoutubeAccount(CreateOrUpdateYoutubeAccount $message, Organization $organization): YoutubeSocialAccount
-    {
-        /** @var ?YoutubeSocialAccount $youtubeAccount */
-        $youtubeAccount = $this->youtubeSocialAccountRepository->findOneBy([
-            'organization' => $organization,
-            'socialAccountId' => $message->youtubeAccount->id,
-        ]);
-
-        if (null === $youtubeAccount) {
-            return new YoutubeSocialAccount($message->accountId);
-        }
-
-        if ($youtubeAccount->getStatus() === SocialAccountStatus::EXPIRED->getValue()) {
-            $youtubeAccount->setStatus(SocialAccountStatus::ACTIVE->getValue());
-        }
-
-        return $youtubeAccount;
     }
 }

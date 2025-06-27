@@ -111,9 +111,7 @@ class FacebookSocialAccountService implements SocialAccountServiceInterface
                     continue;
                 }
 
-                $facebookId = Uuid::v4();
                 $envelope = $this->bus->dispatch(new CreateOrUpdateFacebookAccount(
-                    accountId: $facebookId,
                     organizationId: $user->getActiveOrganization()->getId(),
                     userId: $user->getId(),
                     facebookToken: $longAccessToken,
@@ -136,6 +134,7 @@ class FacebookSocialAccountService implements SocialAccountServiceInterface
             return new RedirectResponse($this->frontUrl.'?'.$query);
         } catch (\Exception $exception) {
             dd($exception->getMessage());
+
             return new RedirectResponse(sprintf('%s?error=true&message=3', $this->frontUrl));
         }
     }

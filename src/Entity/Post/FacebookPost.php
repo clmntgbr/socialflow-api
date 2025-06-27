@@ -17,7 +17,7 @@ class FacebookPost extends Post implements PostInterface
     #[ORM\Column(type: Types::STRING)]
     #[Groups(['cluster.read', 'post.read', 'post.write'])]
     private string $test;
-    
+
     #[Groups(['post.read'])]
     public function getType(): string
     {

@@ -131,9 +131,7 @@ class TwitterSocialAccountService implements SocialAccountServiceInterface
                 throw new SocialAccountException('Failed to retrieve accounts from Facebook API');
             }
 
-            $twitterId = Uuid::v4();
             $envelope = $this->bus->dispatch(new CreateOrUpdateTwitterAccount(
-                accountId: $twitterId,
                 organizationId: $user->getActiveOrganization()->getId(),
                 userId: $user->getId(),
                 twitterAccount: $accounts->twitterAccount,
@@ -153,7 +151,9 @@ class TwitterSocialAccountService implements SocialAccountServiceInterface
             $query = http_build_query(['ids' => $twitterIds]);
 
             return new RedirectResponse($this->frontUrl.'?'.$query);
-        } catch (\Exception) {
+        } catch (\Exception $exception) {
+            dd($exception->getMessage());
+
             return new RedirectResponse(sprintf('%s?error=true&message=3', $this->frontUrl));
         }
     }

@@ -18,7 +18,6 @@ class YoutubeAccount extends AbstractAccount
     public string $name;
 
     #[Assert\Type('string')]
-    #[Assert\NotBlank()]
     #[SerializedPath('[snippet][description]')]
     public ?string $description = null;
 

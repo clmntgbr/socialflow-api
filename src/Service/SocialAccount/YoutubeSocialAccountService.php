@@ -53,6 +53,7 @@ class YoutubeSocialAccountService implements SocialAccountServiceInterface
             'redirect_uri' => $this->apiUrl.SocialAccountServiceInterface::YOUTUBE_CALLBACK_URL,
             'scope' => implode(' ', $this->getScopes()),
             'response_type' => 'code',
+            'prompt' => 'select_account',
             'access_type' => 'offline',
             'state' => $user->getState(),
         ];
@@ -99,9 +100,7 @@ class YoutubeSocialAccountService implements SocialAccountServiceInterface
 
             $youtubeIds = [];
             foreach ($accounts->youtubeAccounts as $youtubeAccount) {
-                $youtubeId = Uuid::v4();
                 $envelope = $this->bus->dispatch(new CreateOrUpdateYoutubeAccount(
-                    accountId: $youtubeId,
                     organizationId: $user->getActiveOrganization()->getId(),
                     userId: $user->getId(),
                     youtubeToken: $accessToken,
@@ -123,6 +122,8 @@ class YoutubeSocialAccountService implements SocialAccountServiceInterface
 
             return new RedirectResponse($this->frontUrl.'?'.$query);
         } catch (\Exception $exception) {
+            dd($exception->getMessage());
+
             return new RedirectResponse(sprintf('%s?error=true&message=3', $this->frontUrl));
         }
 
