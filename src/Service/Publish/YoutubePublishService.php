@@ -2,9 +2,16 @@
 
 namespace App\Service\Publish;
 
+use App\Dto\Publish\GetPost\GetPostInterface;
+use App\Entity\Post\Post;
+use App\Entity\Post\YoutubePost;
+
 class YoutubePublishService implements PublishServiceInterface
 {
-    public function post()
+    /**
+     * @param YoutubePost $post
+     */
+    public function post(Post $post): GetPostInterface
     {
         throw new \RuntimeException('Method not implemented.');
     }

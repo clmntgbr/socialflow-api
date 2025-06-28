@@ -2,9 +2,16 @@
 
 namespace App\Service\Publish;
 
+use App\Dto\Publish\GetPost\GetPostInterface;
+use App\Entity\Post\InstagramPost;
+use App\Entity\Post\Post;
+
 class InstagramPublishService implements PublishServiceInterface
 {
-    public function post()
+    /**
+     * @param InstagramPost $post
+     */
+    public function post(Post $post): GetPostInterface
     {
         throw new \RuntimeException('Method not implemented.');
     }

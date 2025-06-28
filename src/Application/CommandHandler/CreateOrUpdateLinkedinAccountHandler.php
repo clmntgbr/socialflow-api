@@ -67,7 +67,7 @@ final class CreateOrUpdateLinkedinAccountHandler extends CreateOrUpdateAccountHa
 
         $this->LinkedinSocialAccountRepository->save($linkedinAccount, true);
 
-        if ($linkedinAccount->getStatus() !== SocialAccountStatus::PENDING_VALIDATION->getValue()) {
+        if ($linkedinAccount->getStatus() !== SocialAccountStatus::PENDING_VALIDATION->value) {
             return null;
         }
 

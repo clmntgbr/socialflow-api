@@ -67,7 +67,7 @@ final class CreateOrUpdateTwitterAccountHandler extends CreateOrUpdateAccountHan
 
         $this->twitterSocialAccountRepository->save($twitterAccount, true);
 
-        if ($twitterAccount->getStatus() !== SocialAccountStatus::PENDING_VALIDATION->getValue()) {
+        if ($twitterAccount->getStatus() !== SocialAccountStatus::PENDING_VALIDATION->value) {
             return null;
         }
 

@@ -26,8 +26,8 @@ abstract class CreateOrUpdateAccountHandlerAbstract
             return new $class();
         }
 
-        if ($account->getStatus() === SocialAccountStatus::EXPIRED->getValue()) {
-            $account->setStatus(SocialAccountStatus::ACTIVE->getValue());
+        if ($account->getStatus() === SocialAccountStatus::EXPIRED->value) {
+            $account->setStatus(SocialAccountStatus::ACTIVE->value);
         }
 
         return $account;

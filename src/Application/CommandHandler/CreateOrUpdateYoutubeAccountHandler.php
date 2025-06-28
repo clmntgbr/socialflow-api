@@ -67,7 +67,7 @@ final class CreateOrUpdateYoutubeAccountHandler extends CreateOrUpdateAccountHan
 
         $this->youtubeSocialAccountRepository->save($youtubeAccount, true);
 
-        if ($youtubeAccount->getStatus() !== SocialAccountStatus::PENDING_VALIDATION->getValue()) {
+        if ($youtubeAccount->getStatus() !== SocialAccountStatus::PENDING_VALIDATION->value) {
             return null;
         }
 

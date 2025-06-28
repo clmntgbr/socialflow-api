@@ -5,6 +5,7 @@ namespace App\Entity\SocialAccount;
 use ApiPlatform\Doctrine\Orm\Filter\SearchFilter;
 use ApiPlatform\Metadata\ApiFilter;
 use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
 use App\Entity\Organization;
 use App\Entity\Post\Cluster;
@@ -33,6 +34,9 @@ use Symfony\Component\Uid\Uuid;
 #[ApiResource(
     operations: [
         new GetCollection(
+            normalizationContext: ['skip_null_values' => false, 'groups' => ['social_account.read']],
+        ),
+        new Get(
             normalizationContext: ['skip_null_values' => false, 'groups' => ['social_account.read']],
         ),
     ]
@@ -110,13 +114,18 @@ class SocialAccount implements SocialAccountInterface
     public function __construct()
     {
         $this->id = Uuid::v4();
-        $this->status = SocialAccountStatus::PENDING_VALIDATION->getValue();
+        $this->status = SocialAccountStatus::PENDING_VALIDATION->value;
         $this->clusters = new ArrayCollection();
     }
 
     public function getType(): string
     {
         return '';
+    }
+
+    public function isActive(): bool
+    {
+        return $this->status === SocialAccountStatus::ACTIVE->value;
     }
 
     public function getSocialAccountId(): ?string

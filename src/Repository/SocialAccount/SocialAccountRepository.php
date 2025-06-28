@@ -35,7 +35,7 @@ class SocialAccountRepository extends AbstractRepository implements SocialAccoun
         do {
             $parameters = [
                 'lastId' => $lastId ?? new NilUuid(),
-                'status' => SocialAccountStatus::PENDING_VALIDATION->getValue(),
+                'status' => SocialAccountStatus::PENDING_VALIDATION->value,
             ];
 
             /** @var SocialAccount[] $results */

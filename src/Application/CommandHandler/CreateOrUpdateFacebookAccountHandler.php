@@ -70,7 +70,7 @@ final class CreateOrUpdateFacebookAccountHandler extends CreateOrUpdateAccountHa
 
         $this->facebookSocialAccountRepository->save($facebookAccount, true);
 
-        if ($facebookAccount->getStatus() !== SocialAccountStatus::PENDING_VALIDATION->getValue()) {
+        if ($facebookAccount->getStatus() !== SocialAccountStatus::PENDING_VALIDATION->value) {
             return null;
         }
 

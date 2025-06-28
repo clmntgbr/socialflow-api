@@ -2,9 +2,16 @@
 
 namespace App\Service\Publish;
 
+use App\Dto\Publish\GetPost\GetPostInterface;
+use App\Entity\Post\LinkedinPost;
+use App\Entity\Post\Post;
+
 class LinkedinPublishService implements PublishServiceInterface
 {
-    public function post()
+    /**
+     * @param LinkedinPost $post
+     */
+    public function post(Post $post): GetPostInterface
     {
         throw new \RuntimeException('Method not implemented.');
     }

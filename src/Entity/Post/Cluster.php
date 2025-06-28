@@ -52,7 +52,7 @@ class Cluster
     public function __construct()
     {
         $this->id = Uuid::v4();
-        $this->status = ClusterStatus::DRAFT->getValue();
+        $this->status = ClusterStatus::DRAFT->value;
         $this->posts = new ArrayCollection();
     }
 

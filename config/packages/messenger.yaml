@@ -19,3 +19,5 @@ framework:
             App\Application\Command\CreateOrUpdateYoutubeAccount: sync
             App\Application\Command\CreateOrganization: sync
             App\Application\Command\RemoveSocialAccount: async
+            App\Application\Command\ExpireSocialAccount: async
+            App\Application\Command\PublishPost: async
