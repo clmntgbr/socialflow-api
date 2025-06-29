@@ -4,10 +4,10 @@ namespace App\Application\Command;
 
 use Symfony\Component\Uid\Uuid;
 
-final class PublishPost
+final class UpdateClusterStatus
 {
     public function __construct(
-        public Uuid $postId,
+        public Uuid $clusterId,
     ) {
     }
 }

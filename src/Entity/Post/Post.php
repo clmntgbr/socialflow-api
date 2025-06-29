@@ -74,19 +74,19 @@ class Post implements PostInterface
 
     public function isPublished(): bool
     {
-        return $this->status === PostStatus::PUBLISHED->value && $this->postId !== null;
+        return $this->status === PostStatus::PUBLISHED->value && null !== $this->postId;
     }
 
     public function isDraft(): bool
     {
         return $this->status === PostStatus::DRAFT->value;
     }
-    
+
     public function isProgrammed(): bool
     {
         return $this->status === PostStatus::PROGRAMMED->value;
     }
-    
+
     public function isError(): bool
     {
         return $this->status === PostStatus::ERROR->value;
@@ -96,12 +96,14 @@ class Post implements PostInterface
     {
         $this->postId = $postId;
         $this->status = PostStatus::PUBLISHED->value;
+        $this->postedAt = new \DateTime();
     }
 
     public function setFailed(): void
     {
         $this->postId = null;
         $this->status = PostStatus::ERROR->value;
+        $this->postedAt = null;
     }
 
     public function getPostId(): ?string

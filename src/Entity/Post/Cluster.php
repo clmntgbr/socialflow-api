@@ -8,10 +8,12 @@ use ApiPlatform\Metadata\Post as PostOperation;
 use App\Entity\SocialAccount\SocialAccount;
 use App\Entity\Trait\UuidTrait;
 use App\Enum\ClusterStatus;
+use App\Enum\PostStatus;
 use App\Repository\Post\ClusterRepository;
 use App\State\ClusterProcessor;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Doctrine\Common\Collections\Criteria;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Timestampable\Traits\TimestampableEntity;
@@ -59,6 +61,27 @@ class Cluster
     public function initializePosts(array $posts)
     {
         $this->posts = new ArrayCollection($posts);
+    }
+
+    public function hasDraftPosts(): bool
+    {
+        return !$this->posts->filter(
+            fn($post) => $post->getStatus() === PostStatus::DRAFT->value
+        )->isEmpty();
+    }
+
+    public function hasPublishedPosts(): bool
+    {
+        return !$this->posts->filter(
+            fn($post) => $post->getStatus() === PostStatus::PUBLISHED->value
+        )->isEmpty();
+    }
+
+    public function hasErrorPosts(): bool
+    {
+        return !$this->posts->filter(
+            fn($post) => $post->getStatus() === PostStatus::ERROR->value
+        )->isEmpty();
     }
 
     /**

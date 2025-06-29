@@ -21,3 +21,4 @@ framework:
             App\Application\Command\RemoveSocialAccount: async
             App\Application\Command\ExpireSocialAccount: async
             App\Application\Command\PublishPost: async
+            App\Application\Command\UpdateClusterStatus: async

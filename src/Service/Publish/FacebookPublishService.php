@@ -13,7 +13,6 @@ use App\Exception\PublishException;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Messenger\Bridge\Amqp\Transport\AmqpStamp;
 use Symfony\Component\Messenger\MessageBusInterface;
-use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 class FacebookPublishService implements PublishServiceInterface
@@ -59,8 +58,9 @@ class FacebookPublishService implements PublishServiceInterface
             if (in_array($exception->getCode(), [Response::HTTP_UNAUTHORIZED, Response::HTTP_FORBIDDEN])) {
                 $this->messageBus->dispatch(new ExpireSocialAccount(
                     id: $socialAccount->getId()), [
-                    new AmqpStamp('async'),
-                ]);
+                        new AmqpStamp('async'),
+                    ]
+                );
             }
 
             throw new PublishException(message: $exception->getMessage(), code: Response::HTTP_NOT_FOUND, previous: $exception);

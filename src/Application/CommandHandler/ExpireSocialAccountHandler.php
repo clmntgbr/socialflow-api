@@ -3,7 +3,6 @@
 namespace App\Application\CommandHandler;
 
 use App\Application\Command\ExpireSocialAccount;
-use App\Application\Command\RemoveSocialAccount;
 use App\Entity\SocialAccount\SocialAccount;
 use App\Enum\SocialAccountStatus;
 use App\Repository\SocialAccount\SocialAccountRepository;

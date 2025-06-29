@@ -2,18 +2,15 @@
 
 namespace App\Application\CommandHandler;
 
-use App\Application\Command\CreateOrganization;
 use App\Application\Command\PublishPost;
-use App\Entity\Organization;
+use App\Application\Command\UpdateClusterStatus;
 use App\Entity\Post\Post;
-use App\Entity\User;
-use App\Enum\PostStatus;
-use App\Enum\SocialAccountStatus;
 use App\Repository\Post\PostRepository;
-use App\Repository\UserRepository;
 use App\Service\Publish\PublishServiceFactory;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
+use Symfony\Component\Messenger\Bridge\Amqp\Transport\AmqpStamp;
+use Symfony\Component\Messenger\MessageBusInterface;
 
 #[AsMessageHandler]
 final class PublishPostHandler
@@ -22,6 +19,7 @@ final class PublishPostHandler
         private PostRepository $postRepository,
         private PublishServiceFactory $publishServiceFactory,
         private LoggerInterface $logger,
+        private MessageBusInterface $messageBus,
     ) {
     }
 
@@ -32,6 +30,7 @@ final class PublishPostHandler
 
         if (null === $post) {
             $this->logger->info('Post does not exist', ['id' => (string) $message->postId]);
+
             return;
         }
 
@@ -39,11 +38,13 @@ final class PublishPostHandler
 
         if (!$socialAccount->isActive()) {
             $this->logger->info('This social account cant publish', ['id' => (string) $socialAccount->getId(), 'status' => $socialAccount->getStatus()]);
+
             return;
         }
 
         if ($post->isPublished()) {
             $this->logger->info('This post is already published', ['id' => (string) $post->getId(), 'status' => $post->getStatus()]);
+
             return;
         }
 
@@ -56,5 +57,9 @@ final class PublishPostHandler
         }
 
         $this->postRepository->save($post);
+
+        $this->messageBus->dispatch(new UpdateClusterStatus(clusterId: $post->getCluster()->getId()), [
+            new AmqpStamp('async'),
+        ]);
     }
 }
