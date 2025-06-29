@@ -32,32 +32,31 @@ class Post implements PostInterface
     use TimestampableEntity;
 
     #[ORM\Column(type: Types::STRING, nullable: true)]
-    #[Groups(['cluster.read', 'post.read'])]
+    #[Groups(['cluster.read'])]
     private ?string $postId = null;
 
     #[ORM\Column(name: '`order`', type: Types::INTEGER)]
-    #[Groups(['cluster.read', 'post.read', 'post.write'])]
+    #[Groups(['cluster.read', 'cluster.write'])]
     private int $order;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
-    #[Groups(['cluster.read', 'post.read', 'post.write'])]
+    #[Groups(['cluster.read', 'cluster.write'])]
     private ?string $content = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
-    #[Groups(['cluster.read', 'post.read', 'post.write'])]
+    #[Groups(['cluster.read', 'cluster.write'])]
     private ?string $url = null;
 
     #[ORM\Column(type: Types::STRING)]
-    #[Groups(['cluster.read', 'post.read'])]
+    #[Groups(['cluster.read'])]
     private string $status;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
-    #[Groups(['cluster.read', 'post.read'])]
+    #[Groups(['cluster.read'])]
     private ?\DateTime $postedAt = null;
 
     #[ORM\ManyToOne(targetEntity: Cluster::class, inversedBy: 'posts')]
     #[ORM\JoinColumn(nullable: false)]
-    #[Groups(['post.write'])]
     private Cluster $cluster;
 
     public function __construct()

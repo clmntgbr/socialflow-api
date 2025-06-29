@@ -13,7 +13,6 @@ use App\Repository\Post\ClusterRepository;
 use App\State\ClusterProcessor;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
-use Doctrine\Common\Collections\Criteria;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Timestampable\Traits\TimestampableEntity;
@@ -29,7 +28,7 @@ use Symfony\Component\Uid\Uuid;
         new PostOperation(
             processor: ClusterProcessor::class,
             normalizationContext: ['groups' => ['cluster.read']],
-            denormalizationContext: ['groups' => ['cluster.write', 'post.write']],
+            denormalizationContext: ['groups' => ['cluster.write']],
         ),
     ]
 )]
@@ -39,16 +38,21 @@ class Cluster
     use TimestampableEntity;
 
     #[ORM\Column(type: Types::STRING)]
-    #[Groups(['cluster.read', 'post.read'])]
+    #[Groups(['cluster.read', 'cluster.write'])]
     private string $status;
 
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
+    #[Groups(['cluster.read', 'cluster.write'])]
+    private ?\DateTime $programmedAt = null;
+
     #[ORM\OneToMany(targetEntity: Post::class, mappedBy: 'cluster', cascade: ['persist', 'remove'])]
+    #[ORM\OrderBy(['order' => 'ASC'])]
     #[Groups(['cluster.read', 'cluster.write'])]
     private Collection $posts;
 
     #[ORM\ManyToOne(targetEntity: SocialAccount::class, inversedBy: 'clusters')]
     #[ORM\JoinColumn(nullable: false)]
-    #[Groups(['cluster.read', 'post.read', 'cluster.write'])]
+    #[Groups(['cluster.read', 'cluster.write'])]
     private SocialAccount $socialAccount;
 
     public function __construct()
@@ -66,21 +70,21 @@ class Cluster
     public function hasDraftPosts(): bool
     {
         return !$this->posts->filter(
-            fn($post) => $post->getStatus() === PostStatus::DRAFT->value
+            fn ($post) => $post->getStatus() === PostStatus::DRAFT->value
         )->isEmpty();
     }
 
     public function hasPublishedPosts(): bool
     {
         return !$this->posts->filter(
-            fn($post) => $post->getStatus() === PostStatus::PUBLISHED->value
+            fn ($post) => $post->getStatus() === PostStatus::PUBLISHED->value
         )->isEmpty();
     }
 
     public function hasErrorPosts(): bool
     {
         return !$this->posts->filter(
-            fn($post) => $post->getStatus() === PostStatus::ERROR->value
+            fn ($post) => $post->getStatus() === PostStatus::ERROR->value
         )->isEmpty();
     }
 
@@ -134,6 +138,18 @@ class Cluster
     public function setStatus(string $status): static
     {
         $this->status = $status;
+
+        return $this;
+    }
+
+    public function getProgrammedAt(): ?\DateTime
+    {
+        return $this->programmedAt;
+    }
+
+    public function setProgrammedAt(?\DateTime $programmedAt): static
+    {
+        $this->programmedAt = $programmedAt;
 
         return $this;
     }

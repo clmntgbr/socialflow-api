@@ -2,8 +2,8 @@
 
 namespace App\Command;
 
-use App\Application\Command\PublishPost;
-use App\Repository\Post\PostRepository;
+use App\Application\Command\PublishCluster;
+use App\Repository\Post\ClusterRepository;
 use App\Service\Publish\PublishServiceFactory;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -19,7 +19,7 @@ use Symfony\Component\Messenger\MessageBusInterface;
 class TestCommand extends Command
 {
     public function __construct(
-        private PostRepository $postRepository,
+        private ClusterRepository $clusterRepository,
         private PublishServiceFactory $publishServiceFactory,
         private MessageBusInterface $messageBus,
     ) {
@@ -28,11 +28,9 @@ class TestCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $post = $this->postRepository->findOneBy(['id' => '10508a5c-e5fc-4cfa-a19e-ef6d8aa3eda9']);
+        $cluster = $this->clusterRepository->findOneBy(['id' => '93db3670-c529-4ee6-8fd0-c6394c8f7bbe']);
 
-        $this->messageBus->dispatch(new PublishPost(
-            postId: $post->getId(),
-        ), [
+        $this->messageBus->dispatch(new PublishCluster(clusterId: $cluster->getId()), [
             new AmqpStamp('async'),
         ]);
 
