@@ -33,13 +33,12 @@ class SocialAccountController extends AbstractController
         requirements: ['provider' => 'facebook|linkedin|twitter|thread|youtube|instagram']
     )]
     public function getConnectUrl(
-        #[MapQueryString()] GetSocialAccountConnectUrl $getSocialAccountConnectUrl,
         #[CurrentUser()] ?User $user,
         string $provider,
     ): JsonResponse {
         $service = $this->socialAccountServiceFactory->get($provider);
 
-        $url = $service->getConnectUrl($user, $getSocialAccountConnectUrl->frontCallback);
+        $url = $service->getConnectUrl($user);
 
         return new JsonResponse(
             data: $this->serializer->serialize(['url' => $url], 'json'),

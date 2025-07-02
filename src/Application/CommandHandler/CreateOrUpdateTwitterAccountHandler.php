@@ -6,6 +6,7 @@ use App\Application\Command\CreateOrUpdateTwitterAccount;
 use App\Application\Command\RemoveSocialAccount;
 use App\Entity\Organization;
 use App\Entity\SocialAccount\TwitterSocialAccount;
+use App\Entity\User;
 use App\Enum\SocialAccountStatus;
 use App\Repository\OrganizationRepository;
 use App\Repository\SocialAccount\TwitterSocialAccountRepository;

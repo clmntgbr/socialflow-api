@@ -17,7 +17,6 @@ final class PublishClusterHandler
 {
     public function __construct(
         private ClusterRepository $clusterRepository,
-        private PublishServiceFactory $publishServiceFactory,
         private LoggerInterface $logger,
         private MessageBusInterface $messageBus,
     ) {

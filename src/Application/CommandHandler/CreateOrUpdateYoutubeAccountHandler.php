@@ -6,6 +6,7 @@ use App\Application\Command\CreateOrUpdateYoutubeAccount;
 use App\Application\Command\RemoveSocialAccount;
 use App\Entity\Organization;
 use App\Entity\SocialAccount\YoutubeSocialAccount;
+use App\Entity\User;
 use App\Enum\SocialAccountStatus;
 use App\Repository\OrganizationRepository;
 use App\Repository\SocialAccount\YoutubeSocialAccountRepository;
