@@ -3,8 +3,8 @@
 namespace App\Entity\Post;
 
 use ApiPlatform\Metadata\ApiResource;
-use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Post as PostOperation;
 use App\Entity\SocialAccount\SocialAccount;
 use App\Entity\Trait\UuidTrait;

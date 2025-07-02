@@ -14,7 +14,6 @@ use App\Repository\Post\PostRepository;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Messenger\Bridge\Amqp\Transport\AmqpStamp;
 use Symfony\Component\Messenger\MessageBusInterface;
-use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 class LinkedinPublishService implements PublishServiceInterface
@@ -33,7 +32,7 @@ class LinkedinPublishService implements PublishServiceInterface
         private readonly string $twitterApiSecret,
     ) {
     }
-    
+
     /**
      * @param LinkedinPost $post
      */
@@ -53,7 +52,7 @@ class LinkedinPublishService implements PublishServiceInterface
                     'Connection' => 'Keep-Alive',
                     'Content-Type: application/json',
                     'LinkedIn-Version: 202411',
-                    'X-Restli-Protocol-Version: 2.0.0'
+                    'X-Restli-Protocol-Version: 2.0.0',
                 ],
                 'body' => $payload->encode(),
             ]);
@@ -62,7 +61,7 @@ class LinkedinPublishService implements PublishServiceInterface
                 throw new \Exception('Authentication error occurred', $response->status);
             }
 
-            if ($response->getStatusCode() !== Response::HTTP_CREATED) {
+            if (Response::HTTP_CREATED !== $response->getStatusCode()) {
                 throw new \Exception('Publication error occurred', $response->getStatusCode());
             }
 
