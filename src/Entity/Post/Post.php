@@ -71,6 +71,11 @@ class Post implements PostInterface
         return '';
     }
 
+    public function isFirst(): bool
+    {
+        return 1 === $this->order;
+    }
+
     public function isPublished(): bool
     {
         return $this->status === PostStatus::PUBLISHED->value && null !== $this->postId;

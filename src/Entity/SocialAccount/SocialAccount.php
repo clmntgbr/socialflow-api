@@ -32,6 +32,7 @@ use Symfony\Component\Uid\Uuid;
     'instagram' => 'InstagramSocialAccount',
 ])]
 #[ApiResource(
+    order: ['updatedAt' => 'DESC'],
     operations: [
         new GetCollection(
             normalizationContext: ['skip_null_values' => false, 'groups' => ['social_account.read']],

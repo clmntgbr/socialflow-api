@@ -4,6 +4,7 @@ namespace App\Entity\Post;
 
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\Post as PostOperation;
 use App\Entity\SocialAccount\SocialAccount;
 use App\Entity\Trait\UuidTrait;
@@ -23,6 +24,9 @@ use Symfony\Component\Uid\Uuid;
 #[ApiResource(
     operations: [
         new GetCollection(
+            normalizationContext: ['skip_null_values' => false, 'groups' => ['cluster.read']],
+        ),
+        new Get(
             normalizationContext: ['skip_null_values' => false, 'groups' => ['cluster.read']],
         ),
         new PostOperation(

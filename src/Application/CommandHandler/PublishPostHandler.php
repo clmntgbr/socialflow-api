@@ -52,7 +52,8 @@ final class PublishPostHandler
             $service = $this->publishServiceFactory->get($socialAccount->getType());
             $getPost = $service->post($post);
             $post->setPublished($getPost->getId());
-        } catch (\Exception) {
+        } catch (\Exception $exception) {
+            $this->logger->alert($exception->getMessage(), ['postId' => (string) $post->getId()]);
             $post->setFailed();
         }
 

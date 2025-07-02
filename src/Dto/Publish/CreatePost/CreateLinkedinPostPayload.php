@@ -2,21 +2,22 @@
 
 namespace App\Dto\Publish\CreatePost;
 
+use App\Entity\Post\LinkedinPost;
 use App\Entity\SocialAccount\SocialAccount;
 
 final class CreateLinkedinPostPayload implements \JsonSerializable
 {
     public function __construct(
         private SocialAccount $socialAccount,
-        private string $content,
+        private LinkedinPost $post,
     ) {
     }
 
     public function jsonSerialize(): array
     {
         return [
-            'author' => sprintf('urn:li:organization:%s', $this->socialAccount->getSocialAccountId()),
-            'commentary' => $this->content,
+            'author' => sprintf('urn:li:person:%s', $this->socialAccount->getSocialAccountId()),
+            'commentary' => $this->post->getContent(),
             'visibility' => 'PUBLIC',
             'distribution' => [
                 'feedDistribution' => 'MAIN_FEED',
@@ -26,5 +27,10 @@ final class CreateLinkedinPostPayload implements \JsonSerializable
             'lifecycleState' => 'PUBLISHED',
             'isReshareDisabledByAuthor' => false,
         ];
+    }
+
+    public function encode(): string
+    {
+        return json_encode($this->jsonSerialize());
     }
 }

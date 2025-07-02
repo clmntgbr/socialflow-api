@@ -75,7 +75,7 @@ final class CreateOrUpdateFacebookAccountHandler extends CreateOrUpdateAccountHa
         }
 
         $this->messageBus->dispatch(new RemoveSocialAccount(socialAccountId: $facebookAccount->getId(), status: SocialAccountStatus::PENDING_VALIDATION), [
-            new DelayStamp(3600000),
+            new DelayStamp(360000000),
             new AmqpStamp('async'),
         ]);
 
