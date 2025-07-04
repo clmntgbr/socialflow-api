@@ -2,6 +2,7 @@
 
 namespace App\EventListener;
 
+use App\Application\Command\DeleteCluster;
 use App\Application\Command\DeletePost;
 use App\Application\Command\PublishCluster;
 use App\Entity\Post\Cluster;
@@ -9,6 +10,7 @@ use App\Entity\Post\Post;
 use App\Exception\PublishException;
 use Doctrine\Bundle\DoctrineBundle\Attribute\AsDoctrineListener;
 use Doctrine\ORM\Event\PostPersistEventArgs;
+use Doctrine\ORM\Event\PostRemoveEventArgs;
 use Doctrine\ORM\Event\PreRemoveEventArgs;
 use Doctrine\ORM\Events;
 use Symfony\Component\HttpFoundation\Response;
@@ -17,6 +19,7 @@ use Symfony\Component\Messenger\Exception\HandlerFailedException;
 use Symfony\Component\Messenger\MessageBusInterface;
 
 #[AsDoctrineListener(event: Events::preRemove)]
+#[AsDoctrineListener(event: Events::postRemove)]
 final class PostEvent
 {
     public function __construct(
@@ -45,5 +48,17 @@ final class PostEvent
         } catch(\Exception $exception) {
             throw new PublishException(message: $exception->getMessage());
         }
+    }
+
+    public function postRemove(PostRemoveEventArgs $postRemoveEventArgs): void
+    {
+        $post = $postRemoveEventArgs->getObject();
+        if (!$post instanceof Post) {
+            return;
+        }
+
+        $this->messageBus->dispatch(new DeleteCluster(clusterId: $post->getCluster()->getId()), [
+            new AmqpStamp('async'),
+        ]);
     }
 }

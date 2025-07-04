@@ -9,6 +9,6 @@ class PublishException extends HttpException
 {
     public function __construct(string $message, int $code = Response::HTTP_BAD_REQUEST, ?\Throwable $previous = null)
     {
-        parent::__construct($code, $message, $previous);
+        parent::__construct(statusCode: $code, message: $message, previous: $previous);
     }
 }

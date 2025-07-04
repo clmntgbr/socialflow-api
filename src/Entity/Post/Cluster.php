@@ -3,6 +3,7 @@
 namespace App\Entity\Post;
 
 use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Delete;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Post as PostOperation;
@@ -12,6 +13,7 @@ use App\Enum\ClusterStatus;
 use App\Enum\PostStatus;
 use App\Repository\Post\ClusterRepository;
 use App\State\ClusterProcessor;
+use App\State\DeleteClusterProcessor;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
@@ -28,6 +30,9 @@ use Symfony\Component\Uid\Uuid;
         ),
         new Get(
             normalizationContext: ['skip_null_values' => false, 'groups' => ['cluster.read']],
+        ),
+        new Delete(
+            processor: DeleteClusterProcessor::class,
         ),
         new PostOperation(
             processor: ClusterProcessor::class,

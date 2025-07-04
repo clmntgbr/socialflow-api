@@ -31,7 +31,13 @@ final class DeletePostHandler
         ]);
 
         if (null === $post) {
-            $this->logger->warning(sprintf('Post does not exist with id [%s]]', (string) $message->postId));
+            $this->logger->warning('Post does not exist.', ['id' => $message->postId]);
+
+            return;
+        }
+
+        if (null === $post->getPostId()) {
+            $this->logger->warning('Post does not have postId.', ['id' => $post->getId()]);
 
             return;
         }
