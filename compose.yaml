@@ -75,6 +75,43 @@ services:
             chmod a+x php-cs-fixer &&
             composer require --dev phpstan/phpstan &&
             tail -f /dev/null"
+    
+    minio:
+        container_name: ${PROJECT_NAME}-s3
+        image: minio/minio:latest
+        env_file:
+            - .env
+        ports:
+            - '9004:9000'
+            - '9005:9001'
+        networks:
+            - api_network
+        volumes:
+            - minio_data:/data/minio
+        command: 'minio server /data/minio --console-address ":9001"'
+        environment:
+            MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+            MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+            MINIO_BROWSER: "on"
+   
+    minio-init:
+        container_name: ${PROJECT_NAME}-minio
+        image: minio/mc:latest
+        depends_on:
+            - minio
+        env_file:
+            - .env
+        entrypoint: >
+            /bin/sh -c "
+            sleep 10;
+            mc alias set myminio http://minio:9000 ${MINIO_ROOT_USER} ${MINIO_ROOT_PASSWORD};
+            mc admin user add myminio ${S3_USER} ${S3_PASSWORD};
+            mc admin policy attach myminio readwrite --user ${S3_USER};
+            mc admin accesskey create myminio ${S3_USER};
+            exit 0;
+            "
+        networks:
+            - api_network
 
 networks:
   api_network:
@@ -86,3 +123,4 @@ volumes:
     caddy_config:
     database_data:
     rabbitmq_data:
+    minio_data:

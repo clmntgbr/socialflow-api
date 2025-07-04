@@ -2,73 +2,58 @@
 
 namespace App\Entity;
 
-use Doctrine\DBAL\Types\Types;
+use Symfony\Component\HttpFoundation\File\File;
+use Symfony\Component\Validator\Constraints as Assert;
+use Vich\UploaderBundle\Mapping\Annotation as Vich;
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Component\Serializer\Attribute\Groups;
 
+#[Vich\Uploadable]
 abstract class AbstractMedia
 {
-    #[ORM\Column(type: Types::STRING)]
-    #[Groups(['media.read', 'media.write', 'cluster.read'])]
-    protected string $filename;
+    #[Vich\UploadableField(mapping: 'media_object', fileNameProperty: 'filePath')]
+    #[Assert\NotNull]
+    public ?File $file = null;
 
-    #[ORM\Column(type: Types::TEXT, nullable: true)]
-    #[Groups(['media.read', 'media.write', 'cluster.read'])]
-    protected ?string $url = null;
+    #[ORM\Column(nullable: true)]
+    private ?string $imageName = null;
 
-    #[ORM\Column(type: Types::STRING)]
-    #[Groups(['media.read', 'media.write', 'cluster.read'])]
-    protected string $mimeType;
+    #[ORM\Column(nullable: true)]
+    private ?int $imageSize = null;
 
-    #[ORM\Column(type: Types::INTEGER)]
-    #[Groups(['media.read', 'media.write', 'cluster.read'])]
-    protected int $size;
+    #[ORM\Column(nullable: true)]
+    private ?\DateTimeImmutable $updatedAt = null;
 
-    public function getFilename(): ?string
+    public function setFile(?File $imageFile = null): void
     {
-        return $this->filename;
+        $this->file = $imageFile;
+
+        if (null !== $imageFile) {
+            $this->updatedAt = new \DateTimeImmutable();
+        }
     }
 
-    public function setFilename(string $filename): static
+    public function getFile(): ?File
     {
-        $this->filename = $filename;
-
-        return $this;
+        return $this->file;
     }
 
-    public function getUrl(): ?string
+    public function setImageName(?string $imageName): void
     {
-        return $this->url;
+        $this->imageName = $imageName;
     }
 
-    public function setUrl(?string $url): static
+    public function getImageName(): ?string
     {
-        $this->url = $url;
-
-        return $this;
+        return $this->imageName;
     }
 
-    public function getMimeType(): ?string
+    public function setImageSize(?int $imageSize): void
     {
-        return $this->mimeType;
+        $this->imageSize = $imageSize;
     }
 
-    public function setMimeType(string $mimeType): static
+    public function getImageSize(): ?int
     {
-        $this->mimeType = $mimeType;
-
-        return $this;
-    }
-
-    public function getSize(): ?int
-    {
-        return $this->size;
-    }
-
-    public function setSize(int $size): static
-    {
-        $this->size = $size;
-
-        return $this;
+        return $this->imageSize;
     }
 }
