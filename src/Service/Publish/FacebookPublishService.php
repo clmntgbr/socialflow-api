@@ -17,8 +17,9 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 class FacebookPublishService implements PublishServiceInterface
 {
-    private const FACEBOOK_API_URL = 'https://graph.facebook.com';
-    private const FACEBOOK_POST = self::FACEBOOK_API_URL.'/v23.0/%s/feed';
+    private const FACEBOOK_API_VERSION = '/v23.0';
+    private const FACEBOOK_API_URL = 'https://graph.facebook.com'.self::FACEBOOK_API_VERSION;
+    private const FACEBOOK_POST = self::FACEBOOK_API_URL.'/%s/feed';
 
     public function __construct(
         private HttpClientInterface $httpClient,
@@ -67,8 +68,39 @@ class FacebookPublishService implements PublishServiceInterface
         }
     }
 
-    public function delete()
+    /** @param FacebookPost $post */
+    public function delete(Post $post): void
     {
+        $url = self::FACEBOOK_API_URL.'/'.$post->getPostId();
+
+        try {
+            $response = $this->httpClient->request('DELETE', $url, [
+                'headers' => [
+                    'Authorization' => 'Bearer '.$post->getCluster()->getSocialAccount()->getToken(),
+                    'Connection' => 'Keep-Alive',
+                    'ContentType' => 'application/json',
+                ],
+            ]);
+
+            $content = $response->toArray();
+
+            if (isset($content['success']) && $content['success'] === true) {
+                return;
+            }
+
+            throw new PublishException('Failed to delete facebook post.');
+        } catch (\Exception $exception) {
+            if (in_array($exception->getCode(), [Response::HTTP_UNAUTHORIZED, Response::HTTP_FORBIDDEN])) {
+                $this->messageBus->dispatch(new ExpireSocialAccount(
+                    id: $post->getCluster()->getSocialAccount()->getId()), [
+                        new AmqpStamp('async'),
+                    ]
+                );
+            }
+
+            throw new PublishException(message: $exception->getMessage(), code: Response::HTTP_NOT_FOUND, previous: $exception);
+        }
+
         throw new \RuntimeException('Method not implemented.');
     }
 

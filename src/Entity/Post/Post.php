@@ -3,6 +3,7 @@
 namespace App\Entity\Post;
 
 use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Delete;
 use App\Entity\Trait\UuidTrait;
 use App\Enum\PostStatus;
 use App\Repository\Post\PostRepository;
@@ -26,7 +27,9 @@ use Symfony\Component\Uid\Uuid;
     'instagram' => 'InstagramPost',
 ])]
 #[ApiResource(
-    operations: []
+    operations: [
+        new Delete(),
+    ]
 )]
 class Post implements PostInterface
 {

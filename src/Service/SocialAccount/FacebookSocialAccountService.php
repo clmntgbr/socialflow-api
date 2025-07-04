@@ -28,7 +28,6 @@ class FacebookSocialAccountService implements SocialAccountServiceInterface
     private const FACEBOOK_LOGIN_URL = 'https://www.facebook.com/v21.0';
     private const FACEBOOK_CONNECT_URL = self::FACEBOOK_LOGIN_URL.'/dialog/oauth';
     private const FACEBOOK_ACCESS_TOKEN = self::FACEBOOK_API_URL.'/oauth/access_token';
-    private const FACEBOOK_REVOKE_TOKEN = self::FACEBOOK_API_URL.'/oauth/revoke';
     private const FACEBOOK_ACCOUNT = self::FACEBOOK_API_URL.'/me';
 
     public function __construct(

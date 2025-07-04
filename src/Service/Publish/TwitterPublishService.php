@@ -75,7 +75,8 @@ class TwitterPublishService implements PublishServiceInterface
         }
     }
 
-    public function delete()
+    /** @param TwitterPost $post */
+    public function delete(Post $post): void
     {
         throw new \RuntimeException('Method not implemented.');
     }

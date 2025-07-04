@@ -79,7 +79,8 @@ class LinkedinPublishService implements PublishServiceInterface
         }
     }
 
-    public function delete()
+    /** @param LinkedinPost $post */
+    public function delete(Post $post): void
     {
         throw new \RuntimeException('Method not implemented.');
     }

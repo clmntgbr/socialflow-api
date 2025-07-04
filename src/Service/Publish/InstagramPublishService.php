@@ -16,7 +16,8 @@ class InstagramPublishService implements PublishServiceInterface
         throw new \RuntimeException('Method not implemented.');
     }
 
-    public function delete()
+    /** @param InstagramPost $post */
+    public function delete(Post $post): void
     {
         throw new \RuntimeException('Method not implemented.');
     }

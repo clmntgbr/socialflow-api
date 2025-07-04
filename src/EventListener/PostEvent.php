@@ -1,0 +1,49 @@
+<?php
+
+namespace App\EventListener;
+
+use App\Application\Command\DeletePost;
+use App\Application\Command\PublishCluster;
+use App\Entity\Post\Cluster;
+use App\Entity\Post\Post;
+use App\Exception\PublishException;
+use Doctrine\Bundle\DoctrineBundle\Attribute\AsDoctrineListener;
+use Doctrine\ORM\Event\PostPersistEventArgs;
+use Doctrine\ORM\Event\PreRemoveEventArgs;
+use Doctrine\ORM\Events;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Messenger\Bridge\Amqp\Transport\AmqpStamp;
+use Symfony\Component\Messenger\Exception\HandlerFailedException;
+use Symfony\Component\Messenger\MessageBusInterface;
+
+#[AsDoctrineListener(event: Events::preRemove)]
+final class PostEvent
+{
+    public function __construct(
+        private MessageBusInterface $messageBus,
+    ) {
+    }
+
+    public function preRemove(PreRemoveEventArgs $preRemoveEventArgs): void
+    {
+        $post = $preRemoveEventArgs->getObject();
+        if (!$post instanceof Post) {
+            return;
+        }
+
+        try {
+            $this->messageBus->dispatch(new DeletePost(postId: $post->getId()), [
+                new AmqpStamp('sync'),
+            ]);
+        } catch(HandlerFailedException $exception) {
+            $originalException = $exception->getPrevious();
+            if ($originalException instanceof PublishException) {
+                throw new PublishException(message: $originalException->getMessage());
+            }
+            
+            throw $exception;
+        } catch(\Exception $exception) {
+            throw new PublishException(message: $exception->getMessage());
+        }
+    }
+}

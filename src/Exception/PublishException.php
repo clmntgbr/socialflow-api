@@ -2,13 +2,13 @@
 
 namespace App\Exception;
 
-class PublishException extends \Exception
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\HttpException;
+
+class PublishException extends HttpException
 {
-    public function __construct(
-        string $message = '',
-        int $code = 0,
-        ?\Throwable $previous = null,
-    ) {
-        parent::__construct($message, $code, $previous);
+    public function __construct(string $message, int $code = Response::HTTP_BAD_REQUEST, ?\Throwable $previous = null)
+    {
+        parent::__construct($code, $message, $previous);
     }
 }

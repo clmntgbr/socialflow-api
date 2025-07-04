@@ -16,7 +16,8 @@ class YoutubePublishService implements PublishServiceInterface
         throw new \RuntimeException('Method not implemented.');
     }
 
-    public function delete()
+    /** @param YoutubePost $post */
+    public function delete(Post $post): void
     {
         throw new \RuntimeException('Method not implemented.');
     }

@@ -1,0 +1,46 @@
+<?php
+
+namespace App\Application\CommandHandler;
+
+use App\Application\Command\DeletePost;
+use App\Application\Command\RemoveSocialAccount;
+use App\Entity\Post\Post;
+use App\Entity\SocialAccount\SocialAccount;
+use App\Exception\PublishException;
+use App\Repository\Post\PostRepository;
+use App\Repository\SocialAccount\SocialAccountRepository;
+use App\Service\Publish\PublishServiceFactory;
+use Psr\Log\LoggerInterface;
+use Symfony\Component\Messenger\Attribute\AsMessageHandler;
+
+#[AsMessageHandler]
+final class DeletePostHandler
+{
+    public function __construct(
+        private PostRepository $postRepository,
+        private LoggerInterface $logger,
+        private PublishServiceFactory $publish,
+    ) {
+    }
+
+    public function __invoke(DeletePost $message): void
+    {
+        /** @var ?Post $post */
+        $post = $this->postRepository->findOneBy([
+            'id' => (string) $message->postId,
+        ]);
+
+        if (null === $post) {
+            $this->logger->warning(sprintf('Post does not exist with id [%s]]', (string) $message->postId));
+
+            return;
+        }
+
+        try {
+            $publishService = $this->publish->get($post->getType());
+            $publishService->delete($post);
+        } catch (\Exception $exception) {
+            throw new PublishException(message: $exception->getMessage());
+        }
+    }
+}

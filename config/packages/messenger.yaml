@@ -18,6 +18,7 @@ framework:
             App\Application\Command\CreateOrUpdateLinkedinAccount: sync
             App\Application\Command\CreateOrUpdateYoutubeAccount: sync
             App\Application\Command\CreateOrganization: sync
+            App\Application\Command\DeletePost: sync
             
             App\Application\Command\RemoveSocialAccount: async
             App\Application\Command\ExpireSocialAccount: async

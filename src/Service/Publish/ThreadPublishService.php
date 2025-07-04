@@ -16,7 +16,8 @@ class ThreadPublishService implements PublishServiceInterface
         throw new \RuntimeException('Method not implemented.');
     }
 
-    public function delete()
+    /** @param ThreadPost $post */
+    public function delete(Post $post): void
     {
         throw new \RuntimeException('Method not implemented.');
     }
