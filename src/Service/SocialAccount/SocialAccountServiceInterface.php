@@ -24,8 +24,6 @@ interface SocialAccountServiceInterface
 
     public function create(GetSocialAccountCallback $getSocialAccountCallback): RedirectResponse;
 
-    public function delete();
-
     public function getAccessToken(AbstractAccessTokenParameters $params): AbstractAccessToken;
 
     public function getLongAccessToken(string $token): AbstractAccessToken;

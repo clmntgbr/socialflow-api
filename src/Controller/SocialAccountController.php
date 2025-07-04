@@ -3,7 +3,6 @@
 namespace App\Controller;
 
 use App\Dto\SocialAccount\GetSocialAccountCallback;
-use App\Dto\SocialAccount\GetSocialAccountConnectUrl;
 use App\Entity\User;
 use App\Service\SocialAccount\SocialAccountServiceFactory;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;

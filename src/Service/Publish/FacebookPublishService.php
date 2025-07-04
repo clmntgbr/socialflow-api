@@ -46,7 +46,7 @@ class FacebookPublishService implements PublishServiceInterface
         try {
             $response = $this->httpClient->request('POST', $url, [
                 'headers' => [
-                    'Authorization' => sprintf('Bearer %s', $post->getCluster()->getSocialAccount()->getToken()),
+                    'Authorization' => 'Bearer '.$post->getCluster()->getSocialAccount()->getToken(),
                     'Connection' => 'Keep-Alive',
                     'ContentType' => 'application/json',
                 ],

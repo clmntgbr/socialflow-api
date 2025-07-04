@@ -5,6 +5,7 @@ namespace App\Entity\SocialAccount;
 use ApiPlatform\Doctrine\Orm\Filter\SearchFilter;
 use ApiPlatform\Metadata\ApiFilter;
 use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Delete;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
 use App\Entity\Organization;
@@ -38,6 +39,9 @@ use Symfony\Component\Uid\Uuid;
             normalizationContext: ['skip_null_values' => false, 'groups' => ['social_account.read']],
         ),
         new Get(
+            normalizationContext: ['skip_null_values' => false, 'groups' => ['social_account.read']],
+        ),
+        new Delete(
             normalizationContext: ['skip_null_values' => false, 'groups' => ['social_account.read']],
         ),
     ]
@@ -177,7 +181,7 @@ class SocialAccount implements SocialAccountInterface
         return $this;
     }
 
-    public function getAccessToken(): ?string
+    public function getToken(): ?string
     {
         return $this->token;
     }
@@ -239,11 +243,6 @@ class SocialAccount implements SocialAccountInterface
         $this->organization = $organization;
 
         return $this;
-    }
-
-    public function getToken(): ?string
-    {
-        return $this->token;
     }
 
     public function getWebsite(): ?string

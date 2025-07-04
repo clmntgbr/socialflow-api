@@ -48,7 +48,7 @@ class LinkedinPublishService implements PublishServiceInterface
         try {
             $response = $this->httpClient->request('POST', self::LINKEDIN_POST, [
                 'headers' => [
-                    'Authorization' => sprintf('Bearer %s', $post->getCluster()->getSocialAccount()->getToken()),
+                    'Authorization' => 'Bearer '.$post->getCluster()->getSocialAccount()->getToken(),
                     'Connection' => 'Keep-Alive',
                     'Content-Type: application/json',
                     'LinkedIn-Version: 202411',

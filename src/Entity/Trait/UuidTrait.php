@@ -12,7 +12,7 @@ trait UuidTrait
     #[ORM\Id]
     #[ORM\Column(type: 'uuid', unique: true)]
     #[ApiProperty(identifier: true)]
-    #[Groups(['user.read', 'social_account.read', 'post.read', 'cluster.read'])]
+    #[Groups(['user.read', 'social_account.read', 'post.read', 'cluster.read', 'media.read'])]
     private Uuid $id;
 
     public function getId(): ?Uuid

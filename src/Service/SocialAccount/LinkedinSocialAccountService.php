@@ -17,7 +17,6 @@ use App\Exception\SocialAccountException;
 use App\Repository\UserRepository;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\Messenger\MessageBusInterface;
-use Symfony\Component\Messenger\Stamp\HandledStamp;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Uid\Uuid;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
@@ -94,33 +93,17 @@ class LinkedinSocialAccountService implements SocialAccountServiceInterface
                 throw new SocialAccountException('Failed to retrieve accounts from Linkedin API');
             }
 
-            $envelope = $this->bus->dispatch(new CreateOrUpdateLinkedinAccount(
+            $this->bus->dispatch(new CreateOrUpdateLinkedinAccount(
                 organizationId: $user->getActiveOrganization()->getId(),
                 userId: $user->getId(),
                 linkedinAccount: $accounts->linkedinAccount,
                 linkedinToken: $accessToken,
             ));
 
-            /** @var HandledStamp|null $stamp */
-            $stamp = $envelope->last(HandledStamp::class);
-            $linkedinIds[] = (string) $stamp?->getResult();
-
-            $linkedinIds = array_filter($linkedinIds);
-
-            if (empty($linkedinIds)) {
-                return new RedirectResponse($this->frontUrl);
-            }
-
-            $query = http_build_query(['ids' => $linkedinIds]);
-
-            return new RedirectResponse($this->frontUrl.'?'.$query);
+            return new RedirectResponse($this->frontUrl.'/validation');
         } catch (\Exception) {
             return new RedirectResponse(sprintf('%s?error=true&message=3', $this->frontUrl));
         }
-    }
-
-    public function delete()
-    {
     }
 
     /**

@@ -17,7 +17,6 @@ use App\Exception\SocialAccountException;
 use App\Repository\UserRepository;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\Messenger\MessageBusInterface;
-use Symfony\Component\Messenger\Stamp\HandledStamp;
 use Symfony\Component\Uid\Uuid;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
@@ -98,29 +97,16 @@ class YoutubeSocialAccountService implements SocialAccountServiceInterface
                 throw new SocialAccountException('Failed to retrieve accounts from Youtube API');
             }
 
-            $youtubeIds = [];
             foreach ($accounts->youtubeAccounts as $youtubeAccount) {
-                $envelope = $this->bus->dispatch(new CreateOrUpdateYoutubeAccount(
+                $this->bus->dispatch(new CreateOrUpdateYoutubeAccount(
                     organizationId: $user->getActiveOrganization()->getId(),
                     userId: $user->getId(),
                     youtubeToken: $accessToken,
                     youtubeAccount: $youtubeAccount,
                 ));
-
-                /** @var HandledStamp|null $stamp */
-                $stamp = $envelope->last(HandledStamp::class);
-                $youtubeIds[] = (string) $stamp?->getResult();
             }
 
-            $youtubeIds = array_filter($youtubeIds);
-
-            if (empty($youtubeIds)) {
-                return new RedirectResponse($this->frontUrl);
-            }
-
-            $query = http_build_query(['ids' => $youtubeIds]);
-
-            return new RedirectResponse($this->frontUrl.'?'.$query);
+            return new RedirectResponse($this->frontUrl.'/validation');
         } catch (\Exception $exception) {
             dd($exception->getMessage());
 
@@ -128,10 +114,6 @@ class YoutubeSocialAccountService implements SocialAccountServiceInterface
         }
 
         return new RedirectResponse('');
-    }
-
-    public function delete()
-    {
     }
 
     /**

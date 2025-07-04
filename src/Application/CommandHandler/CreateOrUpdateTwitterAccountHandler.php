@@ -15,7 +15,6 @@ use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use Symfony\Component\Messenger\Bridge\Amqp\Transport\AmqpStamp;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Messenger\Stamp\DelayStamp;
-use Symfony\Component\Uid\Uuid;
 
 #[AsMessageHandler]
 final class CreateOrUpdateTwitterAccountHandler extends CreateOrUpdateAccountHandlerAbstract
@@ -29,7 +28,7 @@ final class CreateOrUpdateTwitterAccountHandler extends CreateOrUpdateAccountHan
         parent::__construct($twitterSocialAccountRepository);
     }
 
-    public function __invoke(CreateOrUpdateTwitterAccount $message): ?Uuid
+    public function __invoke(CreateOrUpdateTwitterAccount $message): void
     {
         /** @var ?User $user */
         $user = $this->userRepository->findOneBy(['id' => (string) $message->userId]);
@@ -69,14 +68,12 @@ final class CreateOrUpdateTwitterAccountHandler extends CreateOrUpdateAccountHan
         $this->twitterSocialAccountRepository->save($twitterAccount, true);
 
         if ($twitterAccount->getStatus() !== SocialAccountStatus::PENDING_VALIDATION->value) {
-            return null;
+            return;
         }
 
         $this->messageBus->dispatch(new RemoveSocialAccount(socialAccountId: $twitterAccount->getId(), status: SocialAccountStatus::PENDING_VALIDATION), [
             new DelayStamp(360000000),
             new AmqpStamp('async'),
         ]);
-
-        return $twitterAccount->getId();
     }
 }

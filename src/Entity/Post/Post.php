@@ -6,6 +6,8 @@ use ApiPlatform\Metadata\ApiResource;
 use App\Entity\Trait\UuidTrait;
 use App\Enum\PostStatus;
 use App\Repository\Post\PostRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Timestampable\Traits\TimestampableEntity;
@@ -59,11 +61,16 @@ class Post implements PostInterface
     #[ORM\JoinColumn(nullable: false)]
     private Cluster $cluster;
 
+    #[ORM\OneToMany(targetEntity: MediaPost::class, mappedBy: 'post', cascade: ['persist', 'remove'])]
+    #[Groups(['cluster.read', 'cluster.write'])]
+    private Collection $medias;
+
     public function __construct()
     {
         $this->order = 1;
         $this->id = Uuid::v4();
         $this->status = PostStatus::DRAFT->value;
+        $this->medias = new ArrayCollection();
     }
 
     public function getType(): string
@@ -190,6 +197,36 @@ class Post implements PostInterface
     public function setUrl(?string $url): static
     {
         $this->url = $url;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, MediaPost>
+     */
+    public function getMedias(): Collection
+    {
+        return $this->medias;
+    }
+
+    public function addMedia(MediaPost $media): static
+    {
+        if (!$this->medias->contains($media)) {
+            $this->medias->add($media);
+            $media->setPost($this);
+        }
+
+        return $this;
+    }
+
+    public function removeMedia(MediaPost $media): static
+    {
+        if ($this->medias->removeElement($media)) {
+            // set the owning side to null (unless already changed)
+            if ($media->getPost() === $this) {
+                $media->setPost(null);
+            }
+        }
 
         return $this;
     }

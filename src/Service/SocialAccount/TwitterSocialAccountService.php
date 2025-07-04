@@ -19,7 +19,6 @@ use App\Exception\SocialAccountException;
 use App\Repository\UserRepository;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\Messenger\MessageBusInterface;
-use Symfony\Component\Messenger\Stamp\HandledStamp;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Uid\Uuid;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
@@ -131,35 +130,19 @@ class TwitterSocialAccountService implements SocialAccountServiceInterface
                 throw new SocialAccountException('Failed to retrieve accounts from Facebook API');
             }
 
-            $envelope = $this->bus->dispatch(new CreateOrUpdateTwitterAccount(
+            $this->bus->dispatch(new CreateOrUpdateTwitterAccount(
                 organizationId: $user->getActiveOrganization()->getId(),
                 userId: $user->getId(),
                 twitterAccount: $accounts->twitterAccount,
                 twitterToken: $accessToken,
             ));
 
-            /** @var HandledStamp|null $stamp */
-            $stamp = $envelope->last(HandledStamp::class);
-            $twitterIds[] = (string) $stamp?->getResult();
-
-            $twitterIds = array_filter($twitterIds);
-
-            if (empty($twitterIds)) {
-                return new RedirectResponse($this->frontUrl);
-            }
-
-            $query = http_build_query(['ids' => $twitterIds]);
-
-            return new RedirectResponse($this->frontUrl.'?'.$query);
+            return new RedirectResponse($this->frontUrl.'/validation');
         } catch (\Exception $exception) {
             dd($exception->getMessage());
 
             return new RedirectResponse(sprintf('%s?error=true&message=3', $this->frontUrl));
         }
-    }
-
-    public function delete()
-    {
     }
 
     /**

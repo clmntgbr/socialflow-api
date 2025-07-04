@@ -6,7 +6,6 @@ use App\Application\Command\PublishCluster;
 use App\Application\Command\PublishPost;
 use App\Entity\Post\Cluster;
 use App\Repository\Post\ClusterRepository;
-use App\Service\Publish\PublishServiceFactory;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use Symfony\Component\Messenger\Bridge\Amqp\Transport\AmqpStamp;

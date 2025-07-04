@@ -38,11 +38,6 @@ class InstagramSocialAccountService implements SocialAccountServiceInterface
         throw new \RuntimeException('Method not implemented.');
     }
 
-    public function delete()
-    {
-        throw new \RuntimeException('Method not implemented.');
-    }
-
     /**
      * @param InstagramAccessTokenParameters $params
      */

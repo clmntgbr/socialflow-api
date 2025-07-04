@@ -15,7 +15,6 @@ use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use Symfony\Component\Messenger\Bridge\Amqp\Transport\AmqpStamp;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Messenger\Stamp\DelayStamp;
-use Symfony\Component\Uid\Uuid;
 
 #[AsMessageHandler]
 final class CreateOrUpdateFacebookAccountHandler extends CreateOrUpdateAccountHandlerAbstract
@@ -29,7 +28,7 @@ final class CreateOrUpdateFacebookAccountHandler extends CreateOrUpdateAccountHa
         parent::__construct($facebookSocialAccountRepository);
     }
 
-    public function __invoke(CreateOrUpdateFacebookAccount $message): ?Uuid
+    public function __invoke(CreateOrUpdateFacebookAccount $message): void
     {
         /** @var ?User $user */
         $user = $this->userRepository->findOneBy(['id' => (string) $message->userId]);
@@ -71,14 +70,12 @@ final class CreateOrUpdateFacebookAccountHandler extends CreateOrUpdateAccountHa
         $this->facebookSocialAccountRepository->save($facebookAccount, true);
 
         if ($facebookAccount->getStatus() !== SocialAccountStatus::PENDING_VALIDATION->value) {
-            return null;
+            return;
         }
 
         $this->messageBus->dispatch(new RemoveSocialAccount(socialAccountId: $facebookAccount->getId(), status: SocialAccountStatus::PENDING_VALIDATION), [
             new DelayStamp(360000000),
             new AmqpStamp('async'),
         ]);
-
-        return $facebookAccount->getId();
     }
 }

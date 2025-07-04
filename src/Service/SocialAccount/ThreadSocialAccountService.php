@@ -56,11 +56,6 @@ class ThreadSocialAccountService implements SocialAccountServiceInterface
         throw new \RuntimeException('Method not implemented.');
     }
 
-    public function delete()
-    {
-        throw new \RuntimeException('Method not implemented.');
-    }
-
     /**
      * @param YoutubeAccessTokenParameters $params
      */

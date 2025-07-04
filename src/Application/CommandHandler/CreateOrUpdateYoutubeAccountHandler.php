@@ -15,7 +15,6 @@ use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use Symfony\Component\Messenger\Bridge\Amqp\Transport\AmqpStamp;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Messenger\Stamp\DelayStamp;
-use Symfony\Component\Uid\Uuid;
 
 #[AsMessageHandler]
 final class CreateOrUpdateYoutubeAccountHandler extends CreateOrUpdateAccountHandlerAbstract
@@ -29,7 +28,7 @@ final class CreateOrUpdateYoutubeAccountHandler extends CreateOrUpdateAccountHan
         parent::__construct($youtubeSocialAccountRepository);
     }
 
-    public function __invoke(CreateOrUpdateYoutubeAccount $message): ?Uuid
+    public function __invoke(CreateOrUpdateYoutubeAccount $message): void
     {
         /** @var ?User $user */
         $user = $this->userRepository->findOneBy(['id' => (string) $message->userId]);
@@ -69,14 +68,12 @@ final class CreateOrUpdateYoutubeAccountHandler extends CreateOrUpdateAccountHan
         $this->youtubeSocialAccountRepository->save($youtubeAccount, true);
 
         if ($youtubeAccount->getStatus() !== SocialAccountStatus::PENDING_VALIDATION->value) {
-            return null;
+            return;
         }
 
         $this->messageBus->dispatch(new RemoveSocialAccount(socialAccountId: $youtubeAccount->getId(), status: SocialAccountStatus::PENDING_VALIDATION), [
             new DelayStamp(360000000),
             new AmqpStamp('async'),
         ]);
-
-        return $youtubeAccount->getId();
     }
 }

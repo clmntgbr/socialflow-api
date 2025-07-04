@@ -18,7 +18,6 @@ use App\Exception\SocialAccountException;
 use App\Repository\UserRepository;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\Messenger\MessageBusInterface;
-use Symfony\Component\Messenger\Stamp\HandledStamp;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Uid\Uuid;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
@@ -29,6 +28,7 @@ class FacebookSocialAccountService implements SocialAccountServiceInterface
     private const FACEBOOK_LOGIN_URL = 'https://www.facebook.com/v21.0';
     private const FACEBOOK_CONNECT_URL = self::FACEBOOK_LOGIN_URL.'/dialog/oauth';
     private const FACEBOOK_ACCESS_TOKEN = self::FACEBOOK_API_URL.'/oauth/access_token';
+    private const FACEBOOK_REVOKE_TOKEN = self::FACEBOOK_API_URL.'/oauth/revoke';
     private const FACEBOOK_ACCOUNT = self::FACEBOOK_API_URL.'/me';
 
     public function __construct(
@@ -103,7 +103,6 @@ class FacebookSocialAccountService implements SocialAccountServiceInterface
                 throw new SocialAccountException('Failed to retrieve accounts from Facebook API');
             }
 
-            $facebookIds = [];
             foreach ($accounts->facebookAccounts as $facebookAccount) {
                 $longAccessToken = $this->getLongAccessToken($facebookAccount->token);
 
@@ -111,36 +110,20 @@ class FacebookSocialAccountService implements SocialAccountServiceInterface
                     continue;
                 }
 
-                $envelope = $this->bus->dispatch(new CreateOrUpdateFacebookAccount(
+                $this->bus->dispatch(new CreateOrUpdateFacebookAccount(
                     organizationId: $user->getActiveOrganization()->getId(),
                     userId: $user->getId(),
                     facebookToken: $longAccessToken,
                     facebookAccount: $facebookAccount,
                 ));
-
-                /** @var HandledStamp|null $stamp */
-                $stamp = $envelope->last(HandledStamp::class);
-                $facebookIds[] = (string) $stamp?->getResult();
             }
 
-            $facebookIds = array_filter($facebookIds);
-
-            if (empty($facebookIds)) {
-                return new RedirectResponse($this->frontUrl);
-            }
-
-            $query = http_build_query(['ids' => $facebookIds]);
-
-            return new RedirectResponse($this->frontUrl.'?'.$query);
+            return new RedirectResponse($this->frontUrl.'/validation');
         } catch (\Exception $exception) {
             dd($exception->getMessage());
 
             return new RedirectResponse(sprintf('%s?error=true&message=3', $this->frontUrl));
         }
-    }
-
-    public function delete()
-    {
     }
 
     /**
