@@ -85,17 +85,15 @@ class TwitterPublishService implements PublishServiceInterface
             $twitterOAuth = new TwitterOAuth($this->twitterApiKey, $this->twitterApiSecret, $socialAccount->getToken(), $socialAccount->getTokenSecret());
             $twitterOAuth->setApiVersion(2);
 
-            $response = $twitterOAuth->delete('tweets/' . $post->getPostId());
+            $response = $twitterOAuth->delete('tweets/'.$post->getPostId());
 
             if (isset($response->status) && in_array($response->status, [Response::HTTP_UNAUTHORIZED, Response::HTTP_FORBIDDEN])) {
                 throw new PublishException('Authentication error occurred', $response->status);
             }
 
-            if (isset($response->data) && isset($response->data->deleted) && true === $response->data->deleted) {
-                return;
+            if (!isset($response->data->deleted) || !$response->data->deleted) {
+                throw new PublishException('Failed to delete twitter post.');
             }
-
-            throw new PublishException('Failed to delete twitter post.');
         } catch (\Exception $exception) {
             if (in_array($exception->getCode(), [Response::HTTP_UNAUTHORIZED, Response::HTTP_FORBIDDEN])) {
                 $this->messageBus->dispatch(new ExpireSocialAccount(

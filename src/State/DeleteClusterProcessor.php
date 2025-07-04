@@ -2,19 +2,11 @@
 
 namespace App\State;
 
-use ApiPlatform\Doctrine\Common\State\PersistProcessor;
 use ApiPlatform\Doctrine\Common\State\RemoveProcessor;
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProcessorInterface;
 use App\Denormalizer\PostDenormalizer;
 use App\Entity\Post\Cluster;
-use App\Entity\Post\FacebookPost;
-use App\Entity\Post\InstagramPost;
-use App\Entity\Post\LinkedinPost;
-use App\Entity\Post\ThreadPost;
-use App\Entity\Post\TwitterPost;
-use App\Entity\Post\YoutubePost;
-use App\Entity\SocialAccount\SocialAccount;
 use App\Exception\SocialAccountException;
 use Symfony\Component\HttpFoundation\Response;
 

@@ -4,16 +4,12 @@ namespace App\EventListener;
 
 use App\Application\Command\DeleteCluster;
 use App\Application\Command\DeletePost;
-use App\Application\Command\PublishCluster;
-use App\Entity\Post\Cluster;
 use App\Entity\Post\Post;
 use App\Exception\PublishException;
 use Doctrine\Bundle\DoctrineBundle\Attribute\AsDoctrineListener;
-use Doctrine\ORM\Event\PostPersistEventArgs;
 use Doctrine\ORM\Event\PostRemoveEventArgs;
 use Doctrine\ORM\Event\PreRemoveEventArgs;
 use Doctrine\ORM\Events;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Messenger\Bridge\Amqp\Transport\AmqpStamp;
 use Symfony\Component\Messenger\Exception\HandlerFailedException;
 use Symfony\Component\Messenger\MessageBusInterface;
@@ -38,14 +34,14 @@ final class PostEvent
             $this->messageBus->dispatch(new DeletePost(postId: $post->getId()), [
                 new AmqpStamp('sync'),
             ]);
-        } catch(HandlerFailedException $exception) {
+        } catch (HandlerFailedException $exception) {
             $originalException = $exception->getPrevious();
             if ($originalException instanceof PublishException) {
                 throw new PublishException(message: $originalException->getMessage());
             }
-            
+
             throw $exception;
-        } catch(\Exception $exception) {
+        } catch (\Exception $exception) {
             throw new PublishException(message: $exception->getMessage());
         }
     }

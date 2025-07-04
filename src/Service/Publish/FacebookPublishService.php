@@ -84,11 +84,9 @@ class FacebookPublishService implements PublishServiceInterface
 
             $content = $response->toArray();
 
-            if (isset($content['success']) && $content['success'] === true) {
-                return;
+            if (!isset($content['success']) || !$content['success']) {
+                throw new PublishException('Failed to delete facebook post.');
             }
-
-            throw new PublishException('Failed to delete facebook post.');
         } catch (\Exception $exception) {
             if (in_array($exception->getCode(), [Response::HTTP_UNAUTHORIZED, Response::HTTP_FORBIDDEN])) {
                 $this->messageBus->dispatch(new ExpireSocialAccount(

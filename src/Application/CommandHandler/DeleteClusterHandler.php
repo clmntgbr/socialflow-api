@@ -3,16 +3,8 @@
 namespace App\Application\CommandHandler;
 
 use App\Application\Command\DeleteCluster;
-use App\Application\Command\DeletePost;
-use App\Application\Command\RemoveSocialAccount;
 use App\Entity\Post\Cluster;
-use App\Entity\Post\Post;
-use App\Entity\SocialAccount\SocialAccount;
-use App\Exception\PublishException;
 use App\Repository\Post\ClusterRepository;
-use App\Repository\Post\PostRepository;
-use App\Repository\SocialAccount\SocialAccountRepository;
-use App\Service\Publish\PublishServiceFactory;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 

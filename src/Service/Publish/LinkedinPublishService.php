@@ -82,7 +82,39 @@ class LinkedinPublishService implements PublishServiceInterface
     /** @param LinkedinPost $post */
     public function delete(Post $post): void
     {
-        throw new \RuntimeException('Method not implemented.');
+        $socialAccount = $post->getCluster()->getSocialAccount();
+
+        $url = self::LINKEDIN_POST.'/'.urlencode('urn:li:share:'.$post->getPostId());
+
+        try {
+            $response = $this->httpClient->request('DELETE', $url, [
+                'headers' => [
+                    'Authorization' => 'Bearer '.$post->getCluster()->getSocialAccount()->getToken(),
+                    'Connection' => 'Keep-Alive',
+                    'Content-Type: application/json',
+                    'LinkedIn-Version: 202411',
+                    'X-Restli-Protocol-Version: 2.0.0',
+                ],
+            ]);
+
+            if (in_array($response->getStatusCode(), [Response::HTTP_UNAUTHORIZED, Response::HTTP_FORBIDDEN])) {
+                throw new PublishException('Authentication error occurred', $response->status);
+            }
+
+            if (Response::HTTP_NO_CONTENT !== $response->getStatusCode()) {
+                throw new PublishException('Publication error occurred', $response->getStatusCode());
+            }
+        } catch (\Exception $exception) {
+            if (in_array($exception->getCode(), [Response::HTTP_UNAUTHORIZED, Response::HTTP_FORBIDDEN])) {
+                $this->messageBus->dispatch(new ExpireSocialAccount(
+                    id: $socialAccount->getId()), [
+                        new AmqpStamp('async'),
+                    ]
+                );
+            }
+
+            throw new PublishException(message: $exception->getMessage(), code: Response::HTTP_NOT_FOUND, previous: $exception);
+        }
     }
 
     public function uploadMedia()
