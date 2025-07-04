@@ -53,12 +53,12 @@ class TwitterPublishService implements PublishServiceInterface
             $response = $twitterOAuth->post('tweets', $payload->jsonSerialize(), ['jsonPayload' => true]);
 
             if (isset($response->status) && in_array($response->status, [Response::HTTP_UNAUTHORIZED, Response::HTTP_FORBIDDEN])) {
-                throw new \Exception('Authentication error occurred', $response->status);
+                throw new PublishException('Authentication error occurred', $response->status);
             }
 
             if (!isset($response->data) && !isset($response->data->id)) {
                 $error = $response->title ?? 'An error occurred';
-                throw new \Exception("Request failed: $error", Response::HTTP_BAD_REQUEST);
+                throw new PublishException("Request failed: $error", Response::HTTP_BAD_REQUEST);
             }
 
             return $this->serializer->deserialize(json_encode($response->data), GetTwitterPost::class, 'json');
@@ -78,7 +78,35 @@ class TwitterPublishService implements PublishServiceInterface
     /** @param TwitterPost $post */
     public function delete(Post $post): void
     {
-        throw new \RuntimeException('Method not implemented.');
+        /** @var TwitterSocialAccount $socialAccount */
+        $socialAccount = $post->getCluster()->getSocialAccount();
+
+        try {
+            $twitterOAuth = new TwitterOAuth($this->twitterApiKey, $this->twitterApiSecret, $socialAccount->getToken(), $socialAccount->getTokenSecret());
+            $twitterOAuth->setApiVersion(2);
+
+            $response = $twitterOAuth->delete('tweets/' . $post->getPostId());
+
+            if (isset($response->status) && in_array($response->status, [Response::HTTP_UNAUTHORIZED, Response::HTTP_FORBIDDEN])) {
+                throw new PublishException('Authentication error occurred', $response->status);
+            }
+
+            if (isset($response->data) && isset($response->data->deleted) && true === $response->data->deleted) {
+                return;
+            }
+
+            throw new PublishException('Failed to delete twitter post.');
+        } catch (\Exception $exception) {
+            if (in_array($exception->getCode(), [Response::HTTP_UNAUTHORIZED, Response::HTTP_FORBIDDEN])) {
+                $this->messageBus->dispatch(new ExpireSocialAccount(
+                    id: $post->getCluster()->getSocialAccount()->getId()), [
+                        new AmqpStamp('async'),
+                    ]
+                );
+            }
+
+            throw new PublishException(message: $exception->getMessage(), code: Response::HTTP_NOT_FOUND, previous: $exception);
+        }
     }
 
     public function uploadMedia()

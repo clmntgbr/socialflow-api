@@ -100,8 +100,6 @@ class FacebookPublishService implements PublishServiceInterface
 
             throw new PublishException(message: $exception->getMessage(), code: Response::HTTP_NOT_FOUND, previous: $exception);
         }
-
-        throw new \RuntimeException('Method not implemented.');
     }
 
     public function uploadMedia()
