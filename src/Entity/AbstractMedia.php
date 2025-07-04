@@ -2,34 +2,32 @@
 
 namespace App\Entity;
 
-use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\Validator\Constraints as Assert;
 use Vich\UploaderBundle\Mapping\Annotation as Vich;
 use Doctrine\ORM\Mapping as ORM;
+use Vich\UploaderBundle\Entity\File as EmbeddedFile;
+use Gedmo\Timestampable\Traits\TimestampableEntity;
+use Symfony\Component\HttpFoundation\File\File;
+use Symfony\Component\Serializer\Attribute\Groups;
 
 #[Vich\Uploadable]
 abstract class AbstractMedia
 {
-    #[Vich\UploadableField(mapping: 'media_object', fileNameProperty: 'filePath')]
-    #[Assert\NotNull]
-    public ?File $file = null;
+    #[Vich\UploadableField(mapping: 'media_object', fileNameProperty: 'image.name', originalName: 'image.originalName', size: 'image.size', mimeType: 'image.mimeType', dimensions: 'image.dimensions')]
+    #[Assert\NotNull(groups: ['media.write'])]
+    private ?File $file = null;
 
-    #[ORM\Column(nullable: true)]
-    private ?string $imageName = null;
+    #[ORM\Embedded(class: 'Vich\UploaderBundle\Entity\File')]
+    public ?EmbeddedFile $image = null;
 
-    #[ORM\Column(nullable: true)]
-    private ?int $imageSize = null;
-
-    #[ORM\Column(nullable: true)]
-    private ?\DateTimeImmutable $updatedAt = null;
+    public function __construct()
+    {
+        $this->image = new EmbeddedFile();
+    }
 
     public function setFile(?File $imageFile = null): void
     {
         $this->file = $imageFile;
-
-        if (null !== $imageFile) {
-            $this->updatedAt = new \DateTimeImmutable();
-        }
     }
 
     public function getFile(): ?File
@@ -37,23 +35,49 @@ abstract class AbstractMedia
         return $this->file;
     }
 
-    public function setImageName(?string $imageName): void
+    public function setImage(EmbeddedFile $image): void
     {
-        $this->imageName = $imageName;
+        $this->image = $image;
     }
 
-    public function getImageName(): ?string
+    public function getImage(): ?EmbeddedFile
     {
-        return $this->imageName;
+        return $this->image;
     }
 
-    public function setImageSize(?int $imageSize): void
+    #[Groups(['media.read'])]
+    public function getSize(): ?int
     {
-        $this->imageSize = $imageSize;
+        return $this->image->getSize();
     }
 
-    public function getImageSize(): ?int
+    #[Groups(['media.read'])]
+    public function getMimeType(): ?string
     {
-        return $this->imageSize;
+        return $this->image->getMimeType();
+    }
+
+    #[Groups(['media.read'])]
+    public function getName(): ?string
+    {
+        return $this->image->getName();
+    }
+
+    #[Groups(['media.read'])]
+    public function getOriginalName(): ?string
+    {
+        return $this->image->getOriginalName();
+    }
+
+    #[Groups(['media.read'])]
+    public function getHeight(): ?int
+    {
+        return $this->image->getHeight();
+    }
+
+    #[Groups(['media.read'])]
+    public function getWidth(): ?int
+    {
+        return $this->image->getWidth();
     }
 }
