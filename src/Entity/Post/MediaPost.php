@@ -8,15 +8,11 @@ use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Post as PostOperation;
 use App\ApiResource\MediaPostUploadController;
 use App\Entity\AbstractMedia;
-use App\Entity\UrnInterface;
 use App\Entity\Trait\UuidTrait;
+use App\Entity\UrnInterface;
 use App\Repository\Post\MediaPostRepository;
-use Symfony\Component\Validator\Constraints as Assert;
-use Vich\UploaderBundle\Mapping\Annotation as Vich;
 use Doctrine\ORM\Mapping as ORM;
-use Vich\UploaderBundle\Entity\File as EmbeddedFile;
 use Gedmo\Timestampable\Traits\TimestampableEntity;
-use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\Serializer\Attribute\Groups;
 use Symfony\Component\Uid\Uuid;
 
@@ -67,11 +63,11 @@ class MediaPost extends AbstractMedia implements UrnInterface
         $this->post = $post;
 
         return $this;
-    }  
-    
+    }
+
     #[Groups(['media.read'])]
     public function getUrn(): string
     {
-        return '/api/media_posts/' . (string) $this->getId();
+        return '/api/media_posts/'.(string) $this->getId();
     }
 }

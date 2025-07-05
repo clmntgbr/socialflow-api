@@ -1,0 +1,50 @@
+<?php
+
+namespace App\Application\CommandHandler;
+
+use App\Application\Command\CreateOrganization;
+use App\Application\Command\RemoveUnusedMediaPost;
+use App\Application\Command\UploadToS3MediaPost;
+use App\Entity\Organization;
+use App\Entity\Post\MediaPost;
+use App\Entity\User;
+use App\Repository\Post\MediaPostRepository;
+use App\Repository\UserRepository;
+use App\Service\S3Service;
+use League\Flysystem\FilesystemOperator;
+use Symfony\Component\Messenger\Attribute\AsMessageHandler;
+use Symfony\Component\Messenger\Bridge\Amqp\Transport\AmqpStamp;
+use Symfony\Component\Messenger\MessageBusInterface;
+use Symfony\Component\Messenger\Stamp\DelayStamp;
+use Vich\UploaderBundle\Handler\UploadHandler;
+
+#[AsMessageHandler]
+final class UploadToS3MediaPostHandler
+{
+    public function __construct(
+        private MediaPostRepository $mediaPostRepository,
+        private readonly UploadHandler $uploadHandler,
+        private readonly S3Service $s3Service,
+        private readonly MessageBusInterface $messageBus,
+        private FilesystemOperator $awsStorage,
+    ) {
+    }
+
+    public function __invoke(UploadToS3MediaPost $message): void
+    {
+        /** @var ?MediaPost $mediaPost */
+        $mediaPost = $this->mediaPostRepository->findOneBy(['id' => (string) $message->mediaId]);
+
+        if (null === $mediaPost) {
+            throw new \Exception(sprintf('MediaPost does not exist with id [%s]', (string) $message->mediaId));
+        }
+
+        $this->s3Service->upload($mediaPost);
+        $this->uploadHandler->remove($mediaPost, 'file');
+
+        $this->messageBus->dispatch(new RemoveUnusedMediaPost(mediaPostId: $mediaPost->getId()), [
+            new DelayStamp(21600000),
+            new AmqpStamp('async'),
+        ]);
+    }
+}

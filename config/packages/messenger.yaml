@@ -26,3 +26,5 @@ framework:
             App\Application\Command\PublishPost: async
             App\Application\Command\UpdateClusterStatus: async
             App\Application\Command\DeleteCluster: async
+            App\Application\Command\RemoveUnusedMediaPost: async
+            App\Application\Command\UploadToS3MediaPost: async

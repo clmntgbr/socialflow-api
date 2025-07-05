@@ -2,13 +2,14 @@
 
 namespace App\Entity;
 
-use Symfony\Component\Validator\Constraints as Assert;
-use Vich\UploaderBundle\Mapping\Annotation as Vich;
+use App\Enum\MediaStatus;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
-use Vich\UploaderBundle\Entity\File as EmbeddedFile;
-use Gedmo\Timestampable\Traits\TimestampableEntity;
 use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\Serializer\Attribute\Groups;
+use Symfony\Component\Validator\Constraints as Assert;
+use Vich\UploaderBundle\Entity\File as EmbeddedFile;
+use Vich\UploaderBundle\Mapping\Annotation as Vich;
 
 #[Vich\Uploadable]
 abstract class AbstractMedia
@@ -18,10 +19,14 @@ abstract class AbstractMedia
     private ?File $file = null;
 
     #[ORM\Embedded(class: 'Vich\UploaderBundle\Entity\File')]
-    public ?EmbeddedFile $image = null;
+    protected ?EmbeddedFile $image = null;
+
+    #[ORM\Column(type: Types::STRING)]
+    protected string $status;
 
     public function __construct()
     {
+        $this->status = MediaStatus::CREATED->value;
         $this->image = new EmbeddedFile();
     }
 
@@ -79,5 +84,21 @@ abstract class AbstractMedia
     public function getWidth(): ?int
     {
         return $this->image->getWidth();
+    }
+
+    #[Groups(['media.read'])]
+    public function getStatus(): string
+    {
+        return $this->status;
+    }
+
+    public function setStatus(MediaStatus $mediaStatus): void
+    {
+        $this->status = $mediaStatus->value;
+    }
+
+    public function markAsProcessing()
+    {
+        $this->status = MediaStatus::PROCESSING->value;
     }
 }

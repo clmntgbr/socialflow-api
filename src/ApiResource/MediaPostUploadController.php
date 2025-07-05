@@ -2,21 +2,23 @@
 
 namespace App\ApiResource;
 
+use App\Application\Command\RemoveUnusedMediaPost;
+use App\Application\Command\UploadToS3MediaPost;
 use App\Entity\Post\MediaPost;
-use App\Entity\Post\Post;
 use App\Repository\Post\MediaPostRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Psr\Http\Message\MessageInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\File\File;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\MapUploadedFile;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Messenger\Bridge\Amqp\Transport\AmqpStamp;
+use Symfony\Component\Messenger\MessageBusInterface;
+use Symfony\Component\Messenger\Stamp\DelayStamp;
 use Symfony\Component\Serializer\Context\Normalizer\ObjectNormalizerContextBuilder;
 use Symfony\Component\Serializer\SerializerInterface;
-use Symfony\Component\Uid\Uuid;
 use Vich\UploaderBundle\Handler\UploadHandler;
 
 class MediaPostUploadController extends AbstractController
@@ -26,12 +28,13 @@ class MediaPostUploadController extends AbstractController
         private readonly UploadHandler $uploadHandler,
         private readonly MediaPostRepository $mediaPostRepository,
         private readonly SerializerInterface $serializer,
-    ) {}
+        private readonly MessageBusInterface $messageBus,
+    ) {
+    }
 
     public function __invoke(
         #[MapUploadedFile()] ?File $file,
-    ): JsonResponse 
-    {
+    ): JsonResponse {
         if (null === $file) {
             throw new BadRequestHttpException('No file provided.');
         }
@@ -41,6 +44,10 @@ class MediaPostUploadController extends AbstractController
 
         $this->uploadHandler->upload($mediaPost, 'file');
         $this->mediaPostRepository->save($mediaPost, true);
+
+        $this->messageBus->dispatch(new UploadToS3MediaPost(mediaId: $mediaPost->getId()), [
+            new AmqpStamp('async'),
+        ]);
 
         $context = (new ObjectNormalizerContextBuilder())
             ->withGroups(['media.read'])
