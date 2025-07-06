@@ -2,14 +2,10 @@
 
 namespace App\Application\CommandHandler;
 
-use App\Application\Command\CreateOrganization;
 use App\Application\Command\RemoveUnusedMediaPost;
 use App\Application\Command\UploadToS3MediaPost;
-use App\Entity\Organization;
 use App\Entity\Post\MediaPost;
-use App\Entity\User;
 use App\Repository\Post\MediaPostRepository;
-use App\Repository\UserRepository;
 use App\Service\S3Service;
 use League\Flysystem\FilesystemOperator;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;

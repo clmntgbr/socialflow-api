@@ -3,9 +3,7 @@
 namespace App\Service;
 
 use App\Entity\AbstractMedia;
-use App\Entity\User;
 use League\Flysystem\FilesystemOperator;
-use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Vich\UploaderBundle\Storage\StorageInterface;
 

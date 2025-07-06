@@ -2,12 +2,10 @@
 
 namespace App\ApiResource;
 
-use App\Application\Command\RemoveUnusedMediaPost;
 use App\Application\Command\UploadToS3MediaPost;
 use App\Entity\Post\MediaPost;
 use App\Repository\Post\MediaPostRepository;
 use Doctrine\ORM\EntityManagerInterface;
-use Psr\Http\Message\MessageInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -16,7 +14,6 @@ use Symfony\Component\HttpKernel\Attribute\MapUploadedFile;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\Messenger\Bridge\Amqp\Transport\AmqpStamp;
 use Symfony\Component\Messenger\MessageBusInterface;
-use Symfony\Component\Messenger\Stamp\DelayStamp;
 use Symfony\Component\Serializer\Context\Normalizer\ObjectNormalizerContextBuilder;
 use Symfony\Component\Serializer\SerializerInterface;
 use Vich\UploaderBundle\Handler\UploadHandler;

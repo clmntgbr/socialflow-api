@@ -50,7 +50,7 @@ final class PublishPostHandler
 
         try {
             $service = $this->publishServiceFactory->get($socialAccount->getType());
-            
+
             $getPost = $service->post($post);
             $post->setPublished($getPost->getId());
         } catch (\Exception $exception) {
