@@ -13,6 +13,7 @@ class S3Service
         private FilesystemOperator $awsStorage,
         private MessageBusInterface $messageBus,
         private StorageInterface $vichStorage,
+        private string $projectDir,
     ) {
     }
 
@@ -39,8 +40,53 @@ class S3Service
         }
     }
 
+    public function download(AbstractMedia $media): string
+    {
+        if (null === $media->getName()) {
+            throw new \RuntimeException('File name is null');
+        }
+
+        if (!$this->awsStorage->fileExists($media->getName())) {
+            throw new \RuntimeException('Remote file not found on S3.');
+        }
+
+        $localPath = $this->projectDir.'/public/media/'.$media->getName();
+
+        $stream = $this->awsStorage->readStream($media->getName());
+        if (false === $stream) {
+            throw new \RuntimeException('An error occurred during the download from S3.');
+        }
+
+        $localStream = fopen($localPath, 'w');
+        if (false === $localStream) {
+            if (is_resource($stream)) {
+                fclose($stream);
+            }
+            throw new \RuntimeException('An error occurred during local file creation.');
+        }
+
+        try {
+            if (false === stream_copy_to_stream($stream, $localStream)) {
+                throw new \RuntimeException('Failed to copy stream from S3 to local file.');
+            }
+        } finally {
+            if (is_resource($stream)) {
+                fclose($stream);
+            }
+            if (is_resource($localStream)) {
+                fclose($localStream);
+            }
+        }
+
+        return $localPath;
+    }
+
     public function delete(AbstractMedia $media): void
     {
+        if (null === $media->getName()) {
+            return;
+        }
+
         $this->awsStorage->delete($media->getName());
     }
 }

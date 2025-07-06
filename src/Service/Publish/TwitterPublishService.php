@@ -5,8 +5,9 @@ namespace App\Service\Publish;
 use Abraham\TwitterOAuth\TwitterOAuth;
 use App\Application\Command\ExpireSocialAccount;
 use App\Dto\Publish\CreatePost\CreateTwitterPostPayload;
-use App\Dto\Publish\GetPost\PublishedPostInterface;
-use App\Dto\Publish\GetPost\PublishedTwitterPost;
+use App\Dto\Publish\PublishedPost\PublishedPostInterface;
+use App\Dto\Publish\PublishedPost\PublishedTwitterPost;
+use App\Dto\Publish\UploadMedia\UploadedMediaInterface;
 use App\Entity\Post\Post;
 use App\Entity\Post\TwitterPost;
 use App\Entity\SocialAccount\TwitterSocialAccount;
@@ -33,7 +34,7 @@ class TwitterPublishService implements PublishServiceInterface
     /**
      * @param TwitterPost $post
      */
-    public function post(Post $post): PublishedPostInterface
+    public function post(Post $post, UploadedMediaInterface $medias): PublishedPostInterface
     {
         /** @var TwitterSocialAccount $socialAccount */
         $socialAccount = $post->getCluster()->getSocialAccount();
@@ -73,7 +74,9 @@ class TwitterPublishService implements PublishServiceInterface
         }
     }
 
-    /** @param TwitterPost $post */
+    /**
+     * @param TwitterPost $post
+     */
     public function delete(Post $post): void
     {
         /** @var TwitterSocialAccount $socialAccount */
@@ -103,7 +106,10 @@ class TwitterPublishService implements PublishServiceInterface
         }
     }
 
-    public function uploadMedia()
+    /**
+     * @param TwitterPost $post
+     */
+    public function uploadMedias(Post $post): UploadedMediaInterface
     {
         throw new \RuntimeException('Method not implemented.');
     }

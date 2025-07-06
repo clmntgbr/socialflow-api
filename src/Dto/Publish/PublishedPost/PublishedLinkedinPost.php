@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Dto\Publish\GetPost;
+namespace App\Dto\Publish\PublishedPost;
 
 use Symfony\Component\Serializer\Attribute\SerializedPath;
 

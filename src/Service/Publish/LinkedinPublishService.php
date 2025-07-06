@@ -3,28 +3,40 @@
 namespace App\Service\Publish;
 
 use App\Application\Command\ExpireSocialAccount;
+use App\Application\Command\RemoveMediaPost;
+use App\Application\Command\UploadLinkedinMediaPost;
 use App\Denormalizer\Denormalizer;
 use App\Dto\Publish\CreatePost\CreateLinkedinPostPayload;
-use App\Dto\Publish\GetPost\PublishedLinkedinPost;
-use App\Dto\Publish\GetPost\PublishedPostInterface;
+use App\Dto\Publish\PublishedPost\PublishedLinkedinPost;
+use App\Dto\Publish\PublishedPost\PublishedPostInterface;
+use App\Dto\Publish\UploadMedia\InitializeLinkedinUploadMedia;
+use App\Dto\Publish\UploadMedia\InitializeLinkedinUploadMediaPayload;
+use App\Dto\Publish\UploadMedia\UploadedLinkedinMedia;
+use App\Dto\Publish\UploadMedia\UploadedMediaInterface;
 use App\Entity\Post\LinkedinPost;
 use App\Entity\Post\Post;
+use App\Entity\SocialAccount\LinkedinSocialAccount;
 use App\Exception\PublishException;
 use App\Repository\Post\PostRepository;
+use App\Service\S3Service;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Messenger\Bridge\Amqp\Transport\AmqpStamp;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
+use Vich\UploaderBundle\Handler\UploadHandler;
 
 class LinkedinPublishService implements PublishServiceInterface
 {
     private const LINKEDIN_API_URL = 'https://api.linkedin.com';
     private const LINKEDIN_POST = self::LINKEDIN_API_URL.'/rest/posts';
+    private const LINKEDIN_INITIALIZE_UPLOAD_MEDIA = self::LINKEDIN_API_URL.'/rest/images?action=initializeUpload';
 
     public function __construct(
         private PostRepository $postRepository,
         private HttpClientInterface $httpClient,
         private MessageBusInterface $messageBus,
+        private readonly UploadHandler $uploadHandler,
+        private S3Service $s3Service,
         private Denormalizer $denormalizer,
         private string $twitterClientId,
         private string $twitterClientSecret,
@@ -34,15 +46,17 @@ class LinkedinPublishService implements PublishServiceInterface
     }
 
     /**
-     * @param LinkedinPost $post
+     * @param LinkedinPost          $post
+     * @param UploadedLinkedinMedia $medias
      */
-    public function post(Post $post): PublishedPostInterface
+    public function post(Post $post, UploadedMediaInterface $medias): PublishedPostInterface
     {
         $socialAccount = $post->getCluster()->getSocialAccount();
 
         $payload = new CreateLinkedinPostPayload(
             socialAccount: $socialAccount,
             post: $post,
+            medias: $medias,
         );
 
         try {
@@ -77,7 +91,9 @@ class LinkedinPublishService implements PublishServiceInterface
         }
     }
 
-    /** @param LinkedinPost $post */
+    /**
+     * @param LinkedinPost $post
+     */
     public function delete(Post $post): void
     {
         $socialAccount = $post->getCluster()->getSocialAccount();
@@ -113,8 +129,102 @@ class LinkedinPublishService implements PublishServiceInterface
         }
     }
 
-    public function uploadMedia()
+    /**
+     * @param LinkedinPost $post
+     *
+     * @return UploadedLinkedinMedia
+     */
+    public function uploadMedias(Post $post): UploadedMediaInterface
     {
-        throw new \RuntimeException('Method not implemented.');
+        $uploadedMedia = new UploadedLinkedinMedia();
+        $socialAccount = $post->getCluster()->getSocialAccount();
+
+        foreach ($post->getMedias() as $media) {
+            $initializeUploadMedia = $this->initializeUploadMedia($socialAccount);
+            try {
+                $this->messageBus->dispatch(new UploadLinkedinMediaPost(
+                    mediaId: $media->getId(),
+                    initializeLinkedinUploadMedia: $initializeUploadMedia,
+                ));
+            } catch (\Exception $exception) {
+                throw new PublishException(message: $exception->getMessage(), code: Response::HTTP_BAD_REQUEST, previous: $exception);
+            }
+
+            $uploadedMedia->addMedia($initializeUploadMedia);
+        }
+
+        return $uploadedMedia;
+    }
+
+    private function initializeUploadMedia(LinkedinSocialAccount $socialAccount): InitializeLinkedinUploadMedia
+    {
+        $payload = new InitializeLinkedinUploadMediaPayload(
+            linkedinSocialAccount: $socialAccount,
+        );
+
+        try {
+            $response = $this->httpClient->request('POST', self::LINKEDIN_INITIALIZE_UPLOAD_MEDIA, [
+                'headers' => [
+                    'Authorization' => 'Bearer '.$socialAccount->getToken(),
+                    'Connection' => 'Keep-Alive',
+                    'Content-Type: application/json',
+                    'LinkedIn-Version: 202411',
+                    'X-Restli-Protocol-Version: 2.0.0',
+                ],
+                'body' => $payload->encode(),
+            ]);
+
+            if (in_array($response->getStatusCode(), [Response::HTTP_UNAUTHORIZED, Response::HTTP_FORBIDDEN])) {
+                throw new \Exception('Authentication error occurred', $response->status);
+            }
+
+            if (Response::HTTP_OK !== $response->getStatusCode()) {
+                throw new PublishException('Upload media error occurred', $response->getStatusCode());
+            }
+
+            return $this->denormalizer->denormalize($response->toArray(), InitializeLinkedinUploadMedia::class);
+        } catch (\Exception $exception) {
+            if (in_array($exception->getCode(), [Response::HTTP_UNAUTHORIZED, Response::HTTP_FORBIDDEN])) {
+                $this->messageBus->dispatch(new ExpireSocialAccount(id: $socialAccount->getId()), [
+                    new AmqpStamp('async-high'),
+                ]);
+            }
+
+            throw new PublishException(message: $exception->getMessage(), code: Response::HTTP_NOT_FOUND, previous: $exception);
+        }
+    }
+
+    public function uploadMedia(
+        LinkedinSocialAccount $socialAccount,
+        InitializeLinkedinUploadMedia $initializeLinkedinUploadMedia,
+        string $localPath,
+    ): void {
+        try {
+            $response = $this->httpClient->request('PUT', $initializeLinkedinUploadMedia->uploadUrl, [
+                'headers' => [
+                    'authorization' => sprintf('Bearer %s', $socialAccount->getToken()),
+                    'linkedin-version' => '202411',
+                    'x-restli-protocol-version' => '2.0.0',
+                    'content-type' => 'application/octet-stream',
+                ],
+                'body' => fopen($localPath, 'r'),
+            ]);
+
+            if (in_array($response->getStatusCode(), [Response::HTTP_UNAUTHORIZED, Response::HTTP_FORBIDDEN])) {
+                throw new \Exception('Authentication error occurred', $response->status);
+            }
+
+            if (Response::HTTP_CREATED !== $response->getStatusCode()) {
+                throw new PublishException('Upload media error occurred', $response->getStatusCode());
+            }
+        } catch (\Exception $exception) {
+            if (in_array($exception->getCode(), [Response::HTTP_UNAUTHORIZED, Response::HTTP_FORBIDDEN])) {
+                $this->messageBus->dispatch(new ExpireSocialAccount(id: $socialAccount->getId()), [
+                    new AmqpStamp('async-high'),
+                ]);
+            }
+
+            throw new PublishException(message: $exception->getMessage(), code: Response::HTTP_NOT_FOUND, previous: $exception);
+        }
     }
 }

@@ -19,6 +19,7 @@ services:
             string $threadClientSecret: '%env(resolve:THREAD_CLIENT_SECRET)%'
             string $youtubeClientId: '%env(resolve:YOUTUBE_CLIENT_ID)%'
             string $youtubeClientSecret: '%env(resolve:YOUTUBE_CLIENT_SECRET)%'
+            string $projectDir: '%kernel.project_dir%'
     App\:
         resource: '../src/'
         exclude:

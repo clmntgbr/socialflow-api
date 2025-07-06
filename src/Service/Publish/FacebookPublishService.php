@@ -5,8 +5,9 @@ namespace App\Service\Publish;
 use App\Application\Command\ExpireSocialAccount;
 use App\Denormalizer\Denormalizer;
 use App\Dto\Publish\CreatePost\CreateFacebookPostPayload;
-use App\Dto\Publish\GetPost\PublishedFacebookPost;
-use App\Dto\Publish\GetPost\PublishedPostInterface;
+use App\Dto\Publish\PublishedPost\PublishedFacebookPost;
+use App\Dto\Publish\PublishedPost\PublishedPostInterface;
+use App\Dto\Publish\UploadMedia\UploadedMediaInterface;
 use App\Entity\Post\FacebookPost;
 use App\Entity\Post\Post;
 use App\Exception\PublishException;
@@ -33,7 +34,7 @@ class FacebookPublishService implements PublishServiceInterface
      *
      * @return PublishedFacebookPost
      */
-    public function post(Post $post): PublishedPostInterface
+    public function post(Post $post, UploadedMediaInterface $medias): PublishedPostInterface
     {
         $socialAccount = $post->getCluster()->getSocialAccount();
 
@@ -66,7 +67,9 @@ class FacebookPublishService implements PublishServiceInterface
         }
     }
 
-    /** @param FacebookPost $post */
+    /**
+     * @param FacebookPost $post
+     */
     public function delete(Post $post): void
     {
         $url = self::FACEBOOK_API_URL.'/'.$post->getPostId();
@@ -96,7 +99,10 @@ class FacebookPublishService implements PublishServiceInterface
         }
     }
 
-    public function uploadMedia()
+    /**
+     * @param FacebookPost $post
+     */
+    public function uploadMedias(Post $post): UploadedMediaInterface
     {
         throw new \RuntimeException('Method not implemented.');
     }

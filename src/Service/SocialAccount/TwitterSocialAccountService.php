@@ -139,8 +139,6 @@ class TwitterSocialAccountService implements SocialAccountServiceInterface
 
             return new RedirectResponse($this->frontUrl.'/validation');
         } catch (\Exception $exception) {
-            dd($exception->getMessage());
-
             return new RedirectResponse(sprintf('%s?error=true&message=3', $this->frontUrl));
         }
     }

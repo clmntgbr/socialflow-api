@@ -40,6 +40,7 @@ framework:
             App\Application\Command\CreateOrUpdateYoutubeAccount: sync
             App\Application\Command\CreateOrganization: sync
             App\Application\Command\DeletePost: sync
+            App\Application\Command\UploadLinkedinMediaPost: sync
             
             App\Application\Command\RemoveSocialAccount: async-low
             App\Application\Command\ExpireSocialAccount: async-high
@@ -49,3 +50,6 @@ framework:
             App\Application\Command\DeleteCluster: async-low
             App\Application\Command\RemoveUnusedMediaPost: async-low
             App\Application\Command\UploadToS3MediaPost: async-high
+            App\Application\Command\RemoveMediaPost: async-medium
+            App\Application\Command\DeleteDraftPost: async-medium
+            App\Application\Command\CleanPost: async-medium

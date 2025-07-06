@@ -2,25 +2,27 @@
 
 namespace App\Application\CommandHandler;
 
-use App\Application\Command\DeletePost;
+use App\Application\Command\CleanPost;
+use App\Application\Command\DeleteDraftPost;
+use App\Application\Command\RemoveMediaPost;
 use App\Entity\Post\Post;
-use App\Exception\PublishException;
 use App\Repository\Post\PostRepository;
-use App\Service\Publish\PublishServiceFactory;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
+use Symfony\Component\Messenger\Bridge\Amqp\Transport\AmqpStamp;
+use Symfony\Component\Messenger\MessageBusInterface;
 
 #[AsMessageHandler]
-final class DeletePostHandler
+final class CleanPostHandler
 {
     public function __construct(
         private PostRepository $postRepository,
         private LoggerInterface $logger,
-        private PublishServiceFactory $publish,
+        private MessageBusInterface $messageBus,
     ) {
     }
 
-    public function __invoke(DeletePost $message): void
+    public function __invoke(CleanPost $message): void
     {
         /** @var ?Post $post */
         $post = $this->postRepository->findOneBy([
@@ -33,17 +35,10 @@ final class DeletePostHandler
             return;
         }
 
-        if (null === $post->getPostId()) {
-            $this->logger->warning('Post does not have postId.', ['id' => (string) $post->getId()]);
-
-            return;
-        }
-
-        try {
-            $publishService = $this->publish->get($post->getType());
-            $publishService->delete($post);
-        } catch (\Exception $exception) {
-            throw new PublishException(message: $exception->getMessage());
+        foreach ($post->getMedias() as $media) {
+            $this->messageBus->dispatch(new RemoveMediaPost(mediaPostId: $media->getId(), delete: false), [
+                new AmqpStamp('async-medium'),
+            ]);
         }
     }
 }

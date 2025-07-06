@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Dto\Publish\GetPost;
+namespace App\Dto\Publish\PublishedPost;
 
 final class PublishedFacebookPost implements PublishedPostInterface
 {

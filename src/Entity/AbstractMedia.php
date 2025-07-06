@@ -50,43 +50,40 @@ abstract class AbstractMedia
         return $this->image;
     }
 
-    #[Groups(['media.read'])]
+    #[Groups(['media.read', 'cluster.read'])]
     public function getSize(): ?int
     {
         return $this->image->getSize();
     }
 
-    #[Groups(['media.read'])]
+    #[Groups(['media.read', 'cluster.read'])]
     public function getMimeType(): ?string
     {
         return $this->image->getMimeType();
     }
 
-    #[Groups(['media.read'])]
+    #[Groups(['media.read', 'cluster.read'])]
     public function getName(): ?string
     {
         return $this->image->getName();
     }
 
-    #[Groups(['media.read'])]
     public function getOriginalName(): ?string
     {
         return $this->image->getOriginalName();
     }
 
-    #[Groups(['media.read'])]
+    #[Groups(['media.read', 'cluster.read'])]
     public function getHeight(): ?int
     {
         return $this->image->getHeight();
     }
 
-    #[Groups(['media.read'])]
     public function getWidth(): ?int
     {
         return $this->image->getWidth();
     }
 
-    #[Groups(['media.read'])]
     public function getStatus(): string
     {
         return $this->status;

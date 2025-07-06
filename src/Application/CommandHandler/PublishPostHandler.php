@@ -2,7 +2,9 @@
 
 namespace App\Application\CommandHandler;
 
+use App\Application\Command\CleanPost;
 use App\Application\Command\PublishPost;
+use App\Application\Command\RemoveMediaPost;
 use App\Application\Command\UpdateClusterStatus;
 use App\Entity\Post\Post;
 use App\Repository\Post\PostRepository;
@@ -51,8 +53,13 @@ final class PublishPostHandler
         try {
             $service = $this->publishServiceFactory->get($socialAccount->getType());
 
-            $getPost = $service->post($post);
-            $post->setPublished($getPost->getId());
+            $medias = $service->uploadMedias($post);
+            $publishedPost = $service->post($post, $medias);
+            $post->setPublished($publishedPost->getId());
+
+            $this->messageBus->dispatch(new CleanPost(postId: $post->getId()), [
+                new AmqpStamp('async-medium'),
+            ]);
         } catch (\Exception $exception) {
             $this->logger->alert($exception->getMessage(), ['postId' => (string) $post->getId()]);
             $post->setFailed();
