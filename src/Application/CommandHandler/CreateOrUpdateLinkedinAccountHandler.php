@@ -73,7 +73,7 @@ final class CreateOrUpdateLinkedinAccountHandler extends CreateOrUpdateAccountHa
 
         $this->messageBus->dispatch(new RemoveSocialAccount(socialAccountId: $linkedinAccount->getId(), status: SocialAccountStatus::PENDING_VALIDATION), [
             new DelayStamp(360000000),
-            new AmqpStamp('async'),
+            new AmqpStamp('async-low'),
         ]);
     }
 }

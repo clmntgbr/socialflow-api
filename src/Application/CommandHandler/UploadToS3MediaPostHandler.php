@@ -44,7 +44,7 @@ final class UploadToS3MediaPostHandler
 
         $this->messageBus->dispatch(new RemoveUnusedMediaPost(mediaPostId: $mediaPost->getId()), [
             new DelayStamp(21600000),
-            new AmqpStamp('async'),
+            new AmqpStamp('async-low'),
         ]);
     }
 }

@@ -2,7 +2,7 @@
 
 namespace App\Dto\Publish\GetPost;
 
-interface GetPostInterface
+interface PublishedPostInterface
 {
     public function getId(): string;
 }

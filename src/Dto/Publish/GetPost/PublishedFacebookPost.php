@@ -2,7 +2,7 @@
 
 namespace App\Dto\Publish\GetPost;
 
-final class GetTwitterPost implements GetPostInterface
+final class PublishedFacebookPost implements PublishedPostInterface
 {
     public function __construct(
         public string $id,

@@ -34,7 +34,7 @@ final class PublishClusterHandler
 
         foreach ($cluster->getPosts() as $post) {
             $this->messageBus->dispatch(new PublishPost(postId: $post->getId()), [
-                new AmqpStamp('async'),
+                new AmqpStamp('async-medium'),
             ]);
         }
     }

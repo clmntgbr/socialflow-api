@@ -50,6 +50,7 @@ final class PublishPostHandler
 
         try {
             $service = $this->publishServiceFactory->get($socialAccount->getType());
+            
             $getPost = $service->post($post);
             $post->setPublished($getPost->getId());
         } catch (\Exception $exception) {
@@ -60,7 +61,7 @@ final class PublishPostHandler
         $this->postRepository->save($post);
 
         $this->messageBus->dispatch(new UpdateClusterStatus(clusterId: $post->getCluster()->getId()), [
-            new AmqpStamp('async'),
+            new AmqpStamp('async-medium'),
         ]);
     }
 }

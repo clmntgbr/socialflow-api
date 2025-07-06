@@ -29,7 +29,7 @@ final class ClusterEvent
 
         if (null === $cluster->getProgrammedAt() || $date >= $cluster->getProgrammedAt()) {
             $this->messageBus->dispatch(new PublishCluster(clusterId: $cluster->getId()), [
-                new AmqpStamp('async'),
+                new AmqpStamp('async-medium'),
             ]);
 
             return;

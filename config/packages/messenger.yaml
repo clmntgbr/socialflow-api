@@ -1,7 +1,7 @@
 framework:
     messenger:
         transports:
-            async:
+            async-high:
                 dsn: "%env(MESSENGER_TRANSPORT_DSN)%"
                 options:
                     exchange:
@@ -9,9 +9,30 @@ framework:
                         type: direct
                     auto_setup: true
                     queues:
-                        async:
-                            binding_keys: [async]
+                        async-high:
+                            binding_keys: [async-high]
+            async-medium:
+                dsn: "%env(MESSENGER_TRANSPORT_DSN)%"
+                options:
+                    exchange:
+                        name: messages
+                        type: direct
+                    auto_setup: true
+                    queues:
+                        async-medium:
+                            binding_keys: [async-medium]
+            async-low:
+                dsn: "%env(MESSENGER_TRANSPORT_DSN)%"
+                options:
+                    exchange:
+                        name: messages
+                        type: direct
+                    auto_setup: true
+                    queues:
+                        async-low:
+                            binding_keys: [async-low]
             sync: 'sync://'
+
         routing:
             App\Application\Command\CreateOrUpdateFacebookAccount: sync
             App\Application\Command\CreateOrUpdateTwitterAccount: sync
@@ -20,11 +41,11 @@ framework:
             App\Application\Command\CreateOrganization: sync
             App\Application\Command\DeletePost: sync
             
-            App\Application\Command\RemoveSocialAccount: async
-            App\Application\Command\ExpireSocialAccount: async
-            App\Application\Command\PublishCluster: async
-            App\Application\Command\PublishPost: async
-            App\Application\Command\UpdateClusterStatus: async
-            App\Application\Command\DeleteCluster: async
-            App\Application\Command\RemoveUnusedMediaPost: async
-            App\Application\Command\UploadToS3MediaPost: async
+            App\Application\Command\RemoveSocialAccount: async-low
+            App\Application\Command\ExpireSocialAccount: async-high
+            App\Application\Command\PublishCluster: async-medium
+            App\Application\Command\PublishPost: async-medium
+            App\Application\Command\UpdateClusterStatus: async-medium
+            App\Application\Command\DeleteCluster: async-low
+            App\Application\Command\RemoveUnusedMediaPost: async-low
+            App\Application\Command\UploadToS3MediaPost: async-high

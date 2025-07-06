@@ -2,7 +2,7 @@
 
 namespace App\Service\Publish;
 
-use App\Dto\Publish\GetPost\GetPostInterface;
+use App\Dto\Publish\GetPost\PublishedPostInterface;
 use App\Entity\Post\Post;
 use App\Entity\Post\ThreadPost;
 
@@ -11,7 +11,7 @@ class ThreadPublishService implements PublishServiceInterface
     /**
      * @param ThreadPost $post
      */
-    public function post(Post $post): GetPostInterface
+    public function post(Post $post): PublishedPostInterface
     {
         throw new \RuntimeException('Method not implemented.');
     }

@@ -46,7 +46,7 @@ class MediaPostUploadController extends AbstractController
         $this->mediaPostRepository->save($mediaPost, true);
 
         $this->messageBus->dispatch(new UploadToS3MediaPost(mediaId: $mediaPost->getId()), [
-            new AmqpStamp('async'),
+            new AmqpStamp('async-high'),
         ]);
 
         $context = (new ObjectNormalizerContextBuilder())

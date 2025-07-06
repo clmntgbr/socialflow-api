@@ -5,8 +5,8 @@ namespace App\Service\Publish;
 use Abraham\TwitterOAuth\TwitterOAuth;
 use App\Application\Command\ExpireSocialAccount;
 use App\Dto\Publish\CreatePost\CreateTwitterPostPayload;
-use App\Dto\Publish\GetPost\GetPostInterface;
-use App\Dto\Publish\GetPost\GetTwitterPost;
+use App\Dto\Publish\GetPost\PublishedPostInterface;
+use App\Dto\Publish\GetPost\PublishedTwitterPost;
 use App\Entity\Post\Post;
 use App\Entity\Post\TwitterPost;
 use App\Entity\SocialAccount\TwitterSocialAccount;
@@ -33,7 +33,7 @@ class TwitterPublishService implements PublishServiceInterface
     /**
      * @param TwitterPost $post
      */
-    public function post(Post $post): GetPostInterface
+    public function post(Post $post): PublishedPostInterface
     {
         /** @var TwitterSocialAccount $socialAccount */
         $socialAccount = $post->getCluster()->getSocialAccount();
@@ -61,14 +61,12 @@ class TwitterPublishService implements PublishServiceInterface
                 throw new PublishException("Request failed: $error", Response::HTTP_BAD_REQUEST);
             }
 
-            return $this->serializer->deserialize(json_encode($response->data), GetTwitterPost::class, 'json');
+            return $this->serializer->deserialize(json_encode($response->data), PublishedTwitterPost::class, 'json');
         } catch (\Exception $exception) {
             if (in_array($exception->getCode(), [Response::HTTP_UNAUTHORIZED, Response::HTTP_FORBIDDEN])) {
-                $this->messageBus->dispatch(new ExpireSocialAccount(
-                    id: $socialAccount->getId()), [
-                        new AmqpStamp('async'),
-                    ]
-                );
+                $this->messageBus->dispatch(new ExpireSocialAccount(id: $socialAccount->getId()), [
+                    new AmqpStamp('async-high'),
+                ]);
             }
 
             throw new PublishException(message: $exception->getMessage(), code: Response::HTTP_NOT_FOUND, previous: $exception);
@@ -96,11 +94,9 @@ class TwitterPublishService implements PublishServiceInterface
             }
         } catch (\Exception $exception) {
             if (in_array($exception->getCode(), [Response::HTTP_UNAUTHORIZED, Response::HTTP_FORBIDDEN])) {
-                $this->messageBus->dispatch(new ExpireSocialAccount(
-                    id: $post->getCluster()->getSocialAccount()->getId()), [
-                        new AmqpStamp('async'),
-                    ]
-                );
+                $this->messageBus->dispatch(new ExpireSocialAccount(id: $post->getCluster()->getSocialAccount()->getId()), [
+                    new AmqpStamp('async-high'),
+                ]);
             }
 
             throw new PublishException(message: $exception->getMessage(), code: Response::HTTP_NOT_FOUND, previous: $exception);

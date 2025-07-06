@@ -54,7 +54,7 @@ final class PostEvent
         }
 
         $this->messageBus->dispatch(new DeleteCluster(clusterId: $post->getCluster()->getId()), [
-            new AmqpStamp('async'),
+            new AmqpStamp('async-low'),
         ]);
     }
 }

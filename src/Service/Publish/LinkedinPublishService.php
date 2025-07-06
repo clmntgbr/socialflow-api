@@ -5,8 +5,8 @@ namespace App\Service\Publish;
 use App\Application\Command\ExpireSocialAccount;
 use App\Denormalizer\Denormalizer;
 use App\Dto\Publish\CreatePost\CreateLinkedinPostPayload;
-use App\Dto\Publish\GetPost\GetLinkedinPost;
-use App\Dto\Publish\GetPost\GetPostInterface;
+use App\Dto\Publish\GetPost\PublishedLinkedinPost;
+use App\Dto\Publish\GetPost\PublishedPostInterface;
 use App\Entity\Post\LinkedinPost;
 use App\Entity\Post\Post;
 use App\Exception\PublishException;
@@ -36,7 +36,7 @@ class LinkedinPublishService implements PublishServiceInterface
     /**
      * @param LinkedinPost $post
      */
-    public function post(Post $post): GetPostInterface
+    public function post(Post $post): PublishedPostInterface
     {
         $socialAccount = $post->getCluster()->getSocialAccount();
 
@@ -65,14 +65,12 @@ class LinkedinPublishService implements PublishServiceInterface
                 throw new \Exception('Publication error occurred', $response->getStatusCode());
             }
 
-            return $this->denormalizer->denormalize($response->getHeaders(), GetLinkedinPost::class);
+            return $this->denormalizer->denormalize($response->getHeaders(), PublishedLinkedinPost::class);
         } catch (\Exception $exception) {
             if (in_array($exception->getCode(), [Response::HTTP_UNAUTHORIZED, Response::HTTP_FORBIDDEN])) {
-                $this->messageBus->dispatch(new ExpireSocialAccount(
-                    id: $socialAccount->getId()), [
-                        new AmqpStamp('async'),
-                    ]
-                );
+                $this->messageBus->dispatch(new ExpireSocialAccount(id: $socialAccount->getId()), [
+                    new AmqpStamp('async-high'),
+                ]);
             }
 
             throw new PublishException(message: $exception->getMessage(), code: Response::HTTP_NOT_FOUND, previous: $exception);
@@ -106,11 +104,9 @@ class LinkedinPublishService implements PublishServiceInterface
             }
         } catch (\Exception $exception) {
             if (in_array($exception->getCode(), [Response::HTTP_UNAUTHORIZED, Response::HTTP_FORBIDDEN])) {
-                $this->messageBus->dispatch(new ExpireSocialAccount(
-                    id: $socialAccount->getId()), [
-                        new AmqpStamp('async'),
-                    ]
-                );
+                $this->messageBus->dispatch(new ExpireSocialAccount(id: $socialAccount->getId()), [
+                    new AmqpStamp('async-high'),
+                ]);
             }
 
             throw new PublishException(message: $exception->getMessage(), code: Response::HTTP_NOT_FOUND, previous: $exception);

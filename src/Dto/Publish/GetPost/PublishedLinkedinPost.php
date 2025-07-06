@@ -4,7 +4,7 @@ namespace App\Dto\Publish\GetPost;
 
 use Symfony\Component\Serializer\Attribute\SerializedPath;
 
-final class GetLinkedinPost implements GetPostInterface
+final class PublishedLinkedinPost implements PublishedPostInterface
 {
     private string $id;
 

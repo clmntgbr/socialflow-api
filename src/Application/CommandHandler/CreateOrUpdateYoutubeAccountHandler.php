@@ -73,7 +73,7 @@ final class CreateOrUpdateYoutubeAccountHandler extends CreateOrUpdateAccountHan
 
         $this->messageBus->dispatch(new RemoveSocialAccount(socialAccountId: $youtubeAccount->getId(), status: SocialAccountStatus::PENDING_VALIDATION), [
             new DelayStamp(360000000),
-            new AmqpStamp('async'),
+            new AmqpStamp('async-low'),
         ]);
     }
 }
