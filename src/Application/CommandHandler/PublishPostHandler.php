@@ -61,7 +61,7 @@ final class PublishPostHandler
             ]);
         } catch (\Exception $exception) {
             $this->logger->alert(sprintf('Failed to publish post with id [%s]: %s', (string) $post->getId(), $exception->getMessage()), ['postId' => (string) $post->getId()]);
-            $post->setFailed();
+            $post->setFailed($exception->getMessage());
         }
 
         $this->postRepository->save($post);

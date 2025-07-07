@@ -54,6 +54,7 @@ final class UploadTwitterMediaPostHandler
             );
             
             $mediaId = $service->upload($payload);
+            $service->checkUploadStatus($socialAccount, $mediaId);
 
             $mediaPost->markAsUploaded();
             $this->mediaPostRepository->save($mediaPost);

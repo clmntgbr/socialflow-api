@@ -22,6 +22,7 @@ use App\Entity\SocialAccount\TwitterSocialAccount;
 use App\Exception\MethodNotImplementedException;
 use App\Exception\PublishException;
 use App\Repository\Post\PostRepository;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Messenger\Bridge\Amqp\Transport\AmqpStamp;
 use Symfony\Component\Messenger\MessageBusInterface;
@@ -30,10 +31,13 @@ use Symfony\Component\Serializer\SerializerInterface;
 
 class TwitterPublishService implements PublishServiceInterface
 {
+    private const MAX_ATTEMPS = 50;
+
     public function __construct(
         private PostRepository $postRepository,
         private MessageBusInterface $messageBus,
         private SerializerInterface $serializer,
+        private LoggerInterface $logger,
         private readonly string $twitterApiKey,
         private readonly string $twitterApiSecret,
     ) {
@@ -62,24 +66,24 @@ class TwitterPublishService implements PublishServiceInterface
 
             $response = $twitterOAuth->post('tweets', $payload->jsonSerialize(), ['jsonPayload' => true]);
 
-            if (isset($response->status) && in_array($response->status, [Response::HTTP_UNAUTHORIZED, Response::HTTP_FORBIDDEN])) {
+            if (isset($response->status) && in_array($response->status, [Response::HTTP_UNAUTHORIZED])) {
                 throw new PublishException('Failed to authenticate with Twitter API: received status code '.$response->status, $response->status);
             }
 
             if (!isset($response->data) && !isset($response->data->id)) {
-                $error = $response->title ?? 'Unknown error';
-                throw new PublishException("Failed to publish tweet: $error", Response::HTTP_BAD_REQUEST);
+                $error = $response->detail ?? 'Unknown error';
+                throw new PublishException($error, Response::HTTP_BAD_REQUEST);
             }
 
             return $this->serializer->deserialize(json_encode($response->data), PublishedTwitterPost::class, 'json');
         } catch (\Exception $exception) {
-            if (in_array($exception->getCode(), [Response::HTTP_UNAUTHORIZED, Response::HTTP_FORBIDDEN])) {
+            if (in_array($exception->getCode(), [Response::HTTP_UNAUTHORIZED])) {
                 $this->messageBus->dispatch(new ExpireSocialAccount(id: $socialAccount->getId()), [
                     new AmqpStamp('async-high'),
                 ]);
             }
 
-            throw new PublishException(message: 'Failed to publish tweet: '.$exception->getMessage(), code: Response::HTTP_NOT_FOUND, previous: $exception);
+            throw new PublishException(message: $exception->getMessage(), code: Response::HTTP_NOT_FOUND, previous: $exception);
         }
     }
 
@@ -97,7 +101,7 @@ class TwitterPublishService implements PublishServiceInterface
 
             $response = $twitterOAuth->delete('tweets/'.$post->getPostId());
 
-            if (isset($response->status) && in_array($response->status, [Response::HTTP_UNAUTHORIZED, Response::HTTP_FORBIDDEN])) {
+            if (isset($response->status) && in_array($response->status, [Response::HTTP_UNAUTHORIZED])) {
                 throw new PublishException('Failed to authenticate with Twitter API: received status code '.$response->status, $response->status);
             }
 
@@ -105,7 +109,7 @@ class TwitterPublishService implements PublishServiceInterface
                 throw new PublishException('Failed to delete Twitter post: the API did not confirm deletion.');
             }
         } catch (\Exception $exception) {
-            if (in_array($exception->getCode(), [Response::HTTP_UNAUTHORIZED, Response::HTTP_FORBIDDEN])) {
+            if (in_array($exception->getCode(), [Response::HTTP_UNAUTHORIZED])) {
                 $this->messageBus->dispatch(new ExpireSocialAccount(id: $post->getCluster()->getSocialAccount()->getId()), [
                     new AmqpStamp('async-high'),
                 ]);
@@ -170,9 +174,9 @@ class TwitterPublishService implements PublishServiceInterface
                 throw new PublishException('Failed to upload media to Twitter');
             }
 
-            return $this->serializer->deserialize(json_encode($response), UploadedTwitterMediaId::class, 'json');
+            return new UploadedTwitterMediaId($response->media_id_string, 'image');
         } catch (\Exception $exception) {
-            if (in_array($exception->getCode(), [Response::HTTP_UNAUTHORIZED, Response::HTTP_FORBIDDEN])) {
+            if (in_array($exception->getCode(), [Response::HTTP_UNAUTHORIZED])) {
                 $this->messageBus->dispatch(new ExpireSocialAccount(id: $socialAccount->getId()), [
                     new AmqpStamp('async-high'),
                 ]);
@@ -186,6 +190,62 @@ class TwitterPublishService implements PublishServiceInterface
         TwitterSocialAccount $socialAccount,
         string $localPath,
     ): UploadedTwitterMediaId {
-        throw new MethodNotImplementedException(__METHOD__);
+        try {
+            $twitterOAuth = new TwitterOAuth($this->twitterApiKey, $this->twitterApiSecret, $socialAccount->getToken(), $socialAccount->getTokenSecret());
+            $twitterOAuth->setApiVersion('1.1');
+
+            $response = $twitterOAuth->upload('media/upload', [
+                'media' => $localPath, 
+                'media_type' => 'video/mp4',
+                'media_category' => 'tweet_video',
+            ], ['chunkedUpload' => true]);
+
+            if (!isset($response->media_id_string) && !isset($response->media_id_string)) {
+                throw new PublishException('Failed to upload media to Twitter');
+            }
+
+            return new UploadedTwitterMediaId($response->media_id_string, 'video');
+        } catch (\Exception $exception) {
+            if (in_array($exception->getCode(), [Response::HTTP_UNAUTHORIZED])) {
+                $this->messageBus->dispatch(new ExpireSocialAccount(id: $socialAccount->getId()), [
+                    new AmqpStamp('async-high'),
+                ]);
+            }
+
+            throw new PublishException(message: 'Failed to upload media to Twitter: '.$exception->getMessage(), code: Response::HTTP_NOT_FOUND, previous: $exception);
+        }
+    }
+
+    public function checkUploadStatus(TwitterSocialAccount $socialAccount, UploadedTwitterMediaId $mediaId): void
+    {
+        $twitterOAuth = new TwitterOAuth($this->twitterApiKey, $this->twitterApiSecret, $socialAccount->getToken(), $socialAccount->getTokenSecret());
+        $twitterOAuth->setApiVersion('1.1');
+
+        $attempts = 0;
+    
+        while ($attempts < self::MAX_ATTEMPS) {
+            $response = $twitterOAuth->mediaStatus($mediaId->mediaId);
+
+            $this->logger->info(json_encode($response));
+            
+            if (!isset($response->processing_info)) {
+                return;
+            }
+
+            $processingInfo = $response->processing_info;
+
+            match ($processingInfo->state) {
+                'succeeded' => (function() { return; })(),
+                'failed' => throw new PublishException('Media processing failed: ' . ($processingInfo->error->message ?? 'Unknown error')),
+                'in_progress' => sleep($processingInfo->check_after_secs ?? 10),
+                default => sleep(10)
+            };
+            
+            if ($processingInfo->state === 'succeeded') {
+                return;
+            }
+        
+            $attempts++;
+        }
     }
 }

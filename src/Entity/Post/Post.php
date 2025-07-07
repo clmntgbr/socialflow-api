@@ -56,6 +56,10 @@ class Post implements PostInterface
     #[Groups(['cluster.read'])]
     private string $status;
 
+    #[ORM\Column(type: Types::STRING, nullable: true)]
+    #[Groups(['cluster.read'])]
+    private string $error;
+
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     #[Groups(['cluster.read'])]
     private ?\DateTime $postedAt = null;
@@ -113,11 +117,12 @@ class Post implements PostInterface
         $this->postedAt = new \DateTime();
     }
 
-    public function setFailed(): void
+    public function setFailed(string $message): void
     {
         $this->postId = null;
         $this->status = PostStatus::ERROR->value;
         $this->postedAt = null;
+        $this->error = $message;
     }
 
     public function getPostId(): ?string
@@ -230,6 +235,18 @@ class Post implements PostInterface
                 $media->setPost(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getError(): ?string
+    {
+        return $this->error;
+    }
+
+    public function setError(?string $error): static
+    {
+        $this->error = $error;
 
         return $this;
     }

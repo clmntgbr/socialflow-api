@@ -11,7 +11,8 @@ class UploadedTwitterMediaId implements UploadedMediaIdInterface
         #[Assert\Type('string')]
         #[Assert\NotBlank()]
         #[SerializedName('media_id_string')]
-        public string $mediaId
+        public string $mediaId,
+        public string $mediaType
     ) {   
     }
 }
