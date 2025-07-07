@@ -5,7 +5,7 @@ namespace App\Dto\Publish\UploadMedia;
 use Symfony\Component\Serializer\Attribute\SerializedName;
 use Symfony\Component\Validator\Constraints as Assert;
 
-class UploadedFacebookMediaId
+class UploadedFacebookMediaId implements UploadedMediaIdInterface
 {
     #[Assert\Type('string')]
     #[Assert\NotBlank()]

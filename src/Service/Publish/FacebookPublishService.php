@@ -10,11 +10,15 @@ use App\Dto\Publish\PublishedPost\PublishedFacebookPost;
 use App\Dto\Publish\PublishedPost\PublishedPostInterface;
 use App\Dto\Publish\UploadMedia\UploadedFacebookMedia;
 use App\Dto\Publish\UploadMedia\UploadedFacebookMediaId;
+use App\Dto\Publish\UploadMedia\UploadedMediaIdInterface;
 use App\Dto\Publish\UploadMedia\UploadedMediaInterface;
 use App\Entity\Post\FacebookPost;
+use App\Entity\Post\MediaPost;
 use App\Entity\Post\Post;
 use App\Entity\SocialAccount\FacebookSocialAccount;
+use App\Entity\SocialAccount\SocialAccount;
 use App\Exception\AuthenticationException;
+use App\Exception\MethodNotImplementedException;
 use App\Exception\PublishException;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Messenger\Bridge\Amqp\Transport\AmqpStamp;
@@ -136,7 +140,21 @@ class FacebookPublishService implements PublishServiceInterface
         return $uploadedMedia;
     }
 
-    public function uploadMedia(
+    /**
+     * @param FacebookSocialAccount $socialAccount
+     * 
+     * @return UploadedFacebookMediaId
+     */
+    public function upload(MediaPost $mediaPost, ?string $uploadUrl, SocialAccount $socialAccount, string $localPath): UploadedMediaIdInterface
+    {
+        return match (true) {
+            in_array($mediaPost->getMimeType(), self::IMAGE_MIME_TYPES) => $this->uploadMedia($socialAccount, $localPath),
+            in_array($mediaPost->getMimeType(), self::VIDEO_MIME_TYPES) => $this->uploadVideo($socialAccount, $localPath),
+            default => throw new PublishException('Failed to upload media to Facebook: Undefined mimetype'),
+        };
+    }
+
+    private function uploadMedia(
         FacebookSocialAccount $socialAccount,
         string $localPath,
     ): UploadedFacebookMediaId {
@@ -173,5 +191,12 @@ class FacebookPublishService implements PublishServiceInterface
 
             throw new PublishException(message: 'Failed to upload media to Facebook: '.$exception->getMessage(), code: Response::HTTP_NOT_FOUND, previous: $exception);
         }
+    }
+
+    private function uploadVideo(
+        FacebookSocialAccount $socialAccount,
+        string $localPath,
+    ): UploadedFacebookMediaId {
+        throw new MethodNotImplementedException(__METHOD__);
     }
 }

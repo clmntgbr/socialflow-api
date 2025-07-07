@@ -10,13 +10,13 @@ class UploadedLinkedinMedia implements UploadedMediaInterface
     {
     }
 
-    public function addMedia(InitializeUploadLinkedinMedia $initializeLinkedinUploadMedia)
+    public function addMedia(UploadedLinkedinMediaId $uploadedLinkedinMediaId)
     {
-        $this->medias[] = $initializeLinkedinUploadMedia;
+        $this->medias[] = $uploadedLinkedinMediaId;
     }
 
     /**
-     * @return InitializeUploadLinkedinMedia[]
+     * @return UploadedLinkedinMediaId[]
      */
     public function getMedias(): array
     {

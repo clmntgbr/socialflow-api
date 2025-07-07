@@ -43,7 +43,12 @@ final class UploadLinkedinMediaPostHandler
             $service = $this->publishServiceFactory->get($socialAccount->getType());
 
             $localPath = $this->s3Service->download($mediaPost);
-            $service->uploadMedia($socialAccount, $message->initializeLinkedinUploadMedia, $localPath);
+            $service->upload(
+                mediaPost: $mediaPost, 
+                socialAccount: $socialAccount, 
+                uploadUrl: $message->uploadedLinkedinMediaId->uploadUrl,
+                localPath: $localPath
+            );
 
             $mediaPost->markAsUploaded();
             $this->mediaPostRepository->save($mediaPost);

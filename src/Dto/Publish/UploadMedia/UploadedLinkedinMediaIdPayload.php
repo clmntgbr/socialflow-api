@@ -4,7 +4,7 @@ namespace App\Dto\Publish\UploadMedia;
 
 use App\Entity\SocialAccount\LinkedinSocialAccount;
 
-final class InitializeUploadLinkedinMediaPayload implements \JsonSerializable
+final class UploadedLinkedinMediaIdPayload implements \JsonSerializable
 {
     public function __construct(
         public LinkedinSocialAccount $linkedinSocialAccount,

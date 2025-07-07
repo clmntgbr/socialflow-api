@@ -5,7 +5,7 @@ namespace App\Dto\Publish\UploadMedia;
 use Symfony\Component\Serializer\Attribute\SerializedPath;
 use Symfony\Component\Validator\Constraints as Assert;
 
-class InitializeUploadLinkedinMedia
+class UploadedLinkedinMediaId implements UploadedMediaIdInterface
 {
     #[Assert\Type('int')]
     #[Assert\NotBlank()]

@@ -8,12 +8,16 @@ use App\Application\Command\UploadTwitterMediaPost;
 use App\Dto\Publish\CreatePost\CreateTwitterPostPayload;
 use App\Dto\Publish\PublishedPost\PublishedPostInterface;
 use App\Dto\Publish\PublishedPost\PublishedTwitterPost;
+use App\Dto\Publish\UploadMedia\UploadedMediaIdInterface;
 use App\Dto\Publish\UploadMedia\UploadedMediaInterface;
 use App\Dto\Publish\UploadMedia\UploadedTwitterMedia;
 use App\Dto\Publish\UploadMedia\UploadedTwitterMediaId;
+use App\Entity\Post\MediaPost;
 use App\Entity\Post\Post;
 use App\Entity\Post\TwitterPost;
+use App\Entity\SocialAccount\SocialAccount;
 use App\Entity\SocialAccount\TwitterSocialAccount;
+use App\Exception\MethodNotImplementedException;
 use App\Exception\PublishException;
 use App\Repository\Post\PostRepository;
 use Symfony\Component\HttpFoundation\Response;
@@ -136,7 +140,21 @@ class TwitterPublishService implements PublishServiceInterface
         return $uploadedMedia;
     }
 
-    public function uploadMedia(
+    /** 
+     * @param TwitterSocialAccount $socialAccount
+     * 
+     * @return UploadedTwitterMediaId
+     */
+    public function upload(MediaPost $mediaPost, ?string $uploadUrl, SocialAccount $socialAccount, string $localPath): UploadedMediaIdInterface
+    {
+        return match (true) {
+            in_array($mediaPost->getMimeType(), self::IMAGE_MIME_TYPES) => $this->uploadMedia($socialAccount, $localPath),
+            in_array($mediaPost->getMimeType(), self::VIDEO_MIME_TYPES) => $this->uploadVideo($socialAccount, $localPath),
+            default => throw new PublishException('Failed to upload media to Twitter: Undefined mimetype'),
+        };
+    }
+
+    private function uploadMedia(
         TwitterSocialAccount $socialAccount,
         string $localPath,
     ): UploadedTwitterMediaId {
@@ -147,7 +165,7 @@ class TwitterPublishService implements PublishServiceInterface
             $response = $twitterOAuth->upload('media/upload', ['media' => $localPath], ['chunkedUpload' => true]);
 
             if (!isset($response->media_id_string) && !isset($response->media_id_string)) {
-                throw new PublishException('Failed to upload media to Twutter');
+                throw new PublishException('Failed to upload media to Twitter');
             }
 
             return $this->serializer->deserialize(json_encode($response), UploadedTwitterMediaId::class, 'json');
@@ -160,5 +178,12 @@ class TwitterPublishService implements PublishServiceInterface
 
             throw new PublishException(message: 'Failed to upload media to Twitter: '.$exception->getMessage(), code: Response::HTTP_NOT_FOUND, previous: $exception);
         }
+    }
+
+    private function uploadVideo(
+        TwitterSocialAccount $socialAccount,
+        string $localPath,
+    ): UploadedTwitterMediaId {
+        throw new MethodNotImplementedException(__METHOD__);
     }
 }

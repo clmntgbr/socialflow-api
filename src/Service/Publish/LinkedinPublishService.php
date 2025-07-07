@@ -8,14 +8,18 @@ use App\Denormalizer\Denormalizer;
 use App\Dto\Publish\CreatePost\CreateLinkedinPostPayload;
 use App\Dto\Publish\PublishedPost\PublishedLinkedinPost;
 use App\Dto\Publish\PublishedPost\PublishedPostInterface;
-use App\Dto\Publish\UploadMedia\InitializeUploadLinkedinMedia;
-use App\Dto\Publish\UploadMedia\InitializeUploadLinkedinMediaPayload;
+use App\Dto\Publish\UploadMedia\UploadedLinkedinMediaId;
+use App\Dto\Publish\UploadMedia\UploadedLinkedinMediaIdPayload;
 use App\Dto\Publish\UploadMedia\UploadedLinkedinMedia;
+use App\Dto\Publish\UploadMedia\UploadedMediaIdInterface;
 use App\Dto\Publish\UploadMedia\UploadedMediaInterface;
 use App\Entity\Post\LinkedinPost;
+use App\Entity\Post\MediaPost;
 use App\Entity\Post\Post;
 use App\Entity\SocialAccount\LinkedinSocialAccount;
+use App\Entity\SocialAccount\SocialAccount;
 use App\Exception\AuthenticationException;
+use App\Exception\MethodNotImplementedException;
 use App\Exception\PublishException;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Messenger\Bridge\Amqp\Transport\AmqpStamp;
@@ -135,7 +139,7 @@ class LinkedinPublishService implements PublishServiceInterface
             try {
                 $this->messageBus->dispatch(new UploadLinkedinMediaPost(
                     mediaId: $media->getId(),
-                    initializeLinkedinUploadMedia: $initializeUploadMedia,
+                    uploadedLinkedinMediaId: $initializeUploadMedia,
                 ));
             } catch (\Exception $exception) {
                 throw new PublishException(message: 'Failed to process Linkedin media batch upload: '.$exception->getMessage(), code: Response::HTTP_BAD_REQUEST, previous: $exception);
@@ -147,9 +151,9 @@ class LinkedinPublishService implements PublishServiceInterface
         return $uploadedMedia;
     }
 
-    private function initializeUploadMedia(LinkedinSocialAccount $socialAccount): InitializeUploadLinkedinMedia
+    private function initializeUploadMedia(LinkedinSocialAccount $socialAccount): UploadedLinkedinMediaId
     {
-        $payload = new InitializeUploadLinkedinMediaPayload(
+        $payload = new UploadedLinkedinMediaIdPayload(
             linkedinSocialAccount: $socialAccount,
         );
 
@@ -173,7 +177,7 @@ class LinkedinPublishService implements PublishServiceInterface
                 throw new PublishException('Failed to initialize Linkedin media upload: API returned status code '.$response->getStatusCode(), $response->getStatusCode());
             }
 
-            return $this->denormalizer->denormalize($response->toArray(), InitializeUploadLinkedinMedia::class);
+            return $this->denormalizer->denormalize($response->toArray(), UploadedLinkedinMediaId::class);
         } catch (\Exception $exception) {
             if (in_array($exception->getCode(), [Response::HTTP_UNAUTHORIZED, Response::HTTP_FORBIDDEN])) {
                 $this->messageBus->dispatch(new ExpireSocialAccount(id: $socialAccount->getId()), [
@@ -185,13 +189,25 @@ class LinkedinPublishService implements PublishServiceInterface
         }
     }
 
-    public function uploadMedia(
+    /**
+     * @param LinkedinSocialAccount $socialAccount
+     */
+    public function upload(MediaPost $mediaPost, ?string $uploadUrl, SocialAccount $socialAccount, string $localPath): UploadedMediaIdInterface
+    {
+        return match (true) {
+            in_array($mediaPost->getMimeType(), self::IMAGE_MIME_TYPES) => $this->uploadMedia($socialAccount, $uploadUrl, $localPath),
+            in_array($mediaPost->getMimeType(), self::VIDEO_MIME_TYPES) => $this->uploadVideo($socialAccount, $uploadUrl, $localPath),
+            default => throw new PublishException('Failed to upload media to Linkedin: Undefined mimetype'),
+        };
+    }
+
+    private function uploadMedia(
         LinkedinSocialAccount $socialAccount,
-        InitializeUploadLinkedinMedia $initializeLinkedinUploadMedia,
+        string $uploadUrl,
         string $localPath,
-    ): void {
+    ): UploadedLinkedinMediaId {
         try {
-            $response = $this->httpClient->request('PUT', $initializeLinkedinUploadMedia->uploadUrl, [
+            $response = $this->httpClient->request('PUT', $uploadUrl, [
                 'headers' => [
                     'authorization' => sprintf('Bearer %s', $socialAccount->getToken()),
                     'linkedin-version' => '202411',
@@ -208,6 +224,8 @@ class LinkedinPublishService implements PublishServiceInterface
             if (Response::HTTP_CREATED !== $response->getStatusCode()) {
                 throw new PublishException('Failed to upload media to Linkedin: API returned status code '.$response->getStatusCode(), $response->getStatusCode());
             }
+
+            return new UploadedLinkedinMediaId();
         } catch (\Exception $exception) {
             if (in_array($exception->getCode(), [Response::HTTP_UNAUTHORIZED, Response::HTTP_FORBIDDEN])) {
                 $this->messageBus->dispatch(new ExpireSocialAccount(id: $socialAccount->getId()), [
@@ -217,5 +235,13 @@ class LinkedinPublishService implements PublishServiceInterface
 
             throw new PublishException(message: 'Failed to upload media to Linkedin: '.$exception->getMessage(), code: Response::HTTP_NOT_FOUND, previous: $exception);
         }
+    }
+
+    private function uploadVideo(
+       LinkedinSocialAccount $socialAccount,
+        string $uploadUrl,
+        string $localPath,
+    ): void {
+        throw new MethodNotImplementedException(__METHOD__);
     }
 }

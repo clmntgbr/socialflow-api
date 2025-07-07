@@ -46,7 +46,12 @@ final class UploadTwitterMediaPostHandler
 
             $localPath = $this->s3Service->download($mediaPost);
 
-            $mediaId = $service->uploadMedia($socialAccount, $localPath);
+            $mediaId = $service->upload(
+                mediaPost: $mediaPost, 
+                socialAccount: $socialAccount, 
+                uploadUrl: null,
+                localPath: $localPath
+            );
 
             $mediaPost->markAsUploaded();
             $this->mediaPostRepository->save($mediaPost);

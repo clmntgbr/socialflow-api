@@ -3,9 +3,13 @@
 namespace App\Service\Publish;
 
 use App\Dto\Publish\PublishedPost\PublishedPostInterface;
+use App\Dto\Publish\UploadMedia\UploadedMediaIdInterface;
 use App\Dto\Publish\UploadMedia\UploadedMediaInterface;
+use App\Entity\Post\MediaPost;
 use App\Entity\Post\Post;
 use App\Entity\Post\YoutubePost;
+use App\Entity\SocialAccount\SocialAccount;
+use App\Entity\SocialAccount\YoutubeSocialAccount;
 use App\Exception\MethodNotImplementedException;
 
 class YoutubePublishService implements PublishServiceInterface
@@ -30,6 +34,14 @@ class YoutubePublishService implements PublishServiceInterface
      * @param YoutubePost $post
      */
     public function processMediaBatchUpload(Post $post): UploadedMediaInterface
+    {
+        throw new MethodNotImplementedException(__METHOD__);
+    }
+
+    /** 
+     * @param YoutubeSocialAccount $socialAccount
+     */
+    public function upload(MediaPost $mediaPost, ?string $uploadUrl, SocialAccount $socialAccount, string $localPath): UploadedMediaIdInterface
     {
         throw new MethodNotImplementedException(__METHOD__);
     }
