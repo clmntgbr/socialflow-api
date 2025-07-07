@@ -8,7 +8,6 @@ use App\Entity\SocialAccount\SocialAccount;
 final class CreateTwitterPostPayload implements \JsonSerializable
 {
     public function __construct(
-        private SocialAccount $socialAccount,
         private TwitterPost $post,
         private ?TwitterPost $previousPost,
     ) {

@@ -4,6 +4,7 @@ namespace App\Application\CommandHandler;
 
 use App\Application\Command\UploadLinkedinMediaPost;
 use App\Entity\Post\MediaPost;
+use App\Entity\SocialAccount\LinkedinSocialAccount;
 use App\Exception\PublishException;
 use App\Repository\Post\MediaPostRepository;
 use App\Service\Publish\LinkedinPublishService;
@@ -18,7 +19,6 @@ final class UploadLinkedinMediaPostHandler
 {
     public function __construct(
         private MediaPostRepository $mediaPostRepository,
-        private readonly UploadHandler $uploadHandler,
         private readonly S3Service $s3Service,
         private PublishServiceFactory $publishServiceFactory,
     ) {
@@ -33,6 +33,7 @@ final class UploadLinkedinMediaPostHandler
             throw new \Exception(sprintf('MediaPost does not exist with id [%s]', (string) $message->mediaId));
         }
 
+        /** @var LinkedinSocialAccount $socialAccount */
         $socialAccount = $mediaPost->getPost()->getCluster()->getSocialAccount();
 
         try {

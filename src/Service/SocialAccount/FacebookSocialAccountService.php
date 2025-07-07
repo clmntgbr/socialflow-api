@@ -12,14 +12,12 @@ use App\Dto\Token\AccessToken\AbstractAccessToken;
 use App\Dto\Token\AccessToken\FacebookAccessToken;
 use App\Dto\Token\AccessTokenParameters\AbstractAccessTokenParameters;
 use App\Dto\Token\AccessTokenParameters\FacebookAccessTokenParameters;
-use App\Dto\Token\FacebookToken;
 use App\Entity\User;
 use App\Exception\MethodNotImplementedException;
 use App\Exception\SocialAccountException;
 use App\Repository\UserRepository;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\Messenger\MessageBusInterface;
-use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Uid\Uuid;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
@@ -34,7 +32,6 @@ class FacebookSocialAccountService implements SocialAccountServiceInterface
     public function __construct(
         private UserRepository $userRepository,
         private HttpClientInterface $httpClient,
-        private SerializerInterface $serializer,
         private Denormalizer $denormalizer,
         private MessageBusInterface $bus,
         private string $apiUrl,
@@ -91,24 +88,12 @@ class FacebookSocialAccountService implements SocialAccountServiceInterface
 
         try {
             $params = new FacebookAccessTokenParameters($getSocialAccountCallback->code);
+
             $accessToken = $this->getAccessToken($params);
-
-            if (null === $accessToken) {
-                throw new SocialAccountException('Could not retrieve access token from Facebook API: the API did not return a valid token.');
-            }
-
             $accounts = $this->getAccounts($accessToken);
-
-            if (empty($accounts)) {
-                throw new SocialAccountException('Could not retrieve Facebook accounts: the API returned an empty list.');
-            }
 
             foreach ($accounts->facebookAccounts as $facebookAccount) {
                 $longAccessToken = $this->getLongAccessToken($facebookAccount->token);
-
-                if (null === $longAccessToken) {
-                    continue;
-                }
 
                 $this->bus->dispatch(new CreateOrUpdateFacebookAccount(
                     organizationId: $user->getActiveOrganization()->getId(),
@@ -213,7 +198,7 @@ class FacebookSocialAccountService implements SocialAccountServiceInterface
     }
 
     /**
-     * @param FacebookToken $accessToken
+     * @param FacebookAccessToken $accessToken
      *
      * @return FacebookGetAccounts
      */

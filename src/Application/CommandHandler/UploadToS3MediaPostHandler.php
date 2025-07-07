@@ -23,7 +23,6 @@ final class UploadToS3MediaPostHandler
         private readonly UploadHandler $uploadHandler,
         private readonly S3Service $s3Service,
         private readonly MessageBusInterface $messageBus,
-        private FilesystemOperator $awsStorage,
     ) {
     }
 

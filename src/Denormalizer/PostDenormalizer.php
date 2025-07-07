@@ -9,7 +9,6 @@ class PostDenormalizer
 {
     public function __construct(
         private DenormalizerInterface $denormalizer,
-        private ValidatorInterface $validator,
     ) {
     }
 

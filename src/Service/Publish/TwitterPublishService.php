@@ -25,8 +25,6 @@ class TwitterPublishService implements PublishServiceInterface
         private PostRepository $postRepository,
         private MessageBusInterface $messageBus,
         private SerializerInterface $serializer,
-        private string $twitterClientId,
-        private string $twitterClientSecret,
         private readonly string $twitterApiKey,
         private readonly string $twitterApiSecret,
     ) {
@@ -40,6 +38,7 @@ class TwitterPublishService implements PublishServiceInterface
         /** @var TwitterSocialAccount $socialAccount */
         $socialAccount = $post->getCluster()->getSocialAccount();
 
+        /** @var TwitterPost $previousPost */
         $previousPost = $this->postRepository->getPreviousPost($post);
 
         $payload = new CreateTwitterPostPayload(
@@ -50,7 +49,7 @@ class TwitterPublishService implements PublishServiceInterface
 
         try {
             $twitterOAuth = new TwitterOAuth($this->twitterApiKey, $this->twitterApiSecret, $socialAccount->getToken(), $socialAccount->getTokenSecret());
-            $twitterOAuth->setApiVersion(2);
+            $twitterOAuth->setApiVersion('2');
 
             $response = $twitterOAuth->post('tweets', $payload->jsonSerialize(), ['jsonPayload' => true]);
 
@@ -85,7 +84,7 @@ class TwitterPublishService implements PublishServiceInterface
 
         try {
             $twitterOAuth = new TwitterOAuth($this->twitterApiKey, $this->twitterApiSecret, $socialAccount->getToken(), $socialAccount->getTokenSecret());
-            $twitterOAuth->setApiVersion(2);
+            $twitterOAuth->setApiVersion('2');
 
             $response = $twitterOAuth->delete('tweets/'.$post->getPostId());
 

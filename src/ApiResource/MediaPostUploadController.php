@@ -21,7 +21,6 @@ use Vich\UploaderBundle\Handler\UploadHandler;
 class MediaPostUploadController extends AbstractController
 {
     public function __construct(
-        private readonly EntityManagerInterface $em,
         private readonly UploadHandler $uploadHandler,
         private readonly MediaPostRepository $mediaPostRepository,
         private readonly SerializerInterface $serializer,

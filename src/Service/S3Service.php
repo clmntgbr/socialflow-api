@@ -5,14 +5,12 @@ namespace App\Service;
 use App\Entity\AbstractMedia;
 use App\Exception\UploadMediaException;
 use League\Flysystem\FilesystemOperator;
-use Symfony\Component\Messenger\MessageBusInterface;
 use Vich\UploaderBundle\Storage\StorageInterface;
 
 class S3Service
 {
     public function __construct(
         private FilesystemOperator $awsStorage,
-        private MessageBusInterface $messageBus,
         private StorageInterface $vichStorage,
         private string $projectDir,
     ) {
@@ -54,9 +52,6 @@ class S3Service
         $localPath = $this->projectDir.'/public/media/'.$media->getName();
 
         $stream = $this->awsStorage->readStream($media->getName());
-        if (false === $stream) {
-            throw new UploadMediaException('Download failed: could not open remote file stream from S3.');
-        }
 
         $localStream = fopen($localPath, 'w');
         if (false === $localStream) {

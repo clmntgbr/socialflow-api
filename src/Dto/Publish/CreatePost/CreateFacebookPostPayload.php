@@ -9,7 +9,6 @@ use App\Entity\SocialAccount\SocialAccount;
 final class CreateFacebookPostPayload implements \JsonSerializable
 {
     public function __construct(
-        private SocialAccount $socialAccount,
         private FacebookPost $post,
         private UploadedFacebookMedia $medias,
     ) {

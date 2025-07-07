@@ -15,6 +15,7 @@ use App\Dto\Token\AccessTokenParameters\AbstractAccessTokenParameters;
 use App\Dto\Token\AccessTokenParameters\TwitterAccessTokenParameters;
 use App\Dto\Token\RequestToken\TwitterRequestToken;
 use App\Entity\User;
+use App\Exception\ConnectUrlException;
 use App\Exception\MethodNotImplementedException;
 use App\Exception\SocialAccountException;
 use App\Repository\UserRepository;
@@ -38,8 +39,6 @@ class TwitterSocialAccountService implements SocialAccountServiceInterface
         private MessageBusInterface $bus,
         private string $apiUrl,
         private string $frontUrl,
-        private string $twitterClientId,
-        private string $twitterClientSecret,
         private readonly string $twitterApiKey,
         private readonly string $twitterApiSecret,
         private ?TwitterOAuth $twitterOAuth = null,
@@ -53,10 +52,10 @@ class TwitterSocialAccountService implements SocialAccountServiceInterface
             'state' => Uuid::v4(),
         ]);
 
-        $requestToken = $this->getRequestToken($user->getState());
-
-        if (!$requestToken) {
-            throw new \RuntimeException('Failed to obtain request token from Twitter.');
+        try {
+            $requestToken = $this->getRequestToken($user->getState());
+        } catch (\Exception $exception) {
+            throw new ConnectUrlException(message: $exception->getMessage(), previous: $exception);
         }
 
         $params = [
@@ -119,17 +118,9 @@ class TwitterSocialAccountService implements SocialAccountServiceInterface
                 oauthToken: $getSocialAccountCallback->oauthToken,
                 oauthVerifier: $getSocialAccountCallback->oauthVerifier,
             );
+
             $accessToken = $this->getAccessToken($params);
-
-            if (null === $accessToken) {
-                return new RedirectResponse(sprintf('%s?error=true&message=1', $this->frontUrl));
-            }
-
             $accounts = $this->getAccounts($accessToken);
-
-            if (empty($accounts)) {
-                throw new SocialAccountException('Could not retrieve Twitter accounts: the API returned an empty list.');
-            }
 
             $this->bus->dispatch(new CreateOrUpdateTwitterAccount(
                 organizationId: $user->getActiveOrganization()->getId(),
@@ -146,6 +137,8 @@ class TwitterSocialAccountService implements SocialAccountServiceInterface
 
     /**
      * @param TwitterAccessTokenParameters $params
+     *
+     * @return TwitterAccessToken
      */
     public function getAccessToken(AbstractAccessTokenParameters $params): AbstractAccessToken
     {
@@ -160,6 +153,7 @@ class TwitterSocialAccountService implements SocialAccountServiceInterface
             $response = $this->httpClient->request('POST', $url);
 
             $statusCode = $response->getStatusCode();
+
             if (200 !== $statusCode) {
                 throw new SocialAccountException("Twitter API error: received status code {$statusCode} when requesting access token.", $statusCode);
             }

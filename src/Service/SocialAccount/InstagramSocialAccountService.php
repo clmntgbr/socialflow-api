@@ -8,7 +8,7 @@ use App\Dto\Token\AccessToken\AbstractAccessToken;
 use App\Dto\Token\AccessTokenParameters\AbstractAccessTokenParameters;
 use App\Dto\Token\AccessTokenParameters\InstagramAccessTokenParameters;
 use App\Entity\User;
-use App\Repository\UserRepository;
+use App\Exception\MethodNotImplementedException;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 
 class InstagramSocialAccountService implements SocialAccountServiceInterface
@@ -16,11 +16,8 @@ class InstagramSocialAccountService implements SocialAccountServiceInterface
     public const FACEBOOK_API_URL = 'https://graph.facebook.com';
     public const FACEBOOK_LOGIN_URL = 'https://www.facebook.com/v21.0';
 
-    public function __construct(
-        private UserRepository $userRepository,
-        private string $facebookClientId,
-        private string $facebookClientSecret,
-    ) {
+    public function __construct()
+    {
     }
 
     public function getConnectUrl(User $user): string

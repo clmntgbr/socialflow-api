@@ -5,7 +5,6 @@ namespace App\State;
 use ApiPlatform\Doctrine\Common\State\RemoveProcessor;
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProcessorInterface;
-use App\Denormalizer\PostDenormalizer;
 use App\Entity\Post\Cluster;
 use App\Exception\SocialAccountException;
 use Symfony\Component\HttpFoundation\Response;
@@ -13,7 +12,6 @@ use Symfony\Component\HttpFoundation\Response;
 class DeleteClusterProcessor implements ProcessorInterface
 {
     public function __construct(
-        private readonly PostDenormalizer $denormalizer,
         private readonly RemoveProcessor $removeProcessor,
     ) {
     }

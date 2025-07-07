@@ -2,7 +2,7 @@
 
 namespace App\Serializer;
 
-use App\Entity\ValueObject\SocialAccountStatus;
+use App\Enum\SocialAccountStatus;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 
 class ValueObjectNormalizer implements NormalizerInterface

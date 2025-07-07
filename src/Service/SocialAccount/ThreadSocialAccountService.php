@@ -8,6 +8,7 @@ use App\Dto\Token\AccessToken\AbstractAccessToken;
 use App\Dto\Token\AccessTokenParameters\AbstractAccessTokenParameters;
 use App\Dto\Token\AccessTokenParameters\YoutubeAccessTokenParameters;
 use App\Entity\User;
+use App\Exception\MethodNotImplementedException;
 use App\Repository\UserRepository;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\Uid\Uuid;
@@ -20,9 +21,7 @@ class ThreadSocialAccountService implements SocialAccountServiceInterface
     public function __construct(
         private UserRepository $userRepository,
         private string $threadClientId,
-        private string $threadClientSecret,
         private string $apiUrl,
-        private string $frontUrl,
     ) {
     }
 

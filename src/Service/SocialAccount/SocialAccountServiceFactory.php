@@ -2,6 +2,8 @@
 
 namespace App\Service\SocialAccount;
 
+use App\Exception\ProviderNotSupportedException;
+
 class SocialAccountServiceFactory
 {
     public function __construct(

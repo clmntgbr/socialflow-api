@@ -32,16 +32,9 @@ class LinkedinPublishService implements PublishServiceInterface
     private const LINKEDIN_INITIALIZE_UPLOAD_MEDIA = self::LINKEDIN_API_URL.'/rest/images?action=initializeUpload';
 
     public function __construct(
-        private PostRepository $postRepository,
         private HttpClientInterface $httpClient,
         private MessageBusInterface $messageBus,
-        private readonly UploadHandler $uploadHandler,
-        private S3Service $s3Service,
         private Denormalizer $denormalizer,
-        private string $twitterClientId,
-        private string $twitterClientSecret,
-        private readonly string $twitterApiKey,
-        private readonly string $twitterApiSecret,
     ) {
     }
 
@@ -137,6 +130,7 @@ class LinkedinPublishService implements PublishServiceInterface
     public function processMediaBatchUpload(Post $post): UploadedMediaInterface
     {
         $uploadedMedia = new UploadedLinkedinMedia();
+        /** @var LinkedinSocialAccount $socialAccount */
         $socialAccount = $post->getCluster()->getSocialAccount();
 
         foreach ($post->getMedias() as $media) {

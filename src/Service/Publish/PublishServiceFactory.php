@@ -2,6 +2,8 @@
 
 namespace App\Service\Publish;
 
+use App\Exception\ProviderNotSupportedException;
+
 class PublishServiceFactory
 {
     public function __construct(

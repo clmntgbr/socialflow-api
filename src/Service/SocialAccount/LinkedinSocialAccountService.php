@@ -17,7 +17,6 @@ use App\Exception\SocialAccountException;
 use App\Repository\UserRepository;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\Messenger\MessageBusInterface;
-use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Uid\Uuid;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
@@ -32,7 +31,6 @@ class LinkedinSocialAccountService implements SocialAccountServiceInterface
     public function __construct(
         private UserRepository $userRepository,
         private HttpClientInterface $httpClient,
-        private SerializerInterface $serializer,
         private Denormalizer $denormalizer,
         private MessageBusInterface $bus,
         private string $linkedinClientId,
@@ -81,17 +79,9 @@ class LinkedinSocialAccountService implements SocialAccountServiceInterface
             $params = new LinkedinAccessTokenParameters(
                 code: $getSocialAccountCallback->code,
             );
+
             $accessToken = $this->getAccessToken($params);
-
-            if (null === $accessToken) {
-                throw new SocialAccountException('Could not retrieve access token from Linkedin API: the API did not return a valid token.');
-            }
-
             $accounts = $this->getAccounts($accessToken);
-
-            if (empty($accounts)) {
-                throw new SocialAccountException('Could not retrieve Linkedin accounts: the API returned an empty list.');
-            }
 
             $this->bus->dispatch(new CreateOrUpdateLinkedinAccount(
                 organizationId: $user->getActiveOrganization()->getId(),
@@ -183,7 +173,7 @@ class LinkedinSocialAccountService implements SocialAccountServiceInterface
                 throw new SocialAccountException("Linkedin API error: received status code {$statusCode} when requesting accounts.", $statusCode);
             }
 
-            $accounts = $response->toArray() ?? [];
+            $accounts = $response->toArray() ?: [];
 
             if (empty($accounts)) {
                 throw new SocialAccountException('Linkedin API error: received empty response when requesting accounts.');

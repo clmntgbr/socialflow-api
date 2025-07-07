@@ -11,9 +11,8 @@ use Symfony\Component\Messenger\MessageBusInterface;
 #[AsDoctrineListener(event: Events::preRemove)]
 final class SocialAccountEvent
 {
-    public function __construct(
-        private MessageBusInterface $messageBus,
-    ) {
+    public function __construct() 
+    {
     }
 
     public function preRemove(PreRemoveEventArgs $preRemoveEventArgs): void

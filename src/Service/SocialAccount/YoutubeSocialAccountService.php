@@ -86,17 +86,9 @@ class YoutubeSocialAccountService implements SocialAccountServiceInterface
             $params = new YoutubeAccessTokenParameters(
                 code: $getSocialAccountCallback->code,
             );
+
             $accessToken = $this->getAccessToken($params);
-
-            if (null === $accessToken) {
-                throw new SocialAccountException('Could not retrieve access token from Youtube API: the API did not return a valid token.');
-            }
-
             $accounts = $this->getAccounts($accessToken);
-
-            if (empty($accounts)) {
-                throw new SocialAccountException('Could not retrieve Youtube accounts: the API returned an empty list.');
-            }
 
             foreach ($accounts->youtubeAccounts as $youtubeAccount) {
                 $this->bus->dispatch(new CreateOrUpdateYoutubeAccount(
@@ -111,12 +103,12 @@ class YoutubeSocialAccountService implements SocialAccountServiceInterface
         } catch (\Exception $exception) {
             return new RedirectResponse(sprintf('%s?error=true&message=3', $this->frontUrl));
         }
-
-        return new RedirectResponse('');
     }
 
     /**
      * @param YoutubeAccessTokenParameters $params
+     *
+     * @return YoutubeAccessToken
      */
     public function getAccessToken(AbstractAccessTokenParameters $params): AbstractAccessToken
     {
@@ -186,15 +178,21 @@ class YoutubeSocialAccountService implements SocialAccountServiceInterface
                 throw new SocialAccountException("Youtube API error: received status code {$statusCode} when requesting accounts.", $statusCode);
             }
 
+            /** @var array $accounts */
             $accounts = $response->toArray()['items'] ?? [];
 
             if (empty($accounts)) {
                 throw new SocialAccountException('Youtube API error: received empty response when requesting accounts.');
             }
 
-            return new YoutubeGetAccounts(youtubeAccounts: $this->denormalizer->denormalize($accounts, YoutubeAccount::class.'[]'));
+            return new YoutubeGetAccounts(youtubeAccounts: $this->denormalizer->denormalize($accounts, $this->getYoutubeAccountArrayType()));
         } catch (\Exception $exception) {
             throw new SocialAccountException('Could not retrieve Youtube accounts: an exception occurred during the request.');
         }
+    }
+
+    private function getYoutubeAccountArrayType(): string
+    {
+        return YoutubeAccount::class.'[]';
     }
 }

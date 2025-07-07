@@ -5,6 +5,7 @@ namespace App\Application\CommandHandler;
 use App\Application\Command\UploadFacebookMediaPost;
 use App\Dto\Publish\UploadMedia\UploadedFacebookMediaId;
 use App\Entity\Post\MediaPost;
+use App\Entity\SocialAccount\FacebookSocialAccount;
 use App\Exception\MediaPostNotFoundException;
 use App\Exception\PublishException;
 use App\Repository\Post\MediaPostRepository;
@@ -20,7 +21,6 @@ final class UploadFacebookMediaPostHandler
 {
     public function __construct(
         private MediaPostRepository $mediaPostRepository,
-        private readonly UploadHandler $uploadHandler,
         private readonly S3Service $s3Service,
         private PublishServiceFactory $publishServiceFactory,
     ) {
@@ -35,6 +35,7 @@ final class UploadFacebookMediaPostHandler
             throw new MediaPostNotFoundException((string) $message->mediaId);
         }
 
+        /** @var FacebookSocialAccount $socialAccount */
         $socialAccount = $mediaPost->getPost()->getCluster()->getSocialAccount();
 
         try {
