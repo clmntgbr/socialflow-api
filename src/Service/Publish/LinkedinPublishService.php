@@ -3,14 +3,13 @@
 namespace App\Service\Publish;
 
 use App\Application\Command\ExpireSocialAccount;
-use App\Application\Command\RemoveMediaPost;
 use App\Application\Command\UploadLinkedinMediaPost;
 use App\Denormalizer\Denormalizer;
 use App\Dto\Publish\CreatePost\CreateLinkedinPostPayload;
 use App\Dto\Publish\PublishedPost\PublishedLinkedinPost;
 use App\Dto\Publish\PublishedPost\PublishedPostInterface;
-use App\Dto\Publish\UploadMedia\InitializeLinkedinUploadMedia;
-use App\Dto\Publish\UploadMedia\InitializeLinkedinUploadMediaPayload;
+use App\Dto\Publish\UploadMedia\InitializeUploadLinkedinMedia;
+use App\Dto\Publish\UploadMedia\InitializeUploadLinkedinMediaPayload;
 use App\Dto\Publish\UploadMedia\UploadedLinkedinMedia;
 use App\Dto\Publish\UploadMedia\UploadedMediaInterface;
 use App\Entity\Post\LinkedinPost;
@@ -134,7 +133,7 @@ class LinkedinPublishService implements PublishServiceInterface
      *
      * @return UploadedLinkedinMedia
      */
-    public function uploadMedias(Post $post): UploadedMediaInterface
+    public function processMediaBatchUpload(Post $post): UploadedMediaInterface
     {
         $uploadedMedia = new UploadedLinkedinMedia();
         $socialAccount = $post->getCluster()->getSocialAccount();
@@ -156,9 +155,9 @@ class LinkedinPublishService implements PublishServiceInterface
         return $uploadedMedia;
     }
 
-    private function initializeUploadMedia(LinkedinSocialAccount $socialAccount): InitializeLinkedinUploadMedia
+    private function initializeUploadMedia(LinkedinSocialAccount $socialAccount): InitializeUploadLinkedinMedia
     {
-        $payload = new InitializeLinkedinUploadMediaPayload(
+        $payload = new InitializeUploadLinkedinMediaPayload(
             linkedinSocialAccount: $socialAccount,
         );
 
@@ -182,7 +181,7 @@ class LinkedinPublishService implements PublishServiceInterface
                 throw new PublishException('Upload media error occurred', $response->getStatusCode());
             }
 
-            return $this->denormalizer->denormalize($response->toArray(), InitializeLinkedinUploadMedia::class);
+            return $this->denormalizer->denormalize($response->toArray(), InitializeUploadLinkedinMedia::class);
         } catch (\Exception $exception) {
             if (in_array($exception->getCode(), [Response::HTTP_UNAUTHORIZED, Response::HTTP_FORBIDDEN])) {
                 $this->messageBus->dispatch(new ExpireSocialAccount(id: $socialAccount->getId()), [
@@ -196,7 +195,7 @@ class LinkedinPublishService implements PublishServiceInterface
 
     public function uploadMedia(
         LinkedinSocialAccount $socialAccount,
-        InitializeLinkedinUploadMedia $initializeLinkedinUploadMedia,
+        InitializeUploadLinkedinMedia $initializeLinkedinUploadMedia,
         string $localPath,
     ): void {
         try {

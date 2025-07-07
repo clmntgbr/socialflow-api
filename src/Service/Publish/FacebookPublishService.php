@@ -3,17 +3,22 @@
 namespace App\Service\Publish;
 
 use App\Application\Command\ExpireSocialAccount;
+use App\Application\Command\UploadFacebookMediaPost;
 use App\Denormalizer\Denormalizer;
 use App\Dto\Publish\CreatePost\CreateFacebookPostPayload;
 use App\Dto\Publish\PublishedPost\PublishedFacebookPost;
 use App\Dto\Publish\PublishedPost\PublishedPostInterface;
+use App\Dto\Publish\UploadMedia\UploadedFacebookMedia;
+use App\Dto\Publish\UploadMedia\UploadedFacebookMediaId;
 use App\Dto\Publish\UploadMedia\UploadedMediaInterface;
 use App\Entity\Post\FacebookPost;
 use App\Entity\Post\Post;
+use App\Entity\SocialAccount\FacebookSocialAccount;
 use App\Exception\PublishException;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Messenger\Bridge\Amqp\Transport\AmqpStamp;
 use Symfony\Component\Messenger\MessageBusInterface;
+use Symfony\Component\Messenger\Stamp\HandledStamp;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 class FacebookPublishService implements PublishServiceInterface
@@ -21,6 +26,7 @@ class FacebookPublishService implements PublishServiceInterface
     private const FACEBOOK_API_VERSION = '/v23.0';
     private const FACEBOOK_API_URL = 'https://graph.facebook.com'.self::FACEBOOK_API_VERSION;
     private const FACEBOOK_POST = self::FACEBOOK_API_URL.'/%s/feed';
+    private const FACEBOOK_UPLOAD_MEDIA = self::FACEBOOK_API_URL.'/%s/photos';
 
     public function __construct(
         private HttpClientInterface $httpClient,
@@ -31,6 +37,7 @@ class FacebookPublishService implements PublishServiceInterface
 
     /**
      * @param FacebookPost $post
+     * @param UploadedFacebookMedia $medias
      *
      * @return PublishedFacebookPost
      */
@@ -41,6 +48,7 @@ class FacebookPublishService implements PublishServiceInterface
         $payload = new CreateFacebookPostPayload(
             socialAccount: $socialAccount,
             post: $post,
+            medias: $medias,
         );
 
         $url = sprintf(self::FACEBOOK_POST, $socialAccount->getSocialAccountId());
@@ -101,9 +109,69 @@ class FacebookPublishService implements PublishServiceInterface
 
     /**
      * @param FacebookPost $post
+     *
+     * @return UploadedFacebookMedia
      */
-    public function uploadMedias(Post $post): UploadedMediaInterface
+    public function processMediaBatchUpload(Post $post): UploadedMediaInterface
     {
-        throw new \RuntimeException('Method not implemented.');
+        $uploadedMedia = new UploadedFacebookMedia();
+
+        foreach ($post->getMedias() as $media) {
+            try {
+                /** @var ?UploadedFacebookMediaId $mediaId */
+                $mediaId = $this->messageBus->dispatch(new UploadFacebookMediaPost(
+                    mediaId: $media->getId(),
+                ))->last(HandledStamp::class)?->getResult();
+
+                if (null === $mediaId) {
+                    throw new PublishException(message: 'Failed to upload facebook media', code: Response::HTTP_BAD_REQUEST);
+                }
+
+                $uploadedMedia->addMedia($mediaId);
+            } catch (\Exception $exception) {
+                throw new PublishException(message: $exception->getMessage(), code: Response::HTTP_BAD_REQUEST, previous: $exception);
+            }
+        }
+
+        return $uploadedMedia;
+    }
+
+    public function uploadMedia(
+        FacebookSocialAccount $socialAccount,
+        string $localPath,
+    ): UploadedFacebookMediaId {
+        $url = sprintf(self::FACEBOOK_UPLOAD_MEDIA, $socialAccount->getSocialAccountId());
+
+        try {
+            $response = $this->httpClient->request('POST', $url, [
+                'headers' => [
+                    'Authorization' => 'Bearer '.$socialAccount->getToken(),
+                    'Connection' => 'Keep-Alive',
+                    'ContentType' => 'application/json',
+                ],
+                'body' => [
+                    'source' => fopen($localPath, 'r'),
+                    'published' => false,
+                ],
+            ]);
+
+            if (in_array($response->getStatusCode(), [Response::HTTP_UNAUTHORIZED, Response::HTTP_FORBIDDEN])) {
+                throw new \Exception('Authentication error occurred', $response->status);
+            }
+
+            if (Response::HTTP_OK !== $response->getStatusCode()) {
+                throw new PublishException('Upload media error occurred', $response->getStatusCode());
+            }
+
+            return $this->denormalizer->denormalize($response->toArray(), UploadedFacebookMediaId::class);
+        } catch (\Exception $exception) {
+            if (in_array($exception->getCode(), [Response::HTTP_UNAUTHORIZED, Response::HTTP_FORBIDDEN])) {
+                $this->messageBus->dispatch(new ExpireSocialAccount(id: $socialAccount->getId()), [
+                    new AmqpStamp('async-high'),
+                ]);
+            }
+
+            throw new PublishException(message: $exception->getMessage(), code: Response::HTTP_NOT_FOUND, previous: $exception);
+        }
     }
 }

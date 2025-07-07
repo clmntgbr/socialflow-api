@@ -17,11 +17,6 @@ final class CreateLinkedinPostPayload implements \JsonSerializable
 
     public function jsonSerialize(): array
     {
-        $medias = [];
-        foreach ($this->medias->getMedias() as $media) {
-            $medias[] = ['id' => $media->mediaId, 'altText' => "Description de l'image 1"];
-        }
-
         $payload = [
             'author' => 'urn:li:person:'.$this->socialAccount->getSocialAccountId(),
             'commentary' => $this->post->getContent(),
@@ -35,7 +30,12 @@ final class CreateLinkedinPostPayload implements \JsonSerializable
             'isReshareDisabledByAuthor' => false,
         ];
 
-        if (count($medias) > 0) {
+        $medias = array_map(
+            fn($media) => ['id' => $media->mediaId,],
+            $this->medias->getMedias()
+        );
+
+        if (!empty($medias)) {
             $payload['content'] = $this->buildContentBasedOnMediaCount($medias);
         }
 

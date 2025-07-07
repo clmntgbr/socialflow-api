@@ -41,6 +41,7 @@ framework:
             App\Application\Command\CreateOrganization: sync
             App\Application\Command\DeletePost: sync
             App\Application\Command\UploadLinkedinMediaPost: sync
+            App\Application\Command\UploadFacebookMediaPost: sync
             
             App\Application\Command\RemoveSocialAccount: async-low
             App\Application\Command\ExpireSocialAccount: async-high

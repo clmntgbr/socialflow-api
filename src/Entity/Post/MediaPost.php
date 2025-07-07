@@ -14,7 +14,6 @@ use App\Repository\Post\MediaPostRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Timestampable\Traits\TimestampableEntity;
 use Symfony\Component\Serializer\Attribute\Groups;
-use Symfony\Component\Serializer\Attribute\MaxDepth;
 use Symfony\Component\Uid\Uuid;
 
 #[ORM\Entity(repositoryClass: MediaPostRepository::class)]

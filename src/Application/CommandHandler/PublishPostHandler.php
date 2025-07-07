@@ -4,7 +4,6 @@ namespace App\Application\CommandHandler;
 
 use App\Application\Command\CleanPost;
 use App\Application\Command\PublishPost;
-use App\Application\Command\RemoveMediaPost;
 use App\Application\Command\UpdateClusterStatus;
 use App\Entity\Post\Post;
 use App\Repository\Post\PostRepository;
@@ -53,7 +52,7 @@ final class PublishPostHandler
         try {
             $service = $this->publishServiceFactory->get($socialAccount->getType());
 
-            $medias = $service->uploadMedias($post);
+            $medias = $service->processMediaBatchUpload($post);
             $publishedPost = $service->post($post, $medias);
             $post->setPublished($publishedPost->getId());
 

@@ -109,7 +109,7 @@ class TwitterPublishService implements PublishServiceInterface
     /**
      * @param TwitterPost $post
      */
-    public function uploadMedias(Post $post): UploadedMediaInterface
+    public function processMediaBatchUpload(Post $post): UploadedMediaInterface
     {
         throw new \RuntimeException('Method not implemented.');
     }

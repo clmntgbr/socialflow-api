@@ -12,5 +12,5 @@ interface PublishServiceInterface
 
     public function delete(Post $post): void;
 
-    public function uploadMedias(Post $post): UploadedMediaInterface;
+    public function processMediaBatchUpload(Post $post): UploadedMediaInterface;
 }

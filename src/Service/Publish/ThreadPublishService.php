@@ -28,7 +28,7 @@ class ThreadPublishService implements PublishServiceInterface
     /**
      * @param ThreadPost $post
      */
-    public function uploadMedias(Post $post): UploadedMediaInterface
+    public function processMediaBatchUpload(Post $post): UploadedMediaInterface
     {
         throw new \RuntimeException('Method not implemented.');
     }

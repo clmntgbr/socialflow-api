@@ -3,7 +3,6 @@
 namespace App\Application\CommandHandler;
 
 use App\Application\Command\CleanPost;
-use App\Application\Command\DeleteDraftPost;
 use App\Application\Command\RemoveMediaPost;
 use App\Entity\Post\Post;
 use App\Repository\Post\PostRepository;
