@@ -7,11 +7,6 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 class UploadedLinkedinMediaId implements UploadedMediaIdInterface
 {
-    #[Assert\Type('int')]
-    #[Assert\NotBlank()]
-    #[SerializedPath('[value][uploadUrlExpiresAt]')]
-    public int $uploadUrlExpiresAt;
-
     #[Assert\Type('string')]
     #[Assert\NotBlank()]
     #[SerializedPath('[value][uploadUrl]')]

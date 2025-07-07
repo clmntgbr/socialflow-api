@@ -3,6 +3,7 @@
 namespace App\Application\CommandHandler;
 
 use App\Application\Command\UploadFacebookMediaPost;
+use App\Dto\Publish\Upload\UploadFacebookPayload;
 use App\Dto\Publish\UploadMedia\UploadedFacebookMediaId;
 use App\Entity\Post\MediaPost;
 use App\Entity\SocialAccount\FacebookSocialAccount;
@@ -46,12 +47,13 @@ final class UploadFacebookMediaPostHandler
 
             $localPath = $this->s3Service->download($mediaPost);
 
-            $mediaId = $service->upload(
+            $payload = new UploadFacebookPayload(
                 mediaPost: $mediaPost, 
                 socialAccount: $socialAccount, 
-                uploadUrl: null,
                 localPath: $localPath
             );
+            
+            $mediaId = $service->upload($payload);
 
             $mediaPost->markAsUploaded();
             $this->mediaPostRepository->save($mediaPost);

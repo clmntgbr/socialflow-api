@@ -8,6 +8,8 @@ use App\Denormalizer\Denormalizer;
 use App\Dto\Publish\CreatePost\CreateLinkedinPostPayload;
 use App\Dto\Publish\PublishedPost\PublishedLinkedinPost;
 use App\Dto\Publish\PublishedPost\PublishedPostInterface;
+use App\Dto\Publish\Upload\UploadLinkedinPayload;
+use App\Dto\Publish\Upload\UploadPayloadInterface;
 use App\Dto\Publish\UploadMedia\UploadedLinkedinMediaId;
 use App\Dto\Publish\UploadMedia\UploadedLinkedinMediaIdPayload;
 use App\Dto\Publish\UploadMedia\UploadedLinkedinMedia;
@@ -190,24 +192,24 @@ class LinkedinPublishService implements PublishServiceInterface
     }
 
     /**
-     * @param LinkedinSocialAccount $socialAccount
+     * @param UploadLinkedinPayload $uploadPayload
      */
-    public function upload(MediaPost $mediaPost, ?string $uploadUrl, SocialAccount $socialAccount, string $localPath): UploadedMediaIdInterface
+    public function upload(UploadPayloadInterface $uploadPayload): UploadedMediaIdInterface
     {
         return match (true) {
-            in_array($mediaPost->getMimeType(), self::IMAGE_MIME_TYPES) => $this->uploadMedia($socialAccount, $uploadUrl, $localPath),
-            in_array($mediaPost->getMimeType(), self::VIDEO_MIME_TYPES) => $this->uploadVideo($socialAccount, $uploadUrl, $localPath),
+            in_array($uploadPayload->getMediaPost()->getMimeType(), self::IMAGE_MIME_TYPES) => $this->uploadMedia($uploadPayload->getSocialAccount(), $uploadPayload->getUploadedLinkedinMediaId(), $uploadPayload->getLocalPath()),
+            in_array($uploadPayload->getMediaPost()->getMimeType(), self::VIDEO_MIME_TYPES) => $this->uploadVideo($uploadPayload->getSocialAccount(), $uploadPayload->getUploadedLinkedinMediaId(), $uploadPayload->getLocalPath()),
             default => throw new PublishException('Failed to upload media to Linkedin: Undefined mimetype'),
         };
     }
 
     private function uploadMedia(
         LinkedinSocialAccount $socialAccount,
-        string $uploadUrl,
+        UploadedLinkedinMediaId $uploadedLinkedinMediaId,
         string $localPath,
     ): UploadedLinkedinMediaId {
         try {
-            $response = $this->httpClient->request('PUT', $uploadUrl, [
+            $response = $this->httpClient->request('PUT', $uploadedLinkedinMediaId->uploadUrl, [
                 'headers' => [
                     'authorization' => sprintf('Bearer %s', $socialAccount->getToken()),
                     'linkedin-version' => '202411',
@@ -225,7 +227,7 @@ class LinkedinPublishService implements PublishServiceInterface
                 throw new PublishException('Failed to upload media to Linkedin: API returned status code '.$response->getStatusCode(), $response->getStatusCode());
             }
 
-            return new UploadedLinkedinMediaId();
+            return $uploadedLinkedinMediaId;
         } catch (\Exception $exception) {
             if (in_array($exception->getCode(), [Response::HTTP_UNAUTHORIZED, Response::HTTP_FORBIDDEN])) {
                 $this->messageBus->dispatch(new ExpireSocialAccount(id: $socialAccount->getId()), [
@@ -238,8 +240,8 @@ class LinkedinPublishService implements PublishServiceInterface
     }
 
     private function uploadVideo(
-       LinkedinSocialAccount $socialAccount,
-        string $uploadUrl,
+        LinkedinSocialAccount $socialAccount,
+        UploadedLinkedinMediaId $uploadedLinkedinMediaId,
         string $localPath,
     ): void {
         throw new MethodNotImplementedException(__METHOD__);

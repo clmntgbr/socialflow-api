@@ -8,6 +8,8 @@ use App\Denormalizer\Denormalizer;
 use App\Dto\Publish\CreatePost\CreateFacebookPostPayload;
 use App\Dto\Publish\PublishedPost\PublishedFacebookPost;
 use App\Dto\Publish\PublishedPost\PublishedPostInterface;
+use App\Dto\Publish\Upload\uploadPayload;
+use App\Dto\Publish\Upload\UploadPayloadInterface;
 use App\Dto\Publish\UploadMedia\UploadedFacebookMedia;
 use App\Dto\Publish\UploadMedia\UploadedFacebookMediaId;
 use App\Dto\Publish\UploadMedia\UploadedMediaIdInterface;
@@ -141,15 +143,15 @@ class FacebookPublishService implements PublishServiceInterface
     }
 
     /**
-     * @param FacebookSocialAccount $socialAccount
+     * @param uploadPayload $uploadPayload
      * 
      * @return UploadedFacebookMediaId
      */
-    public function upload(MediaPost $mediaPost, ?string $uploadUrl, SocialAccount $socialAccount, string $localPath): UploadedMediaIdInterface
+    public function upload(UploadPayloadInterface $uploadPayload): UploadedMediaIdInterface
     {
         return match (true) {
-            in_array($mediaPost->getMimeType(), self::IMAGE_MIME_TYPES) => $this->uploadMedia($socialAccount, $localPath),
-            in_array($mediaPost->getMimeType(), self::VIDEO_MIME_TYPES) => $this->uploadVideo($socialAccount, $localPath),
+            in_array($uploadPayload->getMediaPost()->getMimeType(), self::IMAGE_MIME_TYPES) => $this->uploadMedia($uploadPayload->getSocialAccount(), $uploadPayload->getLocalPath()),
+            in_array($uploadPayload->getMediaPost()->getMimeType(), self::VIDEO_MIME_TYPES) => $this->uploadVideo($uploadPayload->getSocialAccount(), $uploadPayload->getLocalPath()),
             default => throw new PublishException('Failed to upload media to Facebook: Undefined mimetype'),
         };
     }

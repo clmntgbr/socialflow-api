@@ -3,6 +3,7 @@
 namespace App\Service\Publish;
 
 use App\Dto\Publish\PublishedPost\PublishedPostInterface;
+use App\Dto\Publish\Upload\UploadPayloadInterface;
 use App\Dto\Publish\UploadMedia\UploadedMediaIdInterface;
 use App\Dto\Publish\UploadMedia\UploadedMediaInterface;
 use App\Entity\Post\MediaPost;
@@ -20,5 +21,5 @@ interface PublishServiceInterface
 
     public function processMediaBatchUpload(Post $post): UploadedMediaInterface;
 
-    public function upload(MediaPost $mediaPost, ?string $uploadUrl, SocialAccount $socialAccount, string $localPath): UploadedMediaIdInterface;
+    public function upload(UploadPayloadInterface $uploadPayloadInterface): UploadedMediaIdInterface;
 }

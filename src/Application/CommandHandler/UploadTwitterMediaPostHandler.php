@@ -3,6 +3,7 @@
 namespace App\Application\CommandHandler;
 
 use App\Application\Command\UploadTwitterMediaPost;
+use App\Dto\Publish\Upload\UploadTwitterPayload;
 use App\Dto\Publish\UploadMedia\UploadedTwitterMediaId;
 use App\Entity\Post\MediaPost;
 use App\Entity\SocialAccount\TwitterSocialAccount;
@@ -46,12 +47,13 @@ final class UploadTwitterMediaPostHandler
 
             $localPath = $this->s3Service->download($mediaPost);
 
-            $mediaId = $service->upload(
+           $payload = new UploadTwitterPayload(
                 mediaPost: $mediaPost, 
                 socialAccount: $socialAccount, 
-                uploadUrl: null,
                 localPath: $localPath
             );
+            
+            $mediaId = $service->upload($payload);
 
             $mediaPost->markAsUploaded();
             $this->mediaPostRepository->save($mediaPost);

@@ -8,6 +8,8 @@ use App\Application\Command\UploadTwitterMediaPost;
 use App\Dto\Publish\CreatePost\CreateTwitterPostPayload;
 use App\Dto\Publish\PublishedPost\PublishedPostInterface;
 use App\Dto\Publish\PublishedPost\PublishedTwitterPost;
+use App\Dto\Publish\Upload\UploadPayloadInterface;
+use App\Dto\Publish\Upload\UploadTwitterPayload;
 use App\Dto\Publish\UploadMedia\UploadedMediaIdInterface;
 use App\Dto\Publish\UploadMedia\UploadedMediaInterface;
 use App\Dto\Publish\UploadMedia\UploadedTwitterMedia;
@@ -141,15 +143,15 @@ class TwitterPublishService implements PublishServiceInterface
     }
 
     /** 
-     * @param TwitterSocialAccount $socialAccount
+     * @param UploadTwitterPayload $uploadPayload
      * 
      * @return UploadedTwitterMediaId
      */
-    public function upload(MediaPost $mediaPost, ?string $uploadUrl, SocialAccount $socialAccount, string $localPath): UploadedMediaIdInterface
+    public function upload(UploadPayloadInterface $uploadPayload): UploadedMediaIdInterface
     {
         return match (true) {
-            in_array($mediaPost->getMimeType(), self::IMAGE_MIME_TYPES) => $this->uploadMedia($socialAccount, $localPath),
-            in_array($mediaPost->getMimeType(), self::VIDEO_MIME_TYPES) => $this->uploadVideo($socialAccount, $localPath),
+            in_array($uploadPayload->getMediaPost()->getMimeType(), self::IMAGE_MIME_TYPES) => $this->uploadMedia($uploadPayload->getSocialAccount(), $uploadPayload->getLocalPath()),
+            in_array($uploadPayload->getMediaPost()->getMimeType(), self::VIDEO_MIME_TYPES) => $this->uploadVideo($uploadPayload->getSocialAccount(), $uploadPayload->getLocalPath()),
             default => throw new PublishException('Failed to upload media to Twitter: Undefined mimetype'),
         };
     }

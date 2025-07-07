@@ -3,6 +3,7 @@
 namespace App\Application\CommandHandler;
 
 use App\Application\Command\UploadLinkedinMediaPost;
+use App\Dto\Publish\Upload\UploadLinkedinPayload;
 use App\Entity\Post\MediaPost;
 use App\Entity\SocialAccount\LinkedinSocialAccount;
 use App\Exception\PublishException;
@@ -43,12 +44,15 @@ final class UploadLinkedinMediaPostHandler
             $service = $this->publishServiceFactory->get($socialAccount->getType());
 
             $localPath = $this->s3Service->download($mediaPost);
-            $service->upload(
+
+            $payload = new UploadLinkedinPayload(
                 mediaPost: $mediaPost, 
                 socialAccount: $socialAccount, 
-                uploadUrl: $message->uploadedLinkedinMediaId->uploadUrl,
+                uploadedLinkedinMediaId: $message->uploadedLinkedinMediaId,
                 localPath: $localPath
             );
+            
+            $service->upload($payload);
 
             $mediaPost->markAsUploaded();
             $this->mediaPostRepository->save($mediaPost);
