@@ -3,7 +3,6 @@
 namespace App\Dto\Publish\CreatePost;
 
 use App\Entity\Post\TwitterPost;
-use App\Entity\SocialAccount\SocialAccount;
 
 final class CreateTwitterPostPayload implements \JsonSerializable
 {

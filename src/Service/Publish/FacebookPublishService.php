@@ -47,7 +47,6 @@ class FacebookPublishService implements PublishServiceInterface
         $socialAccount = $post->getCluster()->getSocialAccount();
 
         $payload = new CreateFacebookPostPayload(
-            socialAccount: $socialAccount,
             post: $post,
             medias: $medias,
         );

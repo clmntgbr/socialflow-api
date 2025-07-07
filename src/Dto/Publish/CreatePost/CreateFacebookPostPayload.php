@@ -4,7 +4,6 @@ namespace App\Dto\Publish\CreatePost;
 
 use App\Dto\Publish\UploadMedia\UploadedFacebookMedia;
 use App\Entity\Post\FacebookPost;
-use App\Entity\SocialAccount\SocialAccount;
 
 final class CreateFacebookPostPayload implements \JsonSerializable
 {

@@ -8,7 +8,6 @@ use App\Entity\Post\MediaPost;
 use App\Exception\MediaPostNotFoundException;
 use App\Repository\Post\MediaPostRepository;
 use App\Service\S3Service;
-use League\Flysystem\FilesystemOperator;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use Symfony\Component\Messenger\Bridge\Amqp\Transport\AmqpStamp;
 use Symfony\Component\Messenger\MessageBusInterface;

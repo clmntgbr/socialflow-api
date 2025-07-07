@@ -12,7 +12,6 @@ use App\Service\Publish\PublishServiceFactory;
 use App\Service\S3Service;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
-use Vich\UploaderBundle\Handler\UploadHandler;
 
 #[AsMessageHandler]
 final class UploadLinkedinMediaPostHandler

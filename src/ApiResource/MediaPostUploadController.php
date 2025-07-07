@@ -5,7 +5,6 @@ namespace App\ApiResource;
 use App\Application\Command\UploadToS3MediaPost;
 use App\Entity\Post\MediaPost;
 use App\Repository\Post\MediaPostRepository;
-use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\HttpFoundation\JsonResponse;

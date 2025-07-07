@@ -6,12 +6,11 @@ use App\Entity\SocialAccount\SocialAccount;
 use Doctrine\Bundle\DoctrineBundle\Attribute\AsDoctrineListener;
 use Doctrine\ORM\Event\PreRemoveEventArgs;
 use Doctrine\ORM\Events;
-use Symfony\Component\Messenger\MessageBusInterface;
 
 #[AsDoctrineListener(event: Events::preRemove)]
 final class SocialAccountEvent
 {
-    public function __construct() 
+    public function __construct()
     {
     }
 

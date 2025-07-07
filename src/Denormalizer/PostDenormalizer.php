@@ -3,7 +3,6 @@
 namespace App\Denormalizer;
 
 use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
-use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 class PostDenormalizer
 {

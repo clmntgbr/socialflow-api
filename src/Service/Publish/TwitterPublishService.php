@@ -42,7 +42,6 @@ class TwitterPublishService implements PublishServiceInterface
         $previousPost = $this->postRepository->getPreviousPost($post);
 
         $payload = new CreateTwitterPostPayload(
-            socialAccount: $socialAccount,
             post: $post,
             previousPost: $previousPost,
         );

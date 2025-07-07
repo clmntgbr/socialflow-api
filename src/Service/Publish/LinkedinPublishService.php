@@ -17,13 +17,10 @@ use App\Entity\Post\Post;
 use App\Entity\SocialAccount\LinkedinSocialAccount;
 use App\Exception\AuthenticationException;
 use App\Exception\PublishException;
-use App\Repository\Post\PostRepository;
-use App\Service\S3Service;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Messenger\Bridge\Amqp\Transport\AmqpStamp;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
-use Vich\UploaderBundle\Handler\UploadHandler;
 
 class LinkedinPublishService implements PublishServiceInterface
 {
