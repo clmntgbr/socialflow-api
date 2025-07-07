@@ -3,6 +3,7 @@
 namespace App\Service;
 
 use App\Entity\AbstractMedia;
+use App\Exception\UploadMediaException;
 use League\Flysystem\FilesystemOperator;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Vich\UploaderBundle\Storage\StorageInterface;
@@ -22,13 +23,13 @@ class S3Service
         $localPath = $this->vichStorage->resolvePath($media, 'file');
 
         if (!$localPath || !file_exists($localPath)) {
-            throw new \RuntimeException('Local file not found.');
+            throw new UploadMediaException('Upload failed: local file not found for media.');
         }
 
         $stream = fopen($localPath, 'r');
 
         if (false === $stream) {
-            throw new \RuntimeException('An error occurred during the upload.');
+            throw new UploadMediaException('Upload failed: could not open local file for reading.');
         }
 
         $this->awsStorage->writeStream($media->getName(), $stream, [
@@ -43,18 +44,18 @@ class S3Service
     public function download(AbstractMedia $media): string
     {
         if (null === $media->getName()) {
-            throw new \RuntimeException('File name is null');
+            throw new UploadMediaException('Download failed: media file name is null.');
         }
 
         if (!$this->awsStorage->fileExists($media->getName())) {
-            throw new \RuntimeException('Remote file not found on S3.');
+            throw new UploadMediaException('Download failed: remote file not found on S3.');
         }
 
         $localPath = $this->projectDir.'/public/media/'.$media->getName();
 
         $stream = $this->awsStorage->readStream($media->getName());
         if (false === $stream) {
-            throw new \RuntimeException('An error occurred during the download from S3.');
+            throw new UploadMediaException('Download failed: could not open remote file stream from S3.');
         }
 
         $localStream = fopen($localPath, 'w');
@@ -62,12 +63,12 @@ class S3Service
             if (is_resource($stream)) {
                 fclose($stream);
             }
-            throw new \RuntimeException('An error occurred during local file creation.');
+            throw new UploadMediaException('Download failed: could not create local file for writing.');
         }
 
         try {
             if (false === stream_copy_to_stream($stream, $localStream)) {
-                throw new \RuntimeException('Failed to copy stream from S3 to local file.');
+                throw new UploadMediaException('Download failed: could not copy stream from S3 to local file.');
             }
         } finally {
             if (is_resource($stream)) {

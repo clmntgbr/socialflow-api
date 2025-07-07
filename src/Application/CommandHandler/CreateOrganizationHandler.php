@@ -5,6 +5,7 @@ namespace App\Application\CommandHandler;
 use App\Application\Command\CreateOrganization;
 use App\Entity\Organization;
 use App\Entity\User;
+use App\Exception\UserNotFoundException;
 use App\Repository\UserRepository;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
@@ -22,7 +23,7 @@ final class CreateOrganizationHandler
         $user = $this->userRepository->findOneBy(['id' => (string) $message->userId]);
 
         if (null === $user) {
-            throw new \Exception(sprintf('User does not exist with id [%s]', (string) $message->userId));
+            throw new UserNotFoundException((string) $message->userId);
         }
 
         $organization = (new Organization())

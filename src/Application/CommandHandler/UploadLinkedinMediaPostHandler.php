@@ -42,7 +42,7 @@ final class UploadLinkedinMediaPostHandler
             $localPath = $this->s3Service->download($mediaPost);
             $service->uploadMedia($socialAccount, $message->initializeLinkedinUploadMedia, $localPath);
         } catch (\Exception $exception) {
-            throw new PublishException(message: $exception->getMessage(), code: Response::HTTP_BAD_REQUEST, previous: $exception);
+            throw new PublishException(message: 'Failed to upload Linkedin media: '.$exception->getMessage(), code: Response::HTTP_BAD_REQUEST, previous: $exception);
         }
     }
 }

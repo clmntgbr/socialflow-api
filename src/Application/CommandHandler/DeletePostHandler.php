@@ -28,13 +28,13 @@ final class DeletePostHandler
         ]);
 
         if (null === $post) {
-            $this->logger->warning('Post does not exist.', ['id' => $message->postId]);
+            $this->logger->warning(sprintf('Failed to delete post: post with id [%s] was not found.', (string) $message->postId), ['id' => (string) $message->postId]);
 
             return;
         }
 
         if (null === $post->getPostId()) {
-            $this->logger->warning('Post does not have postId.', ['id' => (string) $post->getId()]);
+            $this->logger->warning(sprintf('Failed to delete post: post with id [%s] does not have a remote postId.', (string) $post->getId()), ['id' => (string) $post->getId()]);
 
             return;
         }
@@ -43,7 +43,7 @@ final class DeletePostHandler
             $publishService = $this->publish->get($post->getType());
             $publishService->delete($post);
         } catch (\Exception $exception) {
-            throw new PublishException(message: $exception->getMessage());
+            throw new PublishException(message: 'Failed to delete post: '.$exception->getMessage());
         }
     }
 }

@@ -27,7 +27,7 @@ final class PublishClusterHandler
         $cluster = $this->clusterRepository->findOneBy(['id' => (string) $message->clusterId]);
 
         if (null === $cluster) {
-            $this->logger->info('Cluster does not exist', ['id' => (string) $message->clusterId]);
+            $this->logger->info(sprintf('Cannot publish cluster: cluster with id [%s] was not found.', (string) $message->clusterId), ['id' => (string) $message->clusterId]);
 
             return;
         }

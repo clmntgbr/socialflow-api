@@ -5,6 +5,7 @@ namespace App\Application\CommandHandler;
 use App\Application\Command\UpdateClusterStatus;
 use App\Entity\Post\Cluster;
 use App\Enum\ClusterStatus;
+use App\Exception\ClusterNotFoundException;
 use App\Repository\Post\ClusterRepository;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
@@ -22,7 +23,7 @@ final class UpdateClusterStatusHandler
         $cluster = $this->clusterRepository->findOneBy(['id' => (string) $message->clusterId]);
 
         if (null === $cluster) {
-            throw new \Exception(sprintf('Cluster does not exist with id [%s]', (string) $message->clusterId));
+            throw new ClusterNotFoundException((string) $message->clusterId);
         }
 
         $cluster = $this->updateStatus($cluster);

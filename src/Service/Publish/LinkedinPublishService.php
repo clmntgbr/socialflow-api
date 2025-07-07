@@ -15,6 +15,7 @@ use App\Dto\Publish\UploadMedia\UploadedMediaInterface;
 use App\Entity\Post\LinkedinPost;
 use App\Entity\Post\Post;
 use App\Entity\SocialAccount\LinkedinSocialAccount;
+use App\Exception\AuthenticationException;
 use App\Exception\PublishException;
 use App\Repository\Post\PostRepository;
 use App\Service\S3Service;
@@ -71,11 +72,11 @@ class LinkedinPublishService implements PublishServiceInterface
             ]);
 
             if (in_array($response->getStatusCode(), [Response::HTTP_UNAUTHORIZED, Response::HTTP_FORBIDDEN])) {
-                throw new \Exception('Authentication error occurred', $response->status);
+                throw new AuthenticationException('Authentication failed: invalid or expired Linkedin token.', null);
             }
 
             if (Response::HTTP_CREATED !== $response->getStatusCode()) {
-                throw new \Exception('Publication error occurred', $response->getStatusCode());
+                throw new PublishException('Failed to publish post to Linkedin: API returned status code '.$response->getStatusCode(), $response->getStatusCode());
             }
 
             return $this->denormalizer->denormalize($response->getHeaders(), PublishedLinkedinPost::class);
@@ -86,7 +87,7 @@ class LinkedinPublishService implements PublishServiceInterface
                 ]);
             }
 
-            throw new PublishException(message: $exception->getMessage(), code: Response::HTTP_NOT_FOUND, previous: $exception);
+            throw new PublishException(message: 'Failed to publish post to Linkedin: '.$exception->getMessage(), code: Response::HTTP_NOT_FOUND, previous: $exception);
         }
     }
 
@@ -111,11 +112,11 @@ class LinkedinPublishService implements PublishServiceInterface
             ]);
 
             if (in_array($response->getStatusCode(), [Response::HTTP_UNAUTHORIZED, Response::HTTP_FORBIDDEN])) {
-                throw new PublishException('Authentication error occurred', $response->status);
+                throw new AuthenticationException('Authentication failed: invalid or expired Linkedin token.', null);
             }
 
             if (Response::HTTP_NO_CONTENT !== $response->getStatusCode()) {
-                throw new PublishException('Publication error occurred', $response->getStatusCode());
+                throw new PublishException('Failed to delete Linkedin post: API returned status code '.$response->getStatusCode(), $response->getStatusCode());
             }
         } catch (\Exception $exception) {
             if (in_array($exception->getCode(), [Response::HTTP_UNAUTHORIZED, Response::HTTP_FORBIDDEN])) {
@@ -124,7 +125,7 @@ class LinkedinPublishService implements PublishServiceInterface
                 ]);
             }
 
-            throw new PublishException(message: $exception->getMessage(), code: Response::HTTP_NOT_FOUND, previous: $exception);
+            throw new PublishException(message: 'Failed to delete Linkedin post: '.$exception->getMessage(), code: Response::HTTP_NOT_FOUND, previous: $exception);
         }
     }
 
@@ -146,7 +147,7 @@ class LinkedinPublishService implements PublishServiceInterface
                     initializeLinkedinUploadMedia: $initializeUploadMedia,
                 ));
             } catch (\Exception $exception) {
-                throw new PublishException(message: $exception->getMessage(), code: Response::HTTP_BAD_REQUEST, previous: $exception);
+                throw new PublishException(message: 'Failed to process Linkedin media batch upload: '.$exception->getMessage(), code: Response::HTTP_BAD_REQUEST, previous: $exception);
             }
 
             $uploadedMedia->addMedia($initializeUploadMedia);
@@ -174,11 +175,11 @@ class LinkedinPublishService implements PublishServiceInterface
             ]);
 
             if (in_array($response->getStatusCode(), [Response::HTTP_UNAUTHORIZED, Response::HTTP_FORBIDDEN])) {
-                throw new \Exception('Authentication error occurred', $response->status);
+                throw new AuthenticationException('Authentication failed: invalid or expired Linkedin token.', null);
             }
 
             if (Response::HTTP_OK !== $response->getStatusCode()) {
-                throw new PublishException('Upload media error occurred', $response->getStatusCode());
+                throw new PublishException('Failed to initialize Linkedin media upload: API returned status code '.$response->getStatusCode(), $response->getStatusCode());
             }
 
             return $this->denormalizer->denormalize($response->toArray(), InitializeUploadLinkedinMedia::class);
@@ -189,7 +190,7 @@ class LinkedinPublishService implements PublishServiceInterface
                 ]);
             }
 
-            throw new PublishException(message: $exception->getMessage(), code: Response::HTTP_NOT_FOUND, previous: $exception);
+            throw new PublishException(message: 'Failed to initialize Linkedin media upload: '.$exception->getMessage(), code: Response::HTTP_NOT_FOUND, previous: $exception);
         }
     }
 
@@ -210,11 +211,11 @@ class LinkedinPublishService implements PublishServiceInterface
             ]);
 
             if (in_array($response->getStatusCode(), [Response::HTTP_UNAUTHORIZED, Response::HTTP_FORBIDDEN])) {
-                throw new \Exception('Authentication error occurred', $response->status);
+                throw new AuthenticationException('Authentication failed: invalid or expired Linkedin token.', null);
             }
 
             if (Response::HTTP_CREATED !== $response->getStatusCode()) {
-                throw new PublishException('Upload media error occurred', $response->getStatusCode());
+                throw new PublishException('Failed to upload media to Linkedin: API returned status code '.$response->getStatusCode(), $response->getStatusCode());
             }
         } catch (\Exception $exception) {
             if (in_array($exception->getCode(), [Response::HTTP_UNAUTHORIZED, Response::HTTP_FORBIDDEN])) {
@@ -223,7 +224,7 @@ class LinkedinPublishService implements PublishServiceInterface
                 ]);
             }
 
-            throw new PublishException(message: $exception->getMessage(), code: Response::HTTP_NOT_FOUND, previous: $exception);
+            throw new PublishException(message: 'Failed to upload media to Linkedin: '.$exception->getMessage(), code: Response::HTTP_NOT_FOUND, previous: $exception);
         }
     }
 }

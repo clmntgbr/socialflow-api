@@ -11,6 +11,7 @@ use App\Dto\Publish\UploadMedia\UploadedMediaInterface;
 use App\Entity\Post\Post;
 use App\Entity\Post\TwitterPost;
 use App\Entity\SocialAccount\TwitterSocialAccount;
+use App\Exception\MethodNotImplementedException;
 use App\Exception\PublishException;
 use App\Repository\Post\PostRepository;
 use Symfony\Component\HttpFoundation\Response;
@@ -54,12 +55,12 @@ class TwitterPublishService implements PublishServiceInterface
             $response = $twitterOAuth->post('tweets', $payload->jsonSerialize(), ['jsonPayload' => true]);
 
             if (isset($response->status) && in_array($response->status, [Response::HTTP_UNAUTHORIZED, Response::HTTP_FORBIDDEN])) {
-                throw new PublishException('Authentication error occurred', $response->status);
+                throw new PublishException('Failed to authenticate with Twitter API: received status code '.$response->status, $response->status);
             }
 
             if (!isset($response->data) && !isset($response->data->id)) {
-                $error = $response->title ?? 'An error occurred';
-                throw new PublishException("Request failed: $error", Response::HTTP_BAD_REQUEST);
+                $error = $response->title ?? 'Unknown error';
+                throw new PublishException("Failed to publish tweet: $error", Response::HTTP_BAD_REQUEST);
             }
 
             return $this->serializer->deserialize(json_encode($response->data), PublishedTwitterPost::class, 'json');
@@ -70,7 +71,7 @@ class TwitterPublishService implements PublishServiceInterface
                 ]);
             }
 
-            throw new PublishException(message: $exception->getMessage(), code: Response::HTTP_NOT_FOUND, previous: $exception);
+            throw new PublishException(message: 'Failed to publish tweet: '.$exception->getMessage(), code: Response::HTTP_NOT_FOUND, previous: $exception);
         }
     }
 
@@ -89,11 +90,11 @@ class TwitterPublishService implements PublishServiceInterface
             $response = $twitterOAuth->delete('tweets/'.$post->getPostId());
 
             if (isset($response->status) && in_array($response->status, [Response::HTTP_UNAUTHORIZED, Response::HTTP_FORBIDDEN])) {
-                throw new PublishException('Authentication error occurred', $response->status);
+                throw new PublishException('Failed to authenticate with Twitter API: received status code '.$response->status, $response->status);
             }
 
             if (!isset($response->data->deleted) || !$response->data->deleted) {
-                throw new PublishException('Failed to delete twitter post.');
+                throw new PublishException('Failed to delete Twitter post: the API did not confirm deletion.');
             }
         } catch (\Exception $exception) {
             if (in_array($exception->getCode(), [Response::HTTP_UNAUTHORIZED, Response::HTTP_FORBIDDEN])) {
@@ -102,7 +103,7 @@ class TwitterPublishService implements PublishServiceInterface
                 ]);
             }
 
-            throw new PublishException(message: $exception->getMessage(), code: Response::HTTP_NOT_FOUND, previous: $exception);
+            throw new PublishException(message: 'Failed to delete Twitter post: '.$exception->getMessage(), code: Response::HTTP_NOT_FOUND, previous: $exception);
         }
     }
 
@@ -111,6 +112,6 @@ class TwitterPublishService implements PublishServiceInterface
      */
     public function processMediaBatchUpload(Post $post): UploadedMediaInterface
     {
-        throw new \RuntimeException('Method not implemented.');
+        throw new MethodNotImplementedException(__METHOD__);
     }
 }

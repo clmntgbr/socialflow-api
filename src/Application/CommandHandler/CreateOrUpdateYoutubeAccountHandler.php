@@ -8,6 +8,8 @@ use App\Entity\Organization;
 use App\Entity\SocialAccount\YoutubeSocialAccount;
 use App\Entity\User;
 use App\Enum\SocialAccountStatus;
+use App\Exception\OrganizationNotFoundException;
+use App\Exception\UserNotFoundException;
 use App\Repository\OrganizationRepository;
 use App\Repository\SocialAccount\YoutubeSocialAccountRepository;
 use App\Repository\UserRepository;
@@ -34,14 +36,14 @@ final class CreateOrUpdateYoutubeAccountHandler extends CreateOrUpdateAccountHan
         $user = $this->userRepository->findOneBy(['id' => (string) $message->userId]);
 
         if (null === $user) {
-            throw new \Exception(sprintf('User does not exist with id [%s]', (string) $message->userId));
+            throw new UserNotFoundException((string) $message->userId);
         }
 
         /** @var ?Organization $organization */
         $organization = $this->organizationRepository->findOneBy(['id' => (string) $message->organizationId]);
 
         if (null === $organization) {
-            throw new \Exception(sprintf('Organization does not exist with id [%s]', (string) $message->organizationId));
+            throw new OrganizationNotFoundException((string) $message->organizationId);
         }
 
         /** @var YoutubeSocialAccount $youtubeAccount */

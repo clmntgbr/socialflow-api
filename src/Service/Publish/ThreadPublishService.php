@@ -6,6 +6,7 @@ use App\Dto\Publish\PublishedPost\PublishedPostInterface;
 use App\Dto\Publish\UploadMedia\UploadedMediaInterface;
 use App\Entity\Post\Post;
 use App\Entity\Post\ThreadPost;
+use App\Exception\MethodNotImplementedException;
 
 class ThreadPublishService implements PublishServiceInterface
 {
@@ -14,7 +15,7 @@ class ThreadPublishService implements PublishServiceInterface
      */
     public function post(Post $post, UploadedMediaInterface $medias): PublishedPostInterface
     {
-        throw new \RuntimeException('Method not implemented.');
+        throw new MethodNotImplementedException(__METHOD__);
     }
 
     /**
@@ -22,7 +23,7 @@ class ThreadPublishService implements PublishServiceInterface
      */
     public function delete(Post $post): void
     {
-        throw new \RuntimeException('Method not implemented.');
+        throw new MethodNotImplementedException(__METHOD__);
     }
 
     /**
@@ -30,6 +31,6 @@ class ThreadPublishService implements PublishServiceInterface
      */
     public function processMediaBatchUpload(Post $post): UploadedMediaInterface
     {
-        throw new \RuntimeException('Method not implemented.');
+        throw new MethodNotImplementedException(__METHOD__);
     }
 }

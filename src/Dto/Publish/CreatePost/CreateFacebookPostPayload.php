@@ -23,7 +23,7 @@ final class CreateFacebookPostPayload implements \JsonSerializable
         ];
 
         $medias = array_map(
-            fn($media) => ['media_fbid' => $media->mediaId],
+            fn ($media) => ['media_fbid' => $media->mediaId],
             $this->medias->getMedias()
         );
 

@@ -30,7 +30,7 @@ final class PublishPostHandler
         $post = $this->postRepository->findOneBy(['id' => (string) $message->postId]);
 
         if (null === $post) {
-            $this->logger->info('Post does not exist', ['id' => (string) $message->postId]);
+            $this->logger->info(sprintf('Cannot publish post: post with id [%s] was not found.', (string) $message->postId), ['id' => (string) $message->postId]);
 
             return;
         }
@@ -38,13 +38,13 @@ final class PublishPostHandler
         $socialAccount = $post->getCluster()->getSocialAccount();
 
         if (!$socialAccount->isActive()) {
-            $this->logger->info('This social account cant publish', ['id' => (string) $socialAccount->getId(), 'status' => $socialAccount->getStatus()]);
+            $this->logger->info(sprintf('Cannot publish post: social account with id [%s] is not active (status: %s).', (string) $socialAccount->getId(), $socialAccount->getStatus()), ['id' => (string) $socialAccount->getId(), 'status' => $socialAccount->getStatus()]);
 
             return;
         }
 
         if ($post->isPublished()) {
-            $this->logger->info('This post is already published', ['id' => (string) $post->getId(), 'status' => $post->getStatus()]);
+            $this->logger->info(sprintf('Cannot publish post: post with id [%s] is already published (status: %s).', (string) $post->getId(), $post->getStatus()), ['id' => (string) $post->getId(), 'status' => $post->getStatus()]);
 
             return;
         }
@@ -60,7 +60,7 @@ final class PublishPostHandler
                 new AmqpStamp('async-medium'),
             ]);
         } catch (\Exception $exception) {
-            $this->logger->alert($exception->getMessage(), ['postId' => (string) $post->getId()]);
+            $this->logger->alert(sprintf('Failed to publish post with id [%s]: %s', (string) $post->getId(), $exception->getMessage()), ['postId' => (string) $post->getId()]);
             $post->setFailed();
         }
 

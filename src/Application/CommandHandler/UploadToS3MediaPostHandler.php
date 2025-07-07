@@ -5,6 +5,7 @@ namespace App\Application\CommandHandler;
 use App\Application\Command\RemoveUnusedMediaPost;
 use App\Application\Command\UploadToS3MediaPost;
 use App\Entity\Post\MediaPost;
+use App\Exception\MediaPostNotFoundException;
 use App\Repository\Post\MediaPostRepository;
 use App\Service\S3Service;
 use League\Flysystem\FilesystemOperator;
@@ -32,7 +33,7 @@ final class UploadToS3MediaPostHandler
         $mediaPost = $this->mediaPostRepository->findOneBy(['id' => (string) $message->mediaId]);
 
         if (null === $mediaPost) {
-            throw new \Exception(sprintf('MediaPost does not exist with id [%s]', (string) $message->mediaId));
+            throw new MediaPostNotFoundException((string) $message->mediaId);
         }
 
         $this->s3Service->upload($mediaPost);

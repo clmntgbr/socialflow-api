@@ -26,7 +26,7 @@ final class RemoveSocialAccountHandler
         ]);
 
         if (null === $socialAccount) {
-            $this->logger->warning(sprintf('Social account does not exist with id [%s] and status [%s]', (string) $message->socialAccountId, $message->status->value));
+            $this->logger->warning(sprintf('Failed to remove social account: account with id [%s] and status [%s] was not found.', (string) $message->socialAccountId, $message->status->value), ['id' => (string) $message->socialAccountId, 'status' => $message->status->value]);
 
             return;
         }

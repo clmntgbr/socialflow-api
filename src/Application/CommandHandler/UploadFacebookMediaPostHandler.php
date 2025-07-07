@@ -5,6 +5,7 @@ namespace App\Application\CommandHandler;
 use App\Application\Command\UploadFacebookMediaPost;
 use App\Dto\Publish\UploadMedia\UploadedFacebookMediaId;
 use App\Entity\Post\MediaPost;
+use App\Exception\MediaPostNotFoundException;
 use App\Exception\PublishException;
 use App\Repository\Post\MediaPostRepository;
 use App\Service\Publish\FacebookPublishService;
@@ -31,7 +32,7 @@ final class UploadFacebookMediaPostHandler
         $mediaPost = $this->mediaPostRepository->findOneBy(['id' => (string) $message->mediaId]);
 
         if (null === $mediaPost) {
-            throw new \Exception(sprintf('MediaPost does not exist with id [%s]', (string) $message->mediaId));
+            throw new MediaPostNotFoundException((string) $message->mediaId);
         }
 
         $socialAccount = $mediaPost->getPost()->getCluster()->getSocialAccount();
@@ -44,7 +45,7 @@ final class UploadFacebookMediaPostHandler
 
             return $service->uploadMedia($socialAccount, $localPath);
         } catch (\Exception $exception) {
-            throw new PublishException(message: $exception->getMessage(), code: Response::HTTP_BAD_REQUEST, previous: $exception);
+            throw new PublishException(message: 'Failed to upload Facebook media: '.$exception->getMessage(), code: Response::HTTP_BAD_REQUEST, previous: $exception);
         }
     }
 }

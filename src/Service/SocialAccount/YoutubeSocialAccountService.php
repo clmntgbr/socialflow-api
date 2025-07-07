@@ -13,6 +13,7 @@ use App\Dto\Token\AccessToken\YoutubeAccessToken;
 use App\Dto\Token\AccessTokenParameters\AbstractAccessTokenParameters;
 use App\Dto\Token\AccessTokenParameters\YoutubeAccessTokenParameters;
 use App\Entity\User;
+use App\Exception\MethodNotImplementedException;
 use App\Exception\SocialAccountException;
 use App\Repository\UserRepository;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -88,13 +89,13 @@ class YoutubeSocialAccountService implements SocialAccountServiceInterface
             $accessToken = $this->getAccessToken($params);
 
             if (null === $accessToken) {
-                throw new SocialAccountException('Failed to retrieve access token from Youtube API');
+                throw new SocialAccountException('Could not retrieve access token from Youtube API: the API did not return a valid token.');
             }
 
             $accounts = $this->getAccounts($accessToken);
 
             if (empty($accounts)) {
-                throw new SocialAccountException('Failed to retrieve accounts from Youtube API');
+                throw new SocialAccountException('Could not retrieve Youtube accounts: the API returned an empty list.');
             }
 
             foreach ($accounts->youtubeAccounts as $youtubeAccount) {
@@ -139,28 +140,28 @@ class YoutubeSocialAccountService implements SocialAccountServiceInterface
 
             $statusCode = $response->getStatusCode();
             if (200 !== $statusCode) {
-                throw new SocialAccountException("Youtube API returned status code {$statusCode}", $statusCode);
+                throw new SocialAccountException("Youtube API error: received status code {$statusCode} when requesting access token.", $statusCode);
             }
 
             $content = $response->toArray();
             if (empty($content)) {
-                throw new SocialAccountException('Empty response from Youtube API');
+                throw new SocialAccountException('Youtube API error: received empty response when requesting access token.');
             }
 
             return $this->denormalizer->denormalize($content, YoutubeAccessToken::class);
         } catch (\Exception) {
-            throw new SocialAccountException('Failed to retrieve access token from Youtube API');
+            throw new SocialAccountException('Could not retrieve access token from Youtube API: an exception occurred during the request.');
         }
     }
 
     public function getLongAccessToken(string $token): AbstractAccessToken
     {
-        throw new \RuntimeException('Method not implemented.');
+        throw new MethodNotImplementedException(__METHOD__);
     }
 
     public function getAccessTokenFromRefreshToken(string $token): AbstractAccessToken
     {
-        throw new \RuntimeException('Method not implemented.');
+        throw new MethodNotImplementedException(__METHOD__);
     }
 
     /**
@@ -182,18 +183,18 @@ class YoutubeSocialAccountService implements SocialAccountServiceInterface
 
             $statusCode = $response->getStatusCode();
             if (200 !== $statusCode) {
-                throw new SocialAccountException("Youtube API returned status code {$statusCode}", $statusCode);
+                throw new SocialAccountException("Youtube API error: received status code {$statusCode} when requesting accounts.", $statusCode);
             }
 
             $accounts = $response->toArray()['items'] ?? [];
 
             if (empty($accounts)) {
-                throw new SocialAccountException('Empty response from Youtube API');
+                throw new SocialAccountException('Youtube API error: received empty response when requesting accounts.');
             }
 
             return new YoutubeGetAccounts(youtubeAccounts: $this->denormalizer->denormalize($accounts, YoutubeAccount::class.'[]'));
         } catch (\Exception $exception) {
-            throw new SocialAccountException('Failed to retrieve accounts from Youtube API');
+            throw new SocialAccountException('Could not retrieve Youtube accounts: an exception occurred during the request.');
         }
     }
 }

@@ -4,6 +4,7 @@ namespace App\Application\CommandHandler;
 
 use App\Application\Command\RemoveMediaPost;
 use App\Entity\Post\MediaPost;
+use App\Exception\MediaPostNotFoundException;
 use App\Repository\Post\MediaPostRepository;
 use App\Service\S3Service;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
@@ -25,7 +26,7 @@ final class RemoveMediaPostHandler
         $mediaPost = $this->mediaPostRepository->findOneBy(['id' => (string) $message->mediaPostId]);
 
         if (null === $mediaPost) {
-            throw new \Exception(sprintf('MediaPost does not exist with id [%s]', (string) $message->mediaPostId));
+            throw new MediaPostNotFoundException((string) $message->mediaPostId);
         }
 
         $this->s3Service->delete($mediaPost);

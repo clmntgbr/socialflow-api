@@ -84,13 +84,13 @@ class LinkedinSocialAccountService implements SocialAccountServiceInterface
             $accessToken = $this->getAccessToken($params);
 
             if (null === $accessToken) {
-                throw new SocialAccountException('Failed to retrieve access token from Linkedin API');
+                throw new SocialAccountException('Could not retrieve access token from Linkedin API: the API did not return a valid token.');
             }
 
             $accounts = $this->getAccounts($accessToken);
 
             if (empty($accounts)) {
-                throw new SocialAccountException('Failed to retrieve accounts from Linkedin API');
+                throw new SocialAccountException('Could not retrieve Linkedin accounts: the API returned an empty list.');
             }
 
             $this->bus->dispatch(new CreateOrUpdateLinkedinAccount(
@@ -135,17 +135,17 @@ class LinkedinSocialAccountService implements SocialAccountServiceInterface
 
             $statusCode = $response->getStatusCode();
             if (200 !== $statusCode) {
-                throw new SocialAccountException("Linkedin API returned status code {$statusCode}", $statusCode);
+                throw new SocialAccountException("Linkedin API error: received status code {$statusCode} when requesting access token.", $statusCode);
             }
 
             $content = $response->toArray();
             if (empty($content)) {
-                throw new SocialAccountException('Empty response from Linkedin API');
+                throw new SocialAccountException('Linkedin API error: received empty response when requesting access token.');
             }
 
             return $this->denormalizer->denormalize($content, LinkedinAccessToken::class);
         } catch (\Exception) {
-            throw new SocialAccountException('Failed to retrieve access token from Linkedin API');
+            throw new SocialAccountException('Could not retrieve access token from Linkedin API: an exception occurred during the request.');
         }
     }
 
@@ -180,18 +180,18 @@ class LinkedinSocialAccountService implements SocialAccountServiceInterface
 
             $statusCode = $response->getStatusCode();
             if (200 !== $statusCode) {
-                throw new SocialAccountException("Linkedin API returned status code {$statusCode}", $statusCode);
+                throw new SocialAccountException("Linkedin API error: received status code {$statusCode} when requesting accounts.", $statusCode);
             }
 
             $accounts = $response->toArray() ?? [];
 
             if (empty($accounts)) {
-                throw new SocialAccountException('Empty response from Linkedin API');
+                throw new SocialAccountException('Linkedin API error: received empty response when requesting accounts.');
             }
 
             return new LinkedinGetAccounts(linkedinAccount: $this->denormalizer->denormalize($accounts, LinkedinAccount::class));
-        } catch (\Exception) {
-            throw new SocialAccountException('Failed to retrieve accounts from Linkedin API');
+        } catch (\Exception $exception) {
+            throw new SocialAccountException('Could not retrieve Linkedin accounts: an exception occurred during the request.');
         }
     }
 }

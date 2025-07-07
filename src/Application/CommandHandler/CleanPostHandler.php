@@ -29,7 +29,7 @@ final class CleanPostHandler
         ]);
 
         if (null === $post) {
-            $this->logger->warning('Post does not exist.', ['id' => $message->postId]);
+            $this->logger->warning(sprintf('Failed to clean post: post with id [%s] was not found.', (string) $message->postId), ['id' => (string) $message->postId]);
 
             return;
         }

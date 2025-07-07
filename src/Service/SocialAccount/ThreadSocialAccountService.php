@@ -53,7 +53,7 @@ class ThreadSocialAccountService implements SocialAccountServiceInterface
 
     public function create(GetSocialAccountCallback $getSocialAccountCallback): RedirectResponse
     {
-        throw new \RuntimeException('Method not implemented.');
+        throw new MethodNotImplementedException(__METHOD__);
     }
 
     /**
@@ -61,21 +61,21 @@ class ThreadSocialAccountService implements SocialAccountServiceInterface
      */
     public function getAccessToken(AbstractAccessTokenParameters $params): AbstractAccessToken
     {
-        throw new \RuntimeException('Method not implemented.');
+        throw new MethodNotImplementedException(__METHOD__);
     }
 
     public function getAccessTokenFromRefreshToken(string $token): AbstractAccessToken
     {
-        throw new \RuntimeException('Method not implemented.');
+        throw new MethodNotImplementedException(__METHOD__);
     }
 
     public function getLongAccessToken(string $token): AbstractAccessToken
     {
-        throw new \RuntimeException('Method not implemented.');
+        throw new MethodNotImplementedException(__METHOD__);
     }
 
     public function getAccounts(AbstractAccessToken $token): AbstractGetAccounts
     {
-        throw new \RuntimeException('Method not implemented.');
+        throw new MethodNotImplementedException(__METHOD__);
     }
 }

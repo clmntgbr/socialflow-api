@@ -8,6 +8,7 @@ use ApiPlatform\Doctrine\Orm\Util\QueryNameGeneratorInterface;
 use ApiPlatform\Metadata\Operation;
 use App\Entity\Organization;
 use App\Entity\User;
+use App\Exception\AuthenticationException;
 use Doctrine\ORM\QueryBuilder;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
@@ -67,7 +68,7 @@ final readonly class OrganizationExtension implements QueryCollectionExtensionIn
 
         $user = $this->security->getUser();
         if (!$user instanceof User) {
-            throw new \Exception('You have to be authenticated.', 403);
+            throw new AuthenticationException('You must be authenticated to access this organization.', null);
         }
 
         $rootAlias = $queryBuilder->getRootAliases()[0];

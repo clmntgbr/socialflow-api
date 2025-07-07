@@ -15,6 +15,7 @@ use App\Dto\Token\AccessTokenParameters\AbstractAccessTokenParameters;
 use App\Dto\Token\AccessTokenParameters\TwitterAccessTokenParameters;
 use App\Dto\Token\RequestToken\TwitterRequestToken;
 use App\Entity\User;
+use App\Exception\MethodNotImplementedException;
 use App\Exception\SocialAccountException;
 use App\Repository\UserRepository;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -100,7 +101,7 @@ class TwitterSocialAccountService implements SocialAccountServiceInterface
 
             return $this->denormalizer->denormalize($response, TwitterRequestToken::class);
         } catch (\Exception) {
-            throw new SocialAccountException('Failed to obtain request token from Twitter.');
+            throw new SocialAccountException('Could not obtain request token from Twitter: an exception occurred during the request.');
         }
     }
 
@@ -127,7 +128,7 @@ class TwitterSocialAccountService implements SocialAccountServiceInterface
             $accounts = $this->getAccounts($accessToken);
 
             if (empty($accounts)) {
-                throw new SocialAccountException('Failed to retrieve accounts from Facebook API');
+                throw new SocialAccountException('Could not retrieve Twitter accounts: the API returned an empty list.');
             }
 
             $this->bus->dispatch(new CreateOrUpdateTwitterAccount(
@@ -160,23 +161,23 @@ class TwitterSocialAccountService implements SocialAccountServiceInterface
 
             $statusCode = $response->getStatusCode();
             if (200 !== $statusCode) {
-                throw new SocialAccountException("Twitter API returned status code {$statusCode}", $statusCode);
+                throw new SocialAccountException("Twitter API error: received status code {$statusCode} when requesting access token.", $statusCode);
             }
 
             return TwitterAccessToken::fromString($response->getContent());
         } catch (\Exception) {
-            throw new SocialAccountException('Failed to retrieve access token from Twitter API');
+            throw new SocialAccountException('Could not retrieve access token from Twitter API: an exception occurred during the request.');
         }
     }
 
     public function getLongAccessToken(string $token): AbstractAccessToken
     {
-        throw new \RuntimeException('Method not implemented.');
+        throw new MethodNotImplementedException(__METHOD__);
     }
 
     public function getAccessTokenFromRefreshToken(string $token): AbstractAccessToken
     {
-        throw new \RuntimeException('Method not implemented.');
+        throw new MethodNotImplementedException(__METHOD__);
     }
 
     /**
@@ -199,7 +200,7 @@ class TwitterSocialAccountService implements SocialAccountServiceInterface
 
             return new TwitterGetAccounts(twitterAccount: $this->serializer->deserialize(json_encode($response), TwitterAccount::class, 'json'));
         } catch (\Exception) {
-            throw new SocialAccountException('Failed to retrieve accounts from Twitter API');
+            throw new SocialAccountException('Could not retrieve Twitter accounts: an exception occurred during the request.');
         }
     }
 }

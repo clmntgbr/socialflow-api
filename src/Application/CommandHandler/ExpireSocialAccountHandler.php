@@ -26,7 +26,7 @@ final class ExpireSocialAccountHandler
         ]);
 
         if (null === $socialAccount) {
-            $this->logger->warning(sprintf('Social account does not exist with id [%s]', (string) $message->id));
+            $this->logger->warning(sprintf('Failed to expire social account: account with id [%s] was not found.', (string) $message->id), ['id' => (string) $message->id]);
 
             return;
         }

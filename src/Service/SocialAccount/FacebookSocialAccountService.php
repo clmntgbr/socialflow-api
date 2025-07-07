@@ -14,6 +14,7 @@ use App\Dto\Token\AccessTokenParameters\AbstractAccessTokenParameters;
 use App\Dto\Token\AccessTokenParameters\FacebookAccessTokenParameters;
 use App\Dto\Token\FacebookToken;
 use App\Entity\User;
+use App\Exception\MethodNotImplementedException;
 use App\Exception\SocialAccountException;
 use App\Repository\UserRepository;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -93,13 +94,13 @@ class FacebookSocialAccountService implements SocialAccountServiceInterface
             $accessToken = $this->getAccessToken($params);
 
             if (null === $accessToken) {
-                throw new SocialAccountException('Failed to retrieve access token from Facebook API');
+                throw new SocialAccountException('Could not retrieve access token from Facebook API: the API did not return a valid token.');
             }
 
             $accounts = $this->getAccounts($accessToken);
 
             if (empty($accounts)) {
-                throw new SocialAccountException('Failed to retrieve accounts from Facebook API');
+                throw new SocialAccountException('Could not retrieve Facebook accounts: the API returned an empty list.');
             }
 
             foreach ($accounts->facebookAccounts as $facebookAccount) {
@@ -150,23 +151,23 @@ class FacebookSocialAccountService implements SocialAccountServiceInterface
 
             $statusCode = $response->getStatusCode();
             if (200 !== $statusCode) {
-                throw new SocialAccountException("Facebook API returned status code {$statusCode}", $statusCode);
+                throw new SocialAccountException("Facebook API error: received status code {$statusCode} when requesting access token.", $statusCode);
             }
 
             $content = $response->toArray();
             if (empty($content)) {
-                throw new SocialAccountException('Empty response from Facebook API');
+                throw new SocialAccountException('Facebook API error: received empty response when requesting access token.');
             }
 
             return $this->denormalizer->denormalize($content, FacebookAccessToken::class);
         } catch (\Exception) {
-            throw new SocialAccountException('Failed to retrieve long access token from Facebook API');
+            throw new SocialAccountException('Could not retrieve long access token from Facebook API: an exception occurred during the request.');
         }
     }
 
     public function getAccessTokenFromRefreshToken(string $token): AbstractAccessToken
     {
-        throw new \RuntimeException('Method not implemented.');
+        throw new MethodNotImplementedException(__METHOD__);
     }
 
     /**
@@ -197,17 +198,17 @@ class FacebookSocialAccountService implements SocialAccountServiceInterface
 
             $statusCode = $response->getStatusCode();
             if (200 !== $statusCode) {
-                throw new SocialAccountException("Facebook API returned status code {$statusCode}", $statusCode);
+                throw new SocialAccountException("Facebook API error: received status code {$statusCode} when requesting access token.", $statusCode);
             }
 
             $content = $response->toArray();
             if (empty($content)) {
-                throw new SocialAccountException('Empty response from Facebook API');
+                throw new SocialAccountException('Facebook API error: received empty response when requesting access token.');
             }
 
             return $this->denormalizer->denormalize($content, FacebookAccessToken::class);
         } catch (\Exception) {
-            throw new SocialAccountException('Failed to retrieve access token from Facebook API');
+            throw new SocialAccountException('Could not retrieve access token from Facebook API: an exception occurred during the request.');
         }
     }
 
@@ -235,18 +236,18 @@ class FacebookSocialAccountService implements SocialAccountServiceInterface
 
             $statusCode = $response->getStatusCode();
             if (200 !== $statusCode) {
-                throw new SocialAccountException("Facebook API returned status code {$statusCode}", $statusCode);
+                throw new SocialAccountException("Facebook API error: received status code {$statusCode} when requesting access token.", $statusCode);
             }
 
             $accounts = $response->toArray()['accounts']['data'] ?? [];
 
             if (empty($accounts)) {
-                throw new SocialAccountException('Empty response from Facebook API');
+                throw new SocialAccountException('Facebook API error: received empty response when requesting accounts.');
             }
 
             return new FacebookGetAccounts(facebookAccounts: $this->denormalizer->denormalize($accounts, FacebookAccount::class.'[]'));
         } catch (\Exception $exception) {
-            throw new SocialAccountException('Failed to retrieve accounts from Facebook API');
+            throw new SocialAccountException('Could not retrieve Facebook accounts: an exception occurred during the request.');
         }
     }
 }

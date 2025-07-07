@@ -29,13 +29,13 @@ final class DeleteDraftPostHandler
         ]);
 
         if (null === $post) {
-            $this->logger->warning('Post does not exist.', ['id' => $message->postId]);
+            $this->logger->warning(sprintf('Failed to delete draft post: post with id [%s] was not found.', (string) $message->postId), ['id' => (string) $message->postId]);
 
             return;
         }
 
         if (!$post->isDraft()) {
-            $this->logger->warning('Post is not draft', ['id' => (string) $post->getId()]);
+            $this->logger->warning(sprintf('Cannot delete post with id [%s]: post is not a draft.', (string) $post->getId()), ['id' => (string) $post->getId()]);
 
             return;
         }

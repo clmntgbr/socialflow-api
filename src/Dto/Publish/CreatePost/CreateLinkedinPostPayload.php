@@ -31,7 +31,7 @@ final class CreateLinkedinPostPayload implements \JsonSerializable
         ];
 
         $medias = array_map(
-            fn($media) => ['id' => $media->mediaId,],
+            fn ($media) => ['id' => $media->mediaId],
             $this->medias->getMedias()
         );
 

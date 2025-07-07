@@ -23,7 +23,7 @@ class SocialAccountServiceFactory
             'instagram' => $this->instagramService,
             'thread' => $this->threadService,
             'youtube' => $this->youtubeService,
-            default => throw new \InvalidArgumentException("Provider '{$provider}' not supported"),
+            default => throw new ProviderNotSupportedException($provider),
         };
     }
 }

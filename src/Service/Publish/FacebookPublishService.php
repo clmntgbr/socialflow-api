@@ -14,6 +14,7 @@ use App\Dto\Publish\UploadMedia\UploadedMediaInterface;
 use App\Entity\Post\FacebookPost;
 use App\Entity\Post\Post;
 use App\Entity\SocialAccount\FacebookSocialAccount;
+use App\Exception\AuthenticationException;
 use App\Exception\PublishException;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Messenger\Bridge\Amqp\Transport\AmqpStamp;
@@ -36,7 +37,7 @@ class FacebookPublishService implements PublishServiceInterface
     }
 
     /**
-     * @param FacebookPost $post
+     * @param FacebookPost          $post
      * @param UploadedFacebookMedia $medias
      *
      * @return PublishedFacebookPost
@@ -94,7 +95,7 @@ class FacebookPublishService implements PublishServiceInterface
             $content = $response->toArray();
 
             if (!isset($content['success']) || !$content['success']) {
-                throw new PublishException('Failed to delete facebook post.');
+                throw new PublishException('Failed to delete Facebook post: the API did not confirm deletion.');
             }
         } catch (\Exception $exception) {
             if (in_array($exception->getCode(), [Response::HTTP_UNAUTHORIZED, Response::HTTP_FORBIDDEN])) {
@@ -124,12 +125,12 @@ class FacebookPublishService implements PublishServiceInterface
                 ))->last(HandledStamp::class)?->getResult();
 
                 if (null === $mediaId) {
-                    throw new PublishException(message: 'Failed to upload facebook media', code: Response::HTTP_BAD_REQUEST);
+                    throw new PublishException(message: 'Failed to upload Facebook media: the upload handler did not return a media ID.', code: Response::HTTP_BAD_REQUEST);
                 }
 
                 $uploadedMedia->addMedia($mediaId);
             } catch (\Exception $exception) {
-                throw new PublishException(message: $exception->getMessage(), code: Response::HTTP_BAD_REQUEST, previous: $exception);
+                throw new PublishException(message: 'Failed to process Facebook media batch upload: '.$exception->getMessage(), code: Response::HTTP_BAD_REQUEST, previous: $exception);
             }
         }
 
@@ -156,11 +157,11 @@ class FacebookPublishService implements PublishServiceInterface
             ]);
 
             if (in_array($response->getStatusCode(), [Response::HTTP_UNAUTHORIZED, Response::HTTP_FORBIDDEN])) {
-                throw new \Exception('Authentication error occurred', $response->status);
+                throw new AuthenticationException('Authentication failed: invalid or expired Facebook token.', null);
             }
 
             if (Response::HTTP_OK !== $response->getStatusCode()) {
-                throw new PublishException('Upload media error occurred', $response->getStatusCode());
+                throw new PublishException('Failed to upload media to Facebook: API returned status code '.$response->getStatusCode(), $response->getStatusCode());
             }
 
             return $this->denormalizer->denormalize($response->toArray(), UploadedFacebookMediaId::class);
@@ -171,7 +172,7 @@ class FacebookPublishService implements PublishServiceInterface
                 ]);
             }
 
-            throw new PublishException(message: $exception->getMessage(), code: Response::HTTP_NOT_FOUND, previous: $exception);
+            throw new PublishException(message: 'Failed to upload media to Facebook: '.$exception->getMessage(), code: Response::HTTP_NOT_FOUND, previous: $exception);
         }
     }
 }

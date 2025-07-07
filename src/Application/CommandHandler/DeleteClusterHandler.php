@@ -25,13 +25,13 @@ final class DeleteClusterHandler
         ]);
 
         if (null === $cluster) {
-            $this->logger->warning(sprintf('Cluster does not exist with id [%s]]', (string) $message->clusterId));
+            $this->logger->warning(sprintf('Failed to delete cluster: cluster with id [%s] was not found.', (string) $message->clusterId), ['id' => (string) $message->clusterId]);
 
             return;
         }
 
         if ($cluster->hasPublishedPosts()) {
-            $this->logger->warning(sprintf('Cluster have published posts and cant be deleted.', (string) $message->clusterId));
+            $this->logger->warning(sprintf('Cannot delete cluster with id [%s]: cluster has published posts.', (string) $message->clusterId), ['id' => (string) $message->clusterId]);
 
             return;
         }
