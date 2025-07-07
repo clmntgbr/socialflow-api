@@ -2,21 +2,21 @@
 
 namespace App\Application\CommandHandler;
 
-use App\Application\Command\UploadFacebookMediaPost;
-use App\Dto\Publish\UploadMedia\UploadedFacebookMediaId;
+use App\Application\Command\UploadTwitterMediaPost;
+use App\Dto\Publish\UploadMedia\UploadedTwitterMediaId;
 use App\Entity\Post\MediaPost;
-use App\Entity\SocialAccount\FacebookSocialAccount;
+use App\Entity\SocialAccount\TwitterSocialAccount;
 use App\Exception\MediaPostNotFoundException;
 use App\Exception\PublishException;
 use App\Repository\Post\MediaPostRepository;
-use App\Service\Publish\FacebookPublishService;
 use App\Service\Publish\PublishServiceFactory;
+use App\Service\Publish\TwitterPublishService;
 use App\Service\S3Service;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
 #[AsMessageHandler]
-final class UploadFacebookMediaPostHandler
+final class UploadTwitterMediaPostHandler
 {
     public function __construct(
         private MediaPostRepository $mediaPostRepository,
@@ -25,7 +25,7 @@ final class UploadFacebookMediaPostHandler
     ) {
     }
 
-    public function __invoke(UploadFacebookMediaPost $message): UploadedFacebookMediaId
+    public function __invoke(UploadTwitterMediaPost $message): UploadedTwitterMediaId
     {
         /** @var ?MediaPost $mediaPost */
         $mediaPost = $this->mediaPostRepository->findOneBy(['id' => (string) $message->mediaId]);
@@ -37,11 +37,11 @@ final class UploadFacebookMediaPostHandler
         $mediaPost->markAsProcessing();
         $this->mediaPostRepository->save($mediaPost);
 
-        /** @var FacebookSocialAccount $socialAccount */
+        /** @var TwitterSocialAccount $socialAccount */
         $socialAccount = $mediaPost->getPost()->getCluster()->getSocialAccount();
 
         try {
-            /** @var FacebookPublishService */
+            /** @var TwitterPublishService */
             $service = $this->publishServiceFactory->get($socialAccount->getType());
 
             $localPath = $this->s3Service->download($mediaPost);
@@ -53,7 +53,7 @@ final class UploadFacebookMediaPostHandler
 
             return $mediaId;
         } catch (\Exception $exception) {
-            throw new PublishException(message: 'Failed to upload Facebook media: '.$exception->getMessage(), code: Response::HTTP_BAD_REQUEST, previous: $exception);
+            throw new PublishException(message: 'Failed to upload Twitter media: '.$exception->getMessage(), code: Response::HTTP_BAD_REQUEST, previous: $exception);
         }
     }
 }

@@ -4,19 +4,22 @@ namespace App\Service\Publish;
 
 use Abraham\TwitterOAuth\TwitterOAuth;
 use App\Application\Command\ExpireSocialAccount;
+use App\Application\Command\UploadTwitterMediaPost;
 use App\Dto\Publish\CreatePost\CreateTwitterPostPayload;
 use App\Dto\Publish\PublishedPost\PublishedPostInterface;
 use App\Dto\Publish\PublishedPost\PublishedTwitterPost;
 use App\Dto\Publish\UploadMedia\UploadedMediaInterface;
+use App\Dto\Publish\UploadMedia\UploadedTwitterMedia;
+use App\Dto\Publish\UploadMedia\UploadedTwitterMediaId;
 use App\Entity\Post\Post;
 use App\Entity\Post\TwitterPost;
 use App\Entity\SocialAccount\TwitterSocialAccount;
-use App\Exception\MethodNotImplementedException;
 use App\Exception\PublishException;
 use App\Repository\Post\PostRepository;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Messenger\Bridge\Amqp\Transport\AmqpStamp;
 use Symfony\Component\Messenger\MessageBusInterface;
+use Symfony\Component\Messenger\Stamp\HandledStamp;
 use Symfony\Component\Serializer\SerializerInterface;
 
 class TwitterPublishService implements PublishServiceInterface
@@ -44,6 +47,7 @@ class TwitterPublishService implements PublishServiceInterface
         $payload = new CreateTwitterPostPayload(
             post: $post,
             previousPost: $previousPost,
+            medias: $medias,
         );
 
         try {
@@ -110,6 +114,51 @@ class TwitterPublishService implements PublishServiceInterface
      */
     public function processMediaBatchUpload(Post $post): UploadedMediaInterface
     {
-        throw new MethodNotImplementedException(__METHOD__);
+        $uploadedMedia = new UploadedTwitterMedia();
+
+        foreach ($post->getMedias() as $media) {
+            try {
+                /** @var ?UploadedTwitterMediaId $mediaId */
+                $mediaId = $this->messageBus->dispatch(new UploadTwitterMediaPost(
+                    mediaId: $media->getId(),
+                ))->last(HandledStamp::class)?->getResult();
+
+                if (null === $mediaId) {
+                    throw new PublishException(message: 'Failed to upload Twitter media: the upload handler did not return a media ID.', code: Response::HTTP_BAD_REQUEST);
+                }
+
+                $uploadedMedia->addMedia($mediaId);
+            } catch (\Exception $exception) {
+                throw new PublishException(message: 'Failed to process Twitter media batch upload: '.$exception->getMessage(), code: Response::HTTP_BAD_REQUEST, previous: $exception);
+            }
+        }
+
+        return $uploadedMedia;
+    }
+
+    public function uploadMedia(
+        TwitterSocialAccount $socialAccount,
+        string $localPath,
+    ): UploadedTwitterMediaId {
+        try {
+            $twitterOAuth = new TwitterOAuth($this->twitterApiKey, $this->twitterApiSecret, $socialAccount->getToken(), $socialAccount->getTokenSecret());
+            $twitterOAuth->setApiVersion('1.1');
+
+            $response = $twitterOAuth->upload('media/upload', ['media' => $localPath], ['chunkedUpload' => true]);
+
+            if (!isset($response->media_id_string) && !isset($response->media_id_string)) {
+                throw new PublishException('Failed to upload media to Twutter');
+            }
+
+            return $this->serializer->deserialize(json_encode($response), UploadedTwitterMediaId::class, 'json');
+        } catch (\Exception $exception) {
+            if (in_array($exception->getCode(), [Response::HTTP_UNAUTHORIZED, Response::HTTP_FORBIDDEN])) {
+                $this->messageBus->dispatch(new ExpireSocialAccount(id: $socialAccount->getId()), [
+                    new AmqpStamp('async-high'),
+                ]);
+            }
+
+            throw new PublishException(message: 'Failed to upload media to Twitter: '.$exception->getMessage(), code: Response::HTTP_NOT_FOUND, previous: $exception);
+        }
     }
 }

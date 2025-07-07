@@ -32,6 +32,9 @@ final class UploadLinkedinMediaPostHandler
             throw new \Exception(sprintf('MediaPost does not exist with id [%s]', (string) $message->mediaId));
         }
 
+        $mediaPost->markAsProcessing();
+        $this->mediaPostRepository->save($mediaPost);
+
         /** @var LinkedinSocialAccount $socialAccount */
         $socialAccount = $mediaPost->getPost()->getCluster()->getSocialAccount();
 
@@ -41,6 +44,9 @@ final class UploadLinkedinMediaPostHandler
 
             $localPath = $this->s3Service->download($mediaPost);
             $service->uploadMedia($socialAccount, $message->initializeLinkedinUploadMedia, $localPath);
+
+            $mediaPost->markAsUploaded();
+            $this->mediaPostRepository->save($mediaPost);
         } catch (\Exception $exception) {
             throw new PublishException(message: 'Failed to upload Linkedin media: '.$exception->getMessage(), code: Response::HTTP_BAD_REQUEST, previous: $exception);
         }

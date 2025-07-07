@@ -10,7 +10,7 @@ final class PublishedLinkedinPost implements PublishedPostInterface
 
     public function __construct(
         #[SerializedPath('[x-restli-id][0]')]
-        string $urn,
+        private string $urn,
     ) {
         $this->id = str_replace('urn:li:share:', '', $urn);
     }

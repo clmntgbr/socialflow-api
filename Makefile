@@ -102,7 +102,7 @@ php-cs-fixer:
 	$(QA) ./php-cs-fixer fix src --rules=@Symfony --verbose --diff
 
 php-stan:
-	$(PHP) ./vendor/bin/phpstan analyse src -l $(or $(level), 5) --memory-limit=-1
+	$(PHP) ./vendor/bin/phpstan analyse src -l $(or $(level), 8) --memory-limit=-1
 
 consume:
 	$(PHP) php bin/console messenger:consume async-high async-medium async-low -vv

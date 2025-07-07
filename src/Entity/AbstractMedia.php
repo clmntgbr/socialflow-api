@@ -98,4 +98,9 @@ abstract class AbstractMedia
     {
         $this->status = MediaStatus::PROCESSING->value;
     }
+
+    public function markAsUploaded()
+    {
+        $this->status = MediaStatus::UPLOADED->value;
+    }
 }

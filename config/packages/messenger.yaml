@@ -11,6 +11,8 @@ framework:
                     queues:
                         async-high:
                             binding_keys: [async-high]
+                retry_strategy:
+                    max_retries: 1
             async-medium:
                 dsn: "%env(MESSENGER_TRANSPORT_DSN)%"
                 options:
@@ -21,6 +23,8 @@ framework:
                     queues:
                         async-medium:
                             binding_keys: [async-medium]
+                retry_strategy:
+                    max_retries: 1
             async-low:
                 dsn: "%env(MESSENGER_TRANSPORT_DSN)%"
                 options:
@@ -31,6 +35,8 @@ framework:
                     queues:
                         async-low:
                             binding_keys: [async-low]
+                retry_strategy:
+                    max_retries: 1
             sync: 'sync://'
 
         routing:
@@ -40,8 +46,10 @@ framework:
             App\Application\Command\CreateOrUpdateYoutubeAccount: sync
             App\Application\Command\CreateOrganization: sync
             App\Application\Command\DeletePost: sync
+            
             App\Application\Command\UploadLinkedinMediaPost: sync
             App\Application\Command\UploadFacebookMediaPost: sync
+            App\Application\Command\UploadTwitterMediaPost: sync
             
             App\Application\Command\RemoveSocialAccount: async-low
             App\Application\Command\ExpireSocialAccount: async-high
