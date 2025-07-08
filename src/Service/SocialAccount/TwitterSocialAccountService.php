@@ -4,6 +4,7 @@ namespace App\Service\SocialAccount;
 
 use Abraham\TwitterOAuth\TwitterOAuth;
 use App\Application\Command\CreateOrUpdateTwitterAccount;
+use App\Application\Command\UpdateTwitterSocialAccount;
 use App\Denormalizer\Denormalizer;
 use App\Dto\SocialAccount\GetAccounts\AbstractGetAccounts;
 use App\Dto\SocialAccount\GetAccounts\TwitterGetAccounts;
@@ -14,6 +15,8 @@ use App\Dto\Token\AccessToken\TwitterAccessToken;
 use App\Dto\Token\AccessTokenParameters\AbstractAccessTokenParameters;
 use App\Dto\Token\AccessTokenParameters\TwitterAccessTokenParameters;
 use App\Dto\Token\RequestToken\TwitterRequestToken;
+use App\Entity\SocialAccount\SocialAccount;
+use App\Entity\SocialAccount\TwitterSocialAccount;
 use App\Entity\User;
 use App\Exception\ConnectUrlException;
 use App\Exception\MethodNotImplementedException;
@@ -104,6 +107,24 @@ class TwitterSocialAccountService implements SocialAccountServiceInterface
         }
     }
 
+    /**
+     * @param TwitterSocialAccount $twitterSocialAccount
+     *
+     * @return TwitterGetAccounts
+     */
+    public function getMe(SocialAccount $twitterSocialAccount): void
+    {
+        $account = $this->getAccounts(new TwitterAccessToken(
+            oauthToken: $twitterSocialAccount->getToken(),
+            oauthTokenSecret: $twitterSocialAccount->getTokenSecret(),
+        ));
+
+        $this->bus->dispatch(new UpdateTwitterSocialAccount(
+            socialAccountId: $twitterSocialAccount->getSocialAccountId(),
+            twitterAccount: $account->twitterAccount,
+        ));
+    }
+
     public function create(GetSocialAccountCallback $getSocialAccountCallback): RedirectResponse
     {
         /** @var ?User $user */
@@ -124,7 +145,6 @@ class TwitterSocialAccountService implements SocialAccountServiceInterface
 
             $this->bus->dispatch(new CreateOrUpdateTwitterAccount(
                 organizationId: $user->getActiveOrganization()->getId(),
-                userId: $user->getId(),
                 twitterAccount: $accounts->twitterAccount,
                 twitterToken: $accessToken,
             ));

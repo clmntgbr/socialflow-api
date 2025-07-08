@@ -6,6 +6,7 @@ use App\Dto\SocialAccount\GetAccounts\AbstractGetAccounts;
 use App\Dto\SocialAccount\GetSocialAccountCallback;
 use App\Dto\Token\AccessToken\AbstractAccessToken;
 use App\Dto\Token\AccessTokenParameters\AbstractAccessTokenParameters;
+use App\Entity\SocialAccount\SocialAccount;
 use App\Entity\User;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 
@@ -21,6 +22,8 @@ interface SocialAccountServiceInterface
     public function getConnectUrl(User $user): string;
 
     public function getScopes(): array;
+
+    public function getMe(SocialAccount $socialAccount): void;
 
     public function create(GetSocialAccountCallback $getSocialAccountCallback): RedirectResponse;
 

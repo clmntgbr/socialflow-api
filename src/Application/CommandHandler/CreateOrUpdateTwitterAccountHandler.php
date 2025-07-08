@@ -32,13 +32,6 @@ final class CreateOrUpdateTwitterAccountHandler extends CreateOrUpdateAccountHan
 
     public function __invoke(CreateOrUpdateTwitterAccount $message): void
     {
-        /** @var ?User $user */
-        $user = $this->userRepository->findOneBy(['id' => (string) $message->userId]);
-
-        if (null === $user) {
-            throw new UserNotFoundException((string) $message->userId);
-        }
-
         /** @var ?Organization $organization */
         $organization = $this->organizationRepository->findOneBy(['id' => (string) $message->organizationId]);
 

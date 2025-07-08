@@ -32,13 +32,6 @@ final class CreateOrUpdateYoutubeAccountHandler extends CreateOrUpdateAccountHan
 
     public function __invoke(CreateOrUpdateYoutubeAccount $message): void
     {
-        /** @var ?User $user */
-        $user = $this->userRepository->findOneBy(['id' => (string) $message->userId]);
-
-        if (null === $user) {
-            throw new UserNotFoundException((string) $message->userId);
-        }
-
         /** @var ?Organization $organization */
         $organization = $this->organizationRepository->findOneBy(['id' => (string) $message->organizationId]);
 

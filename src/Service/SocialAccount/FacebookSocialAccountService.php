@@ -12,6 +12,7 @@ use App\Dto\Token\AccessToken\AbstractAccessToken;
 use App\Dto\Token\AccessToken\FacebookAccessToken;
 use App\Dto\Token\AccessTokenParameters\AbstractAccessTokenParameters;
 use App\Dto\Token\AccessTokenParameters\FacebookAccessTokenParameters;
+use App\Entity\SocialAccount\SocialAccount;
 use App\Entity\User;
 use App\Exception\MethodNotImplementedException;
 use App\Exception\SocialAccountException;
@@ -97,7 +98,6 @@ class FacebookSocialAccountService implements SocialAccountServiceInterface
 
                 $this->bus->dispatch(new CreateOrUpdateFacebookAccount(
                     organizationId: $user->getActiveOrganization()->getId(),
-                    userId: $user->getId(),
                     facebookToken: $longAccessToken,
                     facebookAccount: $facebookAccount,
                 ));
@@ -107,6 +107,11 @@ class FacebookSocialAccountService implements SocialAccountServiceInterface
         } catch (\Exception $exception) {
             return new RedirectResponse(sprintf('%s?error=true&message=3', $this->frontUrl));
         }
+    }
+
+    public function getMe(SocialAccount $socialAccount): void
+    {
+        throw new MethodNotImplementedException(__METHOD__);
     }
 
     /**

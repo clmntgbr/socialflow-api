@@ -71,4 +71,50 @@ class TwitterSocialAccount extends SocialAccount implements SocialAccountInterfa
 
         return $this;
     }
+
+    #[Groups(['social_account.read'])]
+    public function getRestrictions(): array
+    {
+        if ($this->isVerified()) {
+            return $this->getRestrictionVerified();
+        }
+        
+        return $this->getRestrictionNotVerified();
+    }
+
+    private function getRestrictionVerified()
+    {
+        return [
+            'text' => [
+                'max_characters' => 25000,
+            ],
+            'video' => [
+                'max_duration_seconds' => 7200,
+                'max_file_size_bytes' => 8589934592,
+                'max_file_size_formatted' => '8 GB',
+            ],
+            'image' => [
+                'max_file_size_bytes' => 5242880,
+                'max_file_size_formatted' => '5 MB',
+            ],
+        ];
+    }
+
+    private function getRestrictionNotVerified()
+    {
+        return [
+            'text' => [
+                'max_characters' => 280,
+            ],
+            'video' => [
+                'max_duration_seconds' => 140,
+                'max_file_size_bytes' => 536870912,
+                'max_file_size_formatted' => '512 MB',
+            ],
+            'image' => [
+                'max_file_size_bytes' => 5242880,
+                'max_file_size_formatted' => '5 MB',
+            ],
+        ];
+    }
 }

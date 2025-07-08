@@ -7,6 +7,7 @@ use App\Dto\SocialAccount\GetSocialAccountCallback;
 use App\Dto\Token\AccessToken\AbstractAccessToken;
 use App\Dto\Token\AccessTokenParameters\AbstractAccessTokenParameters;
 use App\Dto\Token\AccessTokenParameters\InstagramAccessTokenParameters;
+use App\Entity\SocialAccount\SocialAccount;
 use App\Entity\User;
 use App\Exception\MethodNotImplementedException;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -31,6 +32,11 @@ class InstagramSocialAccountService implements SocialAccountServiceInterface
     }
 
     public function create(GetSocialAccountCallback $getSocialAccountCallback): RedirectResponse
+    {
+        throw new MethodNotImplementedException(__METHOD__);
+    }
+
+    public function getMe(SocialAccount $socialAccount): void
     {
         throw new MethodNotImplementedException(__METHOD__);
     }

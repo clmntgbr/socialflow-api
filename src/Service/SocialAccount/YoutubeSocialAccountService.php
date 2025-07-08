@@ -12,6 +12,7 @@ use App\Dto\Token\AccessToken\AbstractAccessToken;
 use App\Dto\Token\AccessToken\YoutubeAccessToken;
 use App\Dto\Token\AccessTokenParameters\AbstractAccessTokenParameters;
 use App\Dto\Token\AccessTokenParameters\YoutubeAccessTokenParameters;
+use App\Entity\SocialAccount\SocialAccount;
 use App\Entity\User;
 use App\Exception\MethodNotImplementedException;
 use App\Exception\SocialAccountException;
@@ -93,7 +94,6 @@ class YoutubeSocialAccountService implements SocialAccountServiceInterface
             foreach ($accounts->youtubeAccounts as $youtubeAccount) {
                 $this->bus->dispatch(new CreateOrUpdateYoutubeAccount(
                     organizationId: $user->getActiveOrganization()->getId(),
-                    userId: $user->getId(),
                     youtubeToken: $accessToken,
                     youtubeAccount: $youtubeAccount,
                 ));
@@ -103,6 +103,11 @@ class YoutubeSocialAccountService implements SocialAccountServiceInterface
         } catch (\Exception $exception) {
             return new RedirectResponse(sprintf('%s?error=true&message=3', $this->frontUrl));
         }
+    }
+
+    public function getMe(SocialAccount $socialAccount): void
+    {
+        throw new MethodNotImplementedException(__METHOD__);
     }
 
     /**

@@ -7,6 +7,7 @@ use App\Dto\SocialAccount\GetSocialAccountCallback;
 use App\Dto\Token\AccessToken\AbstractAccessToken;
 use App\Dto\Token\AccessTokenParameters\AbstractAccessTokenParameters;
 use App\Dto\Token\AccessTokenParameters\YoutubeAccessTokenParameters;
+use App\Entity\SocialAccount\SocialAccount;
 use App\Entity\User;
 use App\Exception\MethodNotImplementedException;
 use App\Repository\UserRepository;
@@ -48,6 +49,11 @@ class ThreadSocialAccountService implements SocialAccountServiceInterface
         return [
             'threads_basic',
         ];
+    }
+
+    public function getMe(SocialAccount $socialAccount): void
+    {
+        throw new MethodNotImplementedException(__METHOD__);
     }
 
     public function create(GetSocialAccountCallback $getSocialAccountCallback): RedirectResponse

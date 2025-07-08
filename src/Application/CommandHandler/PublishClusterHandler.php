@@ -6,6 +6,8 @@ use App\Application\Command\PublishCluster;
 use App\Application\Command\PublishPost;
 use App\Entity\Post\Cluster;
 use App\Repository\Post\ClusterRepository;
+use App\Service\Publish\PublishServiceFactory;
+use App\Service\SocialAccount\SocialAccountServiceFactory;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use Symfony\Component\Messenger\Bridge\Amqp\Transport\AmqpStamp;
@@ -18,6 +20,8 @@ final class PublishClusterHandler
         private ClusterRepository $clusterRepository,
         private LoggerInterface $logger,
         private MessageBusInterface $messageBus,
+        private PublishServiceFactory $publishServiceFactory,
+        private SocialAccountServiceFactory $socialAccountServiceFactory,
     ) {
     }
 
@@ -31,6 +35,8 @@ final class PublishClusterHandler
 
             return;
         }
+
+        $socialAccount = $cluster->getSocialAccount();
 
         foreach ($cluster->getPosts() as $post) {
             $this->messageBus->dispatch(new PublishPost(postId: $post->getId()), [

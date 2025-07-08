@@ -9,7 +9,6 @@ use Symfony\Component\Uid\Uuid;
 final class CreateOrUpdateFacebookAccount implements CreateOrUpdateAccountInterface
 {
     public function __construct(
-        public Uuid $userId,
         public Uuid $organizationId,
         public FacebookAccount $facebookAccount,
         public FacebookAccessToken $facebookToken,

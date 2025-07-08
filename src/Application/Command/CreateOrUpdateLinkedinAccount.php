@@ -9,7 +9,6 @@ use Symfony\Component\Uid\Uuid;
 final class CreateOrUpdateLinkedinAccount implements CreateOrUpdateAccountInterface
 {
     public function __construct(
-        public Uuid $userId,
         public Uuid $organizationId,
         public LinkedinAccount $linkedinAccount,
         public LinkedinAccessToken $linkedinToken,

@@ -46,6 +46,7 @@ framework:
             App\Application\Command\CreateOrUpdateYoutubeAccount: sync
             App\Application\Command\CreateOrganization: sync
             App\Application\Command\DeletePost: sync
+            App\Application\Command\UpdateTwitterSocialAccount: sync
             
             App\Application\Command\UploadLinkedinMediaPost: sync
             App\Application\Command\UploadFacebookMediaPost: sync
