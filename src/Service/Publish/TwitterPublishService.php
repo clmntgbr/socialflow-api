@@ -67,7 +67,8 @@ class TwitterPublishService implements PublishServiceInterface
             $response = $twitterOAuth->post('tweets', $payload->jsonSerialize(), ['jsonPayload' => true]);
 
             if (isset($response->status) && in_array($response->status, [Response::HTTP_UNAUTHORIZED])) {
-                throw new PublishException('Failed to authenticate with Twitter API: received status code '.$response->status, $response->status);
+                $error = $response->detail ?? 'Failed to authenticate with Twitter API: received status code '.$response->status;
+                throw new PublishException($error, $response->status);
             }
 
             if (!isset($response->data) && !isset($response->data->id)) {
@@ -139,7 +140,7 @@ class TwitterPublishService implements PublishServiceInterface
 
                 $uploadedMedia->addMedia($mediaId);
             } catch (\Exception $exception) {
-                throw new PublishException(message: 'Failed to process Twitter media batch upload: '.$exception->getMessage(), code: Response::HTTP_BAD_REQUEST, previous: $exception);
+                throw new PublishException(message: 'Failed to process Twitter media', code: Response::HTTP_BAD_REQUEST, previous: $exception);
             }
         }
 
