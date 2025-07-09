@@ -6,7 +6,7 @@ class TwitterAccessToken extends AbstractAccessToken
 {
     public function __construct(
         public string $oauthToken,
-        public string $oauthTokenSecret
+        public string $oauthTokenSecret,
     ) {
     }
 

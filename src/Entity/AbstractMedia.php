@@ -21,6 +21,9 @@ abstract class AbstractMedia
     #[ORM\Embedded(class: 'Vich\UploaderBundle\Entity\File')]
     protected ?EmbeddedFile $image = null;
 
+    #[ORM\Column(type: Types::INTEGER, nullable: true)]
+    protected ?int $duration = null;
+
     #[ORM\Column(type: Types::STRING)]
     protected string $status;
 
@@ -82,6 +85,19 @@ abstract class AbstractMedia
     public function getWidth(): ?int
     {
         return $this->image->getWidth();
+    }
+
+    #[Groups(['media.read', 'cluster.read'])]
+    public function getDuration(): ?int
+    {
+        return $this->duration;
+    }
+
+    public function setDuration(?int $duration): self
+    {
+        $this->duration = $duration;
+
+        return $this;
     }
 
     public function getStatus(): string

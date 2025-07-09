@@ -76,9 +76,10 @@ class Post implements PostInterface
         $this->medias = new ArrayCollection();
     }
 
+    #[Groups(['post.read'])]
     public function getType(): string
     {
-        return '';
+        return $this->getCluster()->getSocialAccount()->getType();
     }
 
     public function isFirst(): bool

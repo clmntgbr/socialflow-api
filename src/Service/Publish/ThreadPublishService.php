@@ -6,11 +6,8 @@ use App\Dto\Publish\PublishedPost\PublishedPostInterface;
 use App\Dto\Publish\Upload\UploadPayloadInterface;
 use App\Dto\Publish\UploadMedia\UploadedMediaIdInterface;
 use App\Dto\Publish\UploadMedia\UploadedMediaInterface;
-use App\Entity\Post\MediaPost;
 use App\Entity\Post\Post;
 use App\Entity\Post\ThreadPost;
-use App\Entity\SocialAccount\SocialAccount;
-use App\Entity\SocialAccount\ThreadSocialAccount;
 use App\Exception\MethodNotImplementedException;
 
 class ThreadPublishService implements PublishServiceInterface
@@ -39,9 +36,6 @@ class ThreadPublishService implements PublishServiceInterface
         throw new MethodNotImplementedException(__METHOD__);
     }
 
-    /** 
-     * @param ThreadSocialAccount $socialAccount
-     */
     public function upload(UploadPayloadInterface $uploadPayloadInterface): UploadedMediaIdInterface
     {
         throw new MethodNotImplementedException(__METHOD__);

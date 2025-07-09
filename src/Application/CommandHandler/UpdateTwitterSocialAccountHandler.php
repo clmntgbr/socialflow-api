@@ -2,16 +2,9 @@
 
 namespace App\Application\CommandHandler;
 
-use App\Application\Command\ExpireSocialAccount;
 use App\Application\Command\UpdateTwitterSocialAccount;
-use App\Application\Command\UploadSocialAccount;
-use App\Application\Command\UploadTwitterSocialAccount;
-use App\Entity\SocialAccount\SocialAccount;
 use App\Entity\SocialAccount\TwitterSocialAccount;
-use App\Enum\SocialAccountStatus;
-use App\Repository\SocialAccount\SocialAccountRepository;
 use App\Repository\SocialAccount\TwitterSocialAccountRepository;
-use App\Service\Publish\PublishServiceFactory;
 use App\Service\SocialAccount\SocialAccountServiceFactory;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
@@ -40,7 +33,7 @@ final class UpdateTwitterSocialAccountHandler
         }
 
         array_map(
-            fn(TwitterSocialAccount $socialAccount) => $this->twitterSocialAccountRepository->save(
+            fn (TwitterSocialAccount $socialAccount) => $this->twitterSocialAccountRepository->save(
                 $socialAccount
                     ->setUsername($message->twitterAccount->username)
                     ->setSocialAccountId($message->twitterAccount->id)

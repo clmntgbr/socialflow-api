@@ -11,7 +11,7 @@ class UploadedFacebookMediaId implements UploadedMediaIdInterface
         #[Assert\Type('string')]
         #[Assert\NotBlank()]
         #[SerializedName('id')]
-        public string $mediaId
-    ) {   
+        public string $mediaId,
+    ) {
     }
 }

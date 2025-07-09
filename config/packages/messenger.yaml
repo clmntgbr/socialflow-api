@@ -1,5 +1,11 @@
 framework:
     messenger:
+        buses:
+            command.bus:
+                middleware:
+                    - App\Messenger\Middleware\UnwrapExceptionMiddleware
+                    - validation
+                    - doctrine_transaction
         transports:
             async-high:
                 dsn: "%env(MESSENGER_TRANSPORT_DSN)%"
@@ -47,6 +53,9 @@ framework:
             App\Application\Command\CreateOrganization: sync
             App\Application\Command\DeletePost: sync
             App\Application\Command\UpdateTwitterSocialAccount: sync
+            App\Application\Command\ValidateCluster: sync
+            App\Application\Command\ValidateMediaPost: sync
+            App\Application\Command\ValidatePost: sync
             
             App\Application\Command\UploadLinkedinMediaPost: sync
             App\Application\Command\UploadFacebookMediaPost: sync

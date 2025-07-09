@@ -48,11 +48,11 @@ final class UploadFacebookMediaPostHandler
             $localPath = $this->s3Service->download($mediaPost);
 
             $payload = new UploadFacebookPayload(
-                mediaPost: $mediaPost, 
-                socialAccount: $socialAccount, 
+                mediaPost: $mediaPost,
+                socialAccount: $socialAccount,
                 localPath: $localPath
             );
-            
+
             $mediaId = $service->upload($payload);
 
             $mediaPost->markAsUploaded();

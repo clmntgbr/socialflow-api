@@ -12,7 +12,7 @@ class UploadedTwitterMediaId implements UploadedMediaIdInterface
         #[Assert\NotBlank()]
         #[SerializedName('media_id_string')]
         public string $mediaId,
-        public string $mediaType
-    ) {   
+        public string $mediaType,
+    ) {
     }
 }

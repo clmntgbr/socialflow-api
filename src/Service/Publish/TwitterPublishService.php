@@ -14,12 +14,9 @@ use App\Dto\Publish\UploadMedia\UploadedMediaIdInterface;
 use App\Dto\Publish\UploadMedia\UploadedMediaInterface;
 use App\Dto\Publish\UploadMedia\UploadedTwitterMedia;
 use App\Dto\Publish\UploadMedia\UploadedTwitterMediaId;
-use App\Entity\Post\MediaPost;
 use App\Entity\Post\Post;
 use App\Entity\Post\TwitterPost;
-use App\Entity\SocialAccount\SocialAccount;
 use App\Entity\SocialAccount\TwitterSocialAccount;
-use App\Exception\MethodNotImplementedException;
 use App\Exception\PublishException;
 use App\Repository\Post\PostRepository;
 use Psr\Log\LoggerInterface;
@@ -147,9 +144,9 @@ class TwitterPublishService implements PublishServiceInterface
         return $uploadedMedia;
     }
 
-    /** 
+    /**
      * @param UploadTwitterPayload $uploadPayload
-     * 
+     *
      * @return UploadedTwitterMediaId
      */
     public function upload(UploadPayloadInterface $uploadPayload): UploadedMediaIdInterface
@@ -196,7 +193,7 @@ class TwitterPublishService implements PublishServiceInterface
             $twitterOAuth->setApiVersion('1.1');
 
             $response = $twitterOAuth->upload('media/upload', [
-                'media' => $localPath, 
+                'media' => $localPath,
                 'media_type' => 'video/mp4',
                 'media_category' => 'tweet_video',
             ], ['chunkedUpload' => true]);
@@ -223,12 +220,12 @@ class TwitterPublishService implements PublishServiceInterface
         $twitterOAuth->setApiVersion('1.1');
 
         $attempts = 0;
-    
+
         while ($attempts < self::MAX_ATTEMPS) {
             $response = $twitterOAuth->mediaStatus($mediaId->mediaId);
 
             $this->logger->info(json_encode($response));
-            
+
             if (!isset($response->processing_info)) {
                 return;
             }
@@ -236,17 +233,17 @@ class TwitterPublishService implements PublishServiceInterface
             $processingInfo = $response->processing_info;
 
             match ($processingInfo->state) {
-                'succeeded' => (function() { return; })(),
-                'failed' => throw new PublishException('Media processing failed: ' . ($processingInfo->error->message ?? 'Unknown error')),
+                'succeeded' => (function () { return; })(),
+                'failed' => throw new PublishException('Media processing failed: '.($processingInfo->error->message ?? 'Unknown error')),
                 'in_progress' => sleep($processingInfo->check_after_secs ?? 10),
-                default => sleep(10)
+                default => sleep(10),
             };
-            
-            if ($processingInfo->state === 'succeeded') {
+
+            if ('succeeded' === $processingInfo->state) {
                 return;
             }
-        
-            $attempts++;
+
+            ++$attempts;
         }
     }
 }

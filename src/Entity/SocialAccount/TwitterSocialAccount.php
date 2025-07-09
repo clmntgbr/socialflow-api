@@ -3,6 +3,9 @@
 namespace App\Entity\SocialAccount;
 
 use ApiPlatform\Metadata\ApiResource;
+use App\Dto\SocialAccount\Restrictions\RestrictionInterface;
+use App\Dto\SocialAccount\Restrictions\TwitterRestrictionNotVerified;
+use App\Dto\SocialAccount\Restrictions\TwitterRestrictionVerified;
 use App\Repository\SocialAccount\TwitterSocialAccountRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
@@ -73,48 +76,12 @@ class TwitterSocialAccount extends SocialAccount implements SocialAccountInterfa
     }
 
     #[Groups(['social_account.read'])]
-    public function getRestrictions(): array
+    public function getRestrictions(): RestrictionInterface
     {
         if ($this->isVerified()) {
-            return $this->getRestrictionVerified();
+            return new TwitterRestrictionVerified();
         }
-        
-        return $this->getRestrictionNotVerified();
-    }
 
-    private function getRestrictionVerified()
-    {
-        return [
-            'text' => [
-                'max_characters' => 25000,
-            ],
-            'video' => [
-                'max_duration_seconds' => 7200,
-                'max_file_size_bytes' => 8589934592,
-                'max_file_size_formatted' => '8 GB',
-            ],
-            'image' => [
-                'max_file_size_bytes' => 5242880,
-                'max_file_size_formatted' => '5 MB',
-            ],
-        ];
-    }
-
-    private function getRestrictionNotVerified()
-    {
-        return [
-            'text' => [
-                'max_characters' => 280,
-            ],
-            'video' => [
-                'max_duration_seconds' => 140,
-                'max_file_size_bytes' => 536870912,
-                'max_file_size_formatted' => '512 MB',
-            ],
-            'image' => [
-                'max_file_size_bytes' => 5242880,
-                'max_file_size_formatted' => '5 MB',
-            ],
-        ];
+        return new TwitterRestrictionNotVerified();
     }
 }

@@ -8,10 +8,10 @@ use App\Entity\SocialAccount\FacebookSocialAccount;
 class UploadFacebookPayload implements UploadPayloadInterface
 {
     public function __construct(
-        private MediaPost $mediaPost, 
-        private FacebookSocialAccount $socialAccount, 
-        private string $localPath
-    ) {  
+        private MediaPost $mediaPost,
+        private FacebookSocialAccount $socialAccount,
+        private string $localPath,
+    ) {
     }
 
     public function getMediaPost(): MediaPost

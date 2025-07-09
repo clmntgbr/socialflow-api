@@ -347,7 +347,7 @@ class SocialAccount implements SocialAccountInterface
         return $this;
     }
 
-    public function getRestrictions(): array
+    public function getRestrictions()
     {
         return [];
     }

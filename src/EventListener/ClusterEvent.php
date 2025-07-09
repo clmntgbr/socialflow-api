@@ -3,6 +3,7 @@
 namespace App\EventListener;
 
 use App\Application\Command\PublishCluster;
+use App\Application\Command\ValidateCluster;
 use App\Entity\Post\Cluster;
 use Doctrine\Bundle\DoctrineBundle\Attribute\AsDoctrineListener;
 use Doctrine\ORM\Event\PostPersistEventArgs;
@@ -24,6 +25,8 @@ final class ClusterEvent
         if (!$cluster instanceof Cluster) {
             return;
         }
+
+        $this->messageBus->dispatch(new ValidateCluster(clusterId: $cluster->getId()));
 
         $date = new \DateTime();
 

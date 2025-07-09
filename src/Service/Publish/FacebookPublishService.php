@@ -15,10 +15,8 @@ use App\Dto\Publish\UploadMedia\UploadedFacebookMediaId;
 use App\Dto\Publish\UploadMedia\UploadedMediaIdInterface;
 use App\Dto\Publish\UploadMedia\UploadedMediaInterface;
 use App\Entity\Post\FacebookPost;
-use App\Entity\Post\MediaPost;
 use App\Entity\Post\Post;
 use App\Entity\SocialAccount\FacebookSocialAccount;
-use App\Entity\SocialAccount\SocialAccount;
 use App\Exception\AuthenticationException;
 use App\Exception\MethodNotImplementedException;
 use App\Exception\PublishException;
@@ -144,7 +142,7 @@ class FacebookPublishService implements PublishServiceInterface
 
     /**
      * @param uploadPayload $uploadPayload
-     * 
+     *
      * @return UploadedFacebookMediaId
      */
     public function upload(UploadPayloadInterface $uploadPayload): UploadedMediaIdInterface

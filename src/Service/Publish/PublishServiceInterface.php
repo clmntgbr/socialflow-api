@@ -6,9 +6,7 @@ use App\Dto\Publish\PublishedPost\PublishedPostInterface;
 use App\Dto\Publish\Upload\UploadPayloadInterface;
 use App\Dto\Publish\UploadMedia\UploadedMediaIdInterface;
 use App\Dto\Publish\UploadMedia\UploadedMediaInterface;
-use App\Entity\Post\MediaPost;
 use App\Entity\Post\Post;
-use App\Entity\SocialAccount\SocialAccount;
 
 interface PublishServiceInterface
 {

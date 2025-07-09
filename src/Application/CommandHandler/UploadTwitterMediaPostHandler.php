@@ -47,12 +47,12 @@ final class UploadTwitterMediaPostHandler
 
             $localPath = $this->s3Service->download($mediaPost);
 
-           $payload = new UploadTwitterPayload(
-                mediaPost: $mediaPost, 
-                socialAccount: $socialAccount, 
+            $payload = new UploadTwitterPayload(
+                mediaPost: $mediaPost,
+                socialAccount: $socialAccount,
                 localPath: $localPath
             );
-            
+
             $mediaId = $service->upload($payload);
             $service->checkUploadStatus($socialAccount, $mediaId);
 
