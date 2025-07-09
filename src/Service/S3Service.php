@@ -18,7 +18,7 @@ class S3Service
 
     public function upload(AbstractMedia $media): void
     {
-        $localPath = $this->vichStorage->resolvePath($media, 'file');
+        $localPath = $this->getLocalPath($media);
 
         if (!$localPath || !file_exists($localPath)) {
             throw new UploadMediaException('Upload failed: local file not found for media.');
@@ -37,6 +37,11 @@ class S3Service
         if (is_resource($stream)) {
             fclose($stream);
         }
+    }
+
+    public function getLocalPath(AbstractMedia $media): string
+    {
+        return $this->vichStorage->resolvePath($media, 'file');
     }
 
     public function download(AbstractMedia $media): string

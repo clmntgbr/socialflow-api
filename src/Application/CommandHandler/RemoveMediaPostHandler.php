@@ -32,8 +32,9 @@ final class RemoveMediaPostHandler
             return;
         }
 
+        $localPath = $this->s3Service->getLocalPath($mediaPost);
         $this->s3Service->delete($mediaPost);
-        $this->uploadHandler->remove($mediaPost, 'file');
+        unlink($localPath);
 
         if ($message->delete) {
             $this->mediaPostRepository->delete($mediaPost);

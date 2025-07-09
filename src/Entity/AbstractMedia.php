@@ -119,4 +119,9 @@ abstract class AbstractMedia
     {
         $this->status = MediaStatus::UPLOADED->value;
     }
+
+    public function markAsPublished()
+    {
+        $this->status = MediaStatus::PUBLISHED->value;
+    }
 }

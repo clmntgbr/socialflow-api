@@ -56,6 +56,7 @@ framework:
             App\Application\Command\ValidateCluster: sync
             App\Application\Command\ValidateMediaPost: sync
             App\Application\Command\ValidatePost: sync
+            App\Application\Command\UpdateMediaPostStatus: sync
             
             App\Application\Command\UploadLinkedinMediaPost: sync
             App\Application\Command\UploadFacebookMediaPost: sync
