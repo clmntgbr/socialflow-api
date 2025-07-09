@@ -2,10 +2,12 @@
 
 namespace App\Service\Validate;
 
+use App\Entity\Post\InstagramPost;
 use App\Entity\Post\MediaPost;
 use App\Entity\Post\Post;
+use App\Exception\ContentValidationException;
 
-class InstagramValidateService implements ValidateServiceInterface
+class InstagramValidateService extends ValidateServiceAbstract implements ValidateServiceInterface
 {
     public function validateContent(Post $post): void
     {

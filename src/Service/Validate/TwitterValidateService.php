@@ -11,7 +11,7 @@ use App\Entity\SocialAccount\TwitterSocialAccount;
 use App\Exception\ContentValidationException;
 use App\Service\Publish\PublishServiceInterface;
 
-class TwitterValidateService implements ValidateServiceInterface
+class TwitterValidateService extends ValidateServiceAbstract implements ValidateServiceInterface
 {
     /**
      * @param TwitterPost $post

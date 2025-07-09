@@ -2,10 +2,12 @@
 
 namespace App\Service\Validate;
 
+use App\Entity\Post\FacebookPost;
 use App\Entity\Post\MediaPost;
 use App\Entity\Post\Post;
+use App\Exception\ContentValidationException;
 
-class FacebookValidateService implements ValidateServiceInterface
+class FacebookValidateService extends ValidateServiceAbstract implements ValidateServiceInterface
 {
     public function validateContent(Post $post): void
     {

@@ -9,6 +9,8 @@ interface ValidateServiceInterface
 {
     public function validateContent(Post $post): void;
 
+    public function validateMediaPostStatus(Post $post): void;
+
     public function validateMediaPost(MediaPost $mediaPost): void;
 
     public function validateMaxFiles(Post $post): void;

@@ -5,6 +5,7 @@ namespace App\Entity\Post;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Delete;
 use App\Entity\Trait\UuidTrait;
+use App\Enum\MediaStatus;
 use App\Enum\PostStatus;
 use App\Repository\Post\PostRepository;
 use App\Service\Publish\PublishServiceInterface;
@@ -88,6 +89,13 @@ class Post implements PostInterface
         return $this->medias->filter(
             fn (MediaPost $media) => in_array($media->getMimeType(), PublishServiceInterface::IMAGE_MIME_TYPES)
         )->count();
+    }
+
+    public function hasPublishedMedias(): bool
+    {
+        return !$this->medias->filter(
+            fn (MediaPost $media) => $media->getStatus() !== MediaStatus::CREATED->value
+        )->isEmpty();
     }
 
     public function getGifQuantity(): int
