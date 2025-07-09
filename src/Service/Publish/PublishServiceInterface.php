@@ -11,6 +11,7 @@ use App\Entity\Post\Post;
 interface PublishServiceInterface
 {
     public const IMAGE_MIME_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+    public const GIF_MIME_TYPES = ['image/gif', 'image/x-gif', 'application/gif', 'application/x-gif'];
     public const VIDEO_MIME_TYPES = ['video/mp4', 'video/avi', 'video/mov', 'video/webm'];
 
     public function post(Post $post, UploadedMediaInterface $medias): PublishedPostInterface;

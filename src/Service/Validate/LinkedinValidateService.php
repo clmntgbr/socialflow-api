@@ -14,4 +14,8 @@ class LinkedinValidateService implements ValidateServiceInterface
     public function validateMediaPost(MediaPost $mediaPost): void
     {
     }
+
+    public function validateMaxFiles(Post $post): void
+    {
+    }
 }

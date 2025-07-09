@@ -196,6 +196,7 @@ class LinkedinPublishService implements PublishServiceInterface
     {
         return match (true) {
             in_array($uploadPayload->getMediaPost()->getMimeType(), self::IMAGE_MIME_TYPES) => $this->uploadMedia($uploadPayload->getSocialAccount(), $uploadPayload->getUploadedLinkedinMediaId(), $uploadPayload->getLocalPath()),
+            in_array($uploadPayload->getMediaPost()->getMimeType(), self::GIF_MIME_TYPES) => $this->uploadMedia($uploadPayload->getSocialAccount(), $uploadPayload->getUploadedLinkedinMediaId(), $uploadPayload->getLocalPath()),
             in_array($uploadPayload->getMediaPost()->getMimeType(), self::VIDEO_MIME_TYPES) => $this->uploadVideo($uploadPayload->getSocialAccount(), $uploadPayload->getUploadedLinkedinMediaId(), $uploadPayload->getLocalPath()),
             default => throw new PublishException('Failed to upload media to Linkedin: Undefined mimetype'),
         };

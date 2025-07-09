@@ -36,6 +36,7 @@ final class ValidatePostHandler
 
         $service = $this->validateServiceFactory->get($post->getType());
         $service->validateContent($post);
+        $service->validateMaxFiles($post);
 
         array_map(
             fn (MediaPost $media) => $this->messageBus->dispatch(

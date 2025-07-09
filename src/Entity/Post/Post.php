@@ -7,6 +7,7 @@ use ApiPlatform\Metadata\Delete;
 use App\Entity\Trait\UuidTrait;
 use App\Enum\PostStatus;
 use App\Repository\Post\PostRepository;
+use App\Service\Publish\PublishServiceInterface;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
@@ -80,6 +81,27 @@ class Post implements PostInterface
     public function getType(): string
     {
         return $this->getCluster()->getSocialAccount()->getType();
+    }
+
+    public function getImageQuantity(): int
+    {
+        return $this->medias->filter(
+            fn (MediaPost $media) => in_array($media->getMimeType(), PublishServiceInterface::IMAGE_MIME_TYPES)
+        )->count();
+    }
+
+    public function getGifQuantity(): int
+    {
+        return $this->medias->filter(
+            fn (MediaPost $media) => in_array($media->getMimeType(), PublishServiceInterface::GIF_MIME_TYPES)
+        )->count();
+    }
+
+    public function getVideoQuantity(): int
+    {
+        return $this->medias->filter(
+            fn (MediaPost $media) => in_array($media->getMimeType(), PublishServiceInterface::VIDEO_MIME_TYPES)
+        )->count();
     }
 
     public function isFirst(): bool
