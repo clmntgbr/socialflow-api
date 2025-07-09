@@ -11,6 +11,7 @@ use App\Entity\AbstractMedia;
 use App\Entity\Trait\UuidTrait;
 use App\Entity\UrnInterface;
 use App\Repository\Post\MediaPostRepository;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Timestampable\Traits\TimestampableEntity;
 use Symfony\Component\Serializer\Attribute\Groups;
@@ -47,6 +48,10 @@ class MediaPost extends AbstractMedia implements UrnInterface
     #[Groups(['media.read'])]
     private ?Post $post = null;
 
+    #[ORM\Column(name: '`order`', type: Types::INTEGER, nullable: true)]
+    #[Groups(['cluster.read', 'cluster.write'])]
+    private ?int $order;
+
     public function __construct()
     {
         parent::__construct();
@@ -69,5 +74,17 @@ class MediaPost extends AbstractMedia implements UrnInterface
     public function getUrn(): string
     {
         return '/api/media_posts/'.(string) $this->getId();
+    }
+
+    public function getOrder(): ?int
+    {
+        return $this->order;
+    }
+
+    public function setOrder(?int $order): static
+    {
+        $this->order = $order;
+
+        return $this;
     }
 }

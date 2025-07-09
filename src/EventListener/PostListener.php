@@ -10,6 +10,7 @@ use App\Exception\PublishException;
 use Doctrine\Bundle\DoctrineBundle\Attribute\AsDoctrineListener;
 use Doctrine\ORM\Event\PostPersistEventArgs;
 use Doctrine\ORM\Event\PostRemoveEventArgs;
+use Doctrine\ORM\Event\PrePersistEventArgs;
 use Doctrine\ORM\Event\PreRemoveEventArgs;
 use Doctrine\ORM\Events;
 use Symfony\Component\Messenger\Bridge\Amqp\Transport\AmqpStamp;
@@ -18,13 +19,27 @@ use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Messenger\Stamp\DelayStamp;
 
 #[AsDoctrineListener(event: Events::postPersist)]
+#[AsDoctrineListener(event: Events::prePersist)]
 #[AsDoctrineListener(event: Events::preRemove)]
 #[AsDoctrineListener(event: Events::postRemove)]
-final class PostEvent
+final class PostListener
 {
     public function __construct(
         private MessageBusInterface $messageBus,
     ) {
+    }
+
+    public function prePersist(PrePersistEventArgs $prePersistEventArgs): void
+    {
+        $post = $prePersistEventArgs->getObject();
+        if (!$post instanceof Post) {
+            return;
+        }
+
+        $medias = $post->getMedias()->toArray();
+        array_map(function($media, $index) {
+            $media->setOrder($index + 1);
+        }, $medias, array_keys($medias));
     }
 
     public function postPersist(PostPersistEventArgs $postPersistEventArgs): void

@@ -8,7 +8,7 @@ use Doctrine\ORM\Event\PreRemoveEventArgs;
 use Doctrine\ORM\Events;
 
 #[AsDoctrineListener(event: Events::preRemove)]
-final class SocialAccountEvent
+final class SocialAccountListener
 {
     public function __construct()
     {

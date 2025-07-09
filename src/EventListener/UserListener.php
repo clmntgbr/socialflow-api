@@ -15,7 +15,7 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 #[AsDoctrineListener(event: Events::prePersist)]
 #[AsDoctrineListener(event: Events::preUpdate)]
 #[AsDoctrineListener(event: Events::postPersist)]
-final class UserEvent
+final class UserListener
 {
     public function __construct(
         private UserPasswordHasherInterface $userPasswordHasher,

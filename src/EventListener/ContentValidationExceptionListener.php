@@ -7,7 +7,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpKernel\Event\ExceptionEvent;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 
-class ContentValidationExceptionEvent
+class ContentValidationExceptionListener
 {
     public function onKernelException(ExceptionEvent $event): void
     {

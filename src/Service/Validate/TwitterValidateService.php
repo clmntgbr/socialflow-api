@@ -70,22 +70,22 @@ class TwitterValidateService implements ValidateServiceInterface
             in_array($mediaPost->getMimeType(), PublishServiceInterface::IMAGE_MIME_TYPES) => $restrictions->getImageMaxFileSizeBytes(),
             in_array($mediaPost->getMimeType(), PublishServiceInterface::GIF_MIME_TYPES) => $restrictions->getGifMaxFileSizeBytes(),
             in_array($mediaPost->getMimeType(), PublishServiceInterface::VIDEO_MIME_TYPES) => $restrictions->getVideoMaxFileSizeBytes(),
-            default => throw new ContentValidationException(message: 'Failed to validate media: Undefined mimetype', postOrder: (string) $mediaPost->getPost()->getOrder()),
+            default => throw new ContentValidationException(message: 'Failed to validate media: Undefined mimetype', postOrder: (string) $mediaPost->getPost()->getOrder(), mediaPostOrder: (string) $mediaPost->getOrder()),
         };
 
         if ($mediaPost->getSize() > $maxFileSizesBytes) {
-            throw new ContentValidationException(message: sprintf('Media is too long: %s bytes (max: %s)', $mediaPost->getSize(), $maxFileSizesBytes), postOrder: (string) $mediaPost->getPost()->getOrder());
+            throw new ContentValidationException(message: sprintf('Media is too long: %s bytes (max: %s)', $mediaPost->getSize(), $maxFileSizesBytes), postOrder: (string) $mediaPost->getPost()->getOrder(), mediaPostOrder: (string) $mediaPost->getOrder());
         }
 
         $maxFileDuration = match (true) {
             in_array($mediaPost->getMimeType(), PublishServiceInterface::IMAGE_MIME_TYPES) => null,
             in_array($mediaPost->getMimeType(), PublishServiceInterface::GIF_MIME_TYPES) => null,
             in_array($mediaPost->getMimeType(), PublishServiceInterface::VIDEO_MIME_TYPES) => $restrictions->getVideoMaxDurationSeconds(),
-            default => throw new ContentValidationException(message: 'Failed to validate media: Undefined mimetype', postOrder: (string) $mediaPost->getPost()->getOrder()),
+            default => throw new ContentValidationException(message: 'Failed to validate media: Undefined mimetype', postOrder: (string) $mediaPost->getPost()->getOrder(), mediaPostOrder: (string) $mediaPost->getOrder()),
         };
 
         if ($mediaPost->getDuration() > $maxFileDuration) {
-            throw new ContentValidationException(message: sprintf('Media duration is too long: %s secondes (max: %s)', $mediaPost->getDuration(), $maxFileDuration), postOrder: (string) $mediaPost->getPost()->getOrder());
+            throw new ContentValidationException(message: sprintf('Media duration is too long: %s secondes (max: %s)', $mediaPost->getDuration(), $maxFileDuration), postOrder: (string) $mediaPost->getPost()->getOrder(), mediaPostOrder: (string) $mediaPost->getOrder());
         }
     }
 }

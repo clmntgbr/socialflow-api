@@ -12,7 +12,7 @@ use Symfony\Component\Messenger\Bridge\Amqp\Transport\AmqpStamp;
 use Symfony\Component\Messenger\MessageBusInterface;
 
 #[AsDoctrineListener(event: Events::postPersist)]
-final class ClusterEvent
+final class ClusterListener
 {
     public function __construct(
         private MessageBusInterface $messageBus,
