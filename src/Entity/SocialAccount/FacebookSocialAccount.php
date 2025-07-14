@@ -3,6 +3,8 @@
 namespace App\Entity\SocialAccount;
 
 use ApiPlatform\Metadata\ApiResource;
+use App\Dto\SocialAccount\Restrictions\FacebookRestrictions;
+use App\Dto\SocialAccount\Restrictions\RestrictionInterface;
 use App\Repository\SocialAccount\FacebookSocialAccountRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
@@ -39,5 +41,11 @@ class FacebookSocialAccount extends SocialAccount implements SocialAccountInterf
         $this->link = $link;
 
         return $this;
+    }
+
+    #[Groups(['social_account.read'])]
+    public function getRestrictions(): RestrictionInterface
+    {
+        return new FacebookRestrictions($this);
     }
 }

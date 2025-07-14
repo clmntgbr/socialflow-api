@@ -7,7 +7,13 @@ use ApiPlatform\Metadata\Delete;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Post as PostOperation;
+use App\Entity\SocialAccount\FacebookSocialAccount;
+use App\Entity\SocialAccount\InstagramSocialAccount;
+use App\Entity\SocialAccount\LinkedinSocialAccount;
 use App\Entity\SocialAccount\SocialAccount;
+use App\Entity\SocialAccount\ThreadSocialAccount;
+use App\Entity\SocialAccount\TwitterSocialAccount;
+use App\Entity\SocialAccount\YoutubeSocialAccount;
 use App\Entity\Trait\UuidTrait;
 use App\Enum\ClusterStatus;
 use App\Enum\PostStatus;
@@ -127,6 +133,9 @@ class Cluster
         return $this;
     }
 
+    /**
+     * @return FacebookSocialAccount|TwitterSocialAccount|LinkedinSocialAccount|ThreadSocialAccount|YoutubeSocialAccount|InstagramSocialAccount
+     */
     public function getSocialAccount(): ?SocialAccount
     {
         return $this->socialAccount;

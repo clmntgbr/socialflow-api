@@ -3,6 +3,8 @@
 namespace App\Entity\SocialAccount;
 
 use ApiPlatform\Metadata\ApiResource;
+use App\Dto\SocialAccount\Restrictions\LinkedinRestrictions;
+use App\Dto\SocialAccount\Restrictions\RestrictionInterface;
 use App\Repository\SocialAccount\LinkedinSocialAccountRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
@@ -34,5 +36,11 @@ class LinkedinSocialAccount extends SocialAccount implements SocialAccountInterf
         $this->name = $name;
 
         return $this;
+    }
+
+    #[Groups(['social_account.read'])]
+    public function getRestrictions(): RestrictionInterface
+    {
+        return new LinkedinRestrictions($this);
     }
 }

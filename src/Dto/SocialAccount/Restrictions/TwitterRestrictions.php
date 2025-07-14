@@ -28,7 +28,7 @@ final class TwitterRestrictions implements \JsonSerializable, RestrictionInterfa
     private string $gifMaxFileSizeFormatted = '15 MB';
 
     public function __construct(
-        private TwitterSocialAccount $twitterSocialAccount
+        private TwitterSocialAccount $twitterSocialAccount,
     ) {
     }
 

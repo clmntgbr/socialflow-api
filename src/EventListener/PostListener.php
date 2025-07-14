@@ -37,7 +37,7 @@ final class PostListener
         }
 
         $medias = $post->getMedias()->toArray();
-        array_map(function($media, $index) {
+        array_map(function ($media, $index) {
             $media->setOrder($index + 1);
         }, $medias, array_keys($medias));
     }

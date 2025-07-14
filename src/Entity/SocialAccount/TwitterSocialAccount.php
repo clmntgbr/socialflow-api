@@ -4,9 +4,7 @@ namespace App\Entity\SocialAccount;
 
 use ApiPlatform\Metadata\ApiResource;
 use App\Dto\SocialAccount\Restrictions\RestrictionInterface;
-use App\Dto\SocialAccount\Restrictions\TwitterRestrictionNotVerified;
 use App\Dto\SocialAccount\Restrictions\TwitterRestrictions;
-use App\Dto\SocialAccount\Restrictions\TwitterRestrictionVerified;
 use App\Repository\SocialAccount\TwitterSocialAccountRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;

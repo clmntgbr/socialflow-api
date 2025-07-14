@@ -36,15 +36,15 @@ final class CleanPostHandler
             return;
         }
 
-        array_map(fn($media) => [
+        array_map(fn ($media) => [
             $this->messageBus->dispatch(new UpdateMediaPostStatus(
-                mediaPostId: $media->getId(), 
+                mediaPostId: $media->getId(),
                 status: MediaStatus::PUBLISHED
             ), [new AmqpStamp('async-medium')]),
             $this->messageBus->dispatch(new RemoveMediaPost(
-                mediaPostId: $media->getId(), 
+                mediaPostId: $media->getId(),
                 delete: false
-            ), [new AmqpStamp('async-medium')])
+            ), [new AmqpStamp('async-medium')]),
         ], $post->getMedias()->toArray());
     }
 }
