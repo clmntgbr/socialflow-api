@@ -27,7 +27,8 @@ final class CreateOrganizationHandler
         }
 
         $organization = (new Organization())
-            ->addUser($user)
+            ->addMember($user)
+            ->setName($user->getFirstname() . "'s organization")
             ->setAdmin($user);
 
         $user->setActiveOrganization($organization);

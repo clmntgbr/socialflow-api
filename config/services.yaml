@@ -42,3 +42,8 @@ services:
                 credentials:
                     key: '%env(S3_ACCESS_KEY)%'
                     secret: '%env(S3_SECRET_KEY)%'
+    
+    App\Serializer\GroupsContextBuilder:
+        decorates: 'api_platform.serializer.context_builder'
+        arguments: [ '@App\Serializer\GroupsContextBuilder.inner' ]
+        autoconfigure: false

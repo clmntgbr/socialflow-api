@@ -3,6 +3,11 @@ App\Entity\User:
     email: "clement@gmail.com"
     plainPassword: "clement"
     roles: ["ROLE_ADMIN"]
-  user_2:
-    email: "user@gmail.com"
-    plainPassword: "random"
+    firstname: 'Clement'
+    lastname: 'Admin'
+  
+  user_{2..10}:
+    email: <email()>
+    lastname: <lastname()>
+    firstname: <firstName()>
+    plain_password: "random"

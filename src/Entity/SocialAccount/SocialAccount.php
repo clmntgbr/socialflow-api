@@ -60,19 +60,19 @@ class SocialAccount implements SocialAccountInterface
     use TimestampableEntity;
 
     #[ORM\Column(type: Types::STRING)]
-    #[Groups(['social_account.read'])]
+    #[Groups(['social_account.read', 'organization.read.full'])]
     private string $socialAccountId;
 
     #[ORM\Column(type: Types::STRING)]
-    #[Groups(['social_account.read'])]
+    #[Groups(['social_account.read', 'organization.read.full'])]
     private string $username;
 
     #[ORM\Column(type: Types::STRING, nullable: true)]
-    #[Groups(['social_account.read'])]
+    #[Groups(['social_account.read', 'organization.read.full'])]
     private ?string $email = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
-    #[Groups(['social_account.read'])]
+    #[Groups(['social_account.read', 'organization.read.full'])]
     private ?string $avatarUrl = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
@@ -82,31 +82,31 @@ class SocialAccount implements SocialAccountInterface
     private ?string $refreshToken = null;
 
     #[ORM\Column(type: Types::BOOLEAN)]
-    #[Groups(['social_account.read'])]
+    #[Groups(['social_account.read', 'organization.read.full'])]
     private bool $isVerified = false;
 
     #[ORM\Column(type: Types::INTEGER)]
-    #[Groups(['social_account.read'])]
+    #[Groups(['social_account.read', 'organization.read.full'])]
     private int $followers = 0;
 
     #[ORM\Column(type: Types::INTEGER)]
-    #[Groups(['social_account.read'])]
+    #[Groups(['social_account.read', 'organization.read.full'])]
     private int $followings = 0;
 
     #[ORM\Column(type: Types::INTEGER)]
-    #[Groups(['social_account.read'])]
+    #[Groups(['social_account.read', 'organization.read.full'])]
     private int $likes = 0;
 
     #[ORM\Column(type: Types::STRING, nullable: true)]
-    #[Groups(['social_account.read'])]
+    #[Groups(['social_account.read', 'organization.read.full'])]
     private ?string $website = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
-    #[Groups(['social_account.read'])]
+    #[Groups(['social_account.read', 'organization.read.full'])]
     private ?\DateTime $expireAt = null;
 
     #[ORM\Column(type: Types::STRING)]
-    #[Groups(['social_account.read'])]
+    #[Groups(['social_account.read', 'organization.read.full'])]
     private string $status;
 
     #[ORM\ManyToOne(targetEntity: Organization::class, inversedBy: 'socialAccounts')]

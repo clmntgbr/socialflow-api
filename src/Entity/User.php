@@ -33,14 +33,22 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     use TimestampableEntity;
 
     #[ORM\Column(length: 180)]
-    #[Groups(['user.read'])]
+    #[Groups(['user.read', 'organization.read.full'])]
     private ?string $email = null;
+
+    #[ORM\Column(type: Types::STRING)]
+    #[Groups(['user.read', 'organization.read.full'])]
+    private string $firstname;
+
+    #[ORM\Column(type: Types::STRING)]
+    #[Groups(['user.read', 'organization.read.full'])]
+    private string $lastname;
 
     /**
      * @var list<string> The user roles
      */
     #[ORM\Column]
-    #[Groups(['user.read'])]
+    #[Groups(['user.read', 'organization.read.full'])]
     private array $roles = [];
 
     /**
@@ -58,7 +66,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\JoinColumn(nullable: true)]
     private ?Organization $activeOrganization = null;
 
-    #[ORM\ManyToMany(targetEntity: Organization::class, mappedBy: 'users', cascade: ['persist', 'remove'])]
+    #[ORM\ManyToMany(targetEntity: Organization::class, mappedBy: 'members', cascade: ['persist', 'remove'])]
     private Collection $organizations;
 
     public function __construct()
@@ -70,6 +78,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function getEmail(): ?string
     {
         return $this->email;
+    }
+
+    #[Groups(['user.read', 'organization.read.full'])]
+    public function getName(): ?string
+    {
+        return $this->firstname . ' ' . $this->lastname;
     }
 
     public function setEmail(string $email): static
@@ -183,7 +197,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     {
         if (!$this->organizations->contains($organization)) {
             $this->organizations->add($organization);
-            $organization->addUser($this);
+            $organization->addMember($this);
         }
 
         return $this;
@@ -192,8 +206,32 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function removeOrganization(Organization $organization): static
     {
         if ($this->organizations->removeElement($organization)) {
-            $organization->removeUser($this);
+            $organization->removeMember($this);
         }
+
+        return $this;
+    }
+
+    public function getFirstname(): ?string
+    {
+        return $this->firstname;
+    }
+
+    public function setFirstname(string $firstname): static
+    {
+        $this->firstname = $firstname;
+
+        return $this;
+    }
+
+    public function getLastname(): ?string
+    {
+        return $this->lastname;
+    }
+
+    public function setLastname(string $lastname): static
+    {
+        $this->lastname = $lastname;
 
         return $this;
     }
