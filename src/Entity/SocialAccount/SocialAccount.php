@@ -75,12 +75,6 @@ class SocialAccount implements SocialAccountInterface
     #[Groups(['social_account.read', 'organization.read.full'])]
     private ?string $avatarUrl = null;
 
-    #[ORM\Column(type: Types::TEXT, nullable: true)]
-    private ?string $token = null;
-
-    #[ORM\Column(type: Types::TEXT, nullable: true)]
-    private ?string $refreshToken = null;
-
     #[ORM\Column(type: Types::BOOLEAN)]
     #[Groups(['social_account.read', 'organization.read.full'])]
     private bool $isVerified = false;
@@ -101,10 +95,6 @@ class SocialAccount implements SocialAccountInterface
     #[Groups(['social_account.read', 'organization.read.full'])]
     private ?string $website = null;
 
-    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
-    #[Groups(['social_account.read', 'organization.read.full'])]
-    private ?\DateTime $expireAt = null;
-
     #[ORM\Column(type: Types::STRING)]
     #[Groups(['social_account.read', 'organization.read.full'])]
     private string $status;
@@ -112,6 +102,10 @@ class SocialAccount implements SocialAccountInterface
     #[ORM\ManyToOne(targetEntity: Organization::class, inversedBy: 'socialAccounts')]
     #[ORM\JoinColumn(nullable: false)]
     private Organization $organization;
+
+    #[ORM\ManyToOne(targetEntity: TokenSocialAccount::class, cascade: ['persist'])]
+    #[ORM\JoinColumn(nullable: false)]
+    private TokenSocialAccount $tokenSocialAccount;
 
     #[ORM\OneToMany(targetEntity: Cluster::class, mappedBy: 'socialAccount', cascade: ['remove'])]
     private Collection $clusters;
@@ -177,46 +171,6 @@ class SocialAccount implements SocialAccountInterface
     public function setAvatarUrl(?string $avatarUrl): static
     {
         $this->avatarUrl = $avatarUrl;
-
-        return $this;
-    }
-
-    public function getToken(): ?string
-    {
-        return $this->token;
-    }
-
-    public function setToken(?string $token): static
-    {
-        $this->token = $token;
-
-        return $this;
-    }
-
-    public function getRefreshToken(): ?string
-    {
-        return $this->refreshToken;
-    }
-
-    public function setRefreshToken(?string $refreshToken): static
-    {
-        if (null === $refreshToken) {
-            return $this;
-        }
-
-        $this->refreshToken = $refreshToken;
-
-        return $this;
-    }
-
-    public function setRefreshTokenAndExpireAt(?string $refreshToken, \DateTime $expireAt): static
-    {
-        if (null === $refreshToken) {
-            return $this;
-        }
-
-        $this->refreshToken = $refreshToken;
-        $this->expireAt = $expireAt;
 
         return $this;
     }
@@ -293,18 +247,6 @@ class SocialAccount implements SocialAccountInterface
         return $this;
     }
 
-    public function getExpireAt(): ?\DateTime
-    {
-        return $this->expireAt;
-    }
-
-    public function setExpireAt(?\DateTime $expireAt): static
-    {
-        $this->expireAt = $expireAt;
-
-        return $this;
-    }
-
     public function getStatus(): ?string
     {
         return $this->status;
@@ -350,5 +292,17 @@ class SocialAccount implements SocialAccountInterface
     public function getRestrictions()
     {
         return [];
+    }
+
+    public function getTokenSocialAccount(): ?TokenSocialAccount
+    {
+        return $this->tokenSocialAccount;
+    }
+
+    public function setTokenSocialAccount(?TokenSocialAccount $tokenSocialAccount): static
+    {
+        $this->tokenSocialAccount = $tokenSocialAccount;
+
+        return $this;
     }
 }

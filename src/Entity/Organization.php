@@ -3,7 +3,9 @@
 namespace App\Entity;
 
 use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
+use App\ApiResource\GetActiveOrganizationController;
 use App\Entity\SocialAccount\SocialAccount;
 use App\Entity\Trait\UuidTrait;
 use App\Repository\OrganizationRepository;
@@ -21,7 +23,12 @@ use Symfony\Component\Uid\Uuid;
     operations: [
         new GetCollection(
             normalizationContext: ['skip_null_values' => false, 'groups' => ['organization.read']],
-        )
+        ),
+        new Get(
+            uriTemplate: '/organization',
+            controller: GetActiveOrganizationController::class,
+            normalizationContext: ['groups' => ['organization.read']],
+        ),
     ]
 )]
 class Organization

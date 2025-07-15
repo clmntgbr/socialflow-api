@@ -6,10 +6,12 @@ use App\Application\Command\CreateOrUpdateFacebookAccount;
 use App\Application\Command\RemoveSocialAccount;
 use App\Entity\Organization;
 use App\Entity\SocialAccount\FacebookSocialAccount;
+use App\Entity\SocialAccount\TokenSocialAccount;
 use App\Enum\SocialAccountStatus;
 use App\Exception\OrganizationNotFoundException;
 use App\Repository\OrganizationRepository;
 use App\Repository\SocialAccount\FacebookSocialAccountRepository;
+use App\Repository\SocialAccount\TokenSocialAccountRepository;
 use App\Repository\UserRepository;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use Symfony\Component\Messenger\Bridge\Amqp\Transport\AmqpStamp;
@@ -22,6 +24,7 @@ final class CreateOrUpdateFacebookAccountHandler extends CreateOrUpdateAccountHa
     public function __construct(
         private UserRepository $userRepository,
         private OrganizationRepository $organizationRepository,
+        private TokenSocialAccountRepository $tokenSocialAccountRepository,
         private FacebookSocialAccountRepository $facebookSocialAccountRepository,
         private MessageBusInterface $messageBus,
     ) {
@@ -47,6 +50,17 @@ final class CreateOrUpdateFacebookAccountHandler extends CreateOrUpdateAccountHa
         $date = new \DateTime();
         $date->modify('+60 days');
 
+        $token = $this->tokenSocialAccountRepository->findOneBy(['socialAccountId' => $message->facebookAccount->id]);
+
+        if (null === $token) {
+            $token = new TokenSocialAccount();
+        }
+    
+        $token
+            ->setSocialAccountId($message->facebookAccount->id)
+            ->setExpireAt($date)
+            ->setToken($message->facebookToken->token);
+
         $facebookAccount
             ->setLink($message->facebookAccount->link)
             ->setUsername($message->facebookAccount->username)
@@ -56,9 +70,8 @@ final class CreateOrUpdateFacebookAccountHandler extends CreateOrUpdateAccountHa
             ->setFollowings($message->facebookAccount->followings)
             ->setWebsite($message->facebookAccount->website)
             ->setEmail($message->facebookAccount->email)
-            ->setAvatarUrl($message->facebookAccount->picture)
-            ->setExpireAt($date)
-            ->setToken($message->facebookToken->token);
+            ->setTokenSocialAccount($token)
+            ->setAvatarUrl($message->facebookAccount->picture);
 
         $this->facebookSocialAccountRepository->save($facebookAccount, true);
 

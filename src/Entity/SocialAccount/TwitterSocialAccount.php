@@ -16,9 +16,6 @@ use Symfony\Component\Serializer\Attribute\Groups;
 )]
 class TwitterSocialAccount extends SocialAccount implements SocialAccountInterface
 {
-    #[ORM\Column(type: Types::STRING, nullable: true)]
-    private ?string $tokenSecret = null;
-
     #[ORM\Column(type: Types::STRING)]
     #[Groups(['social_account.read'])]
     private string $name;
@@ -46,18 +43,6 @@ class TwitterSocialAccount extends SocialAccount implements SocialAccountInterfa
     public function setName(string $name): static
     {
         $this->name = $name;
-
-        return $this;
-    }
-
-    public function getTokenSecret(): ?string
-    {
-        return $this->tokenSecret;
-    }
-
-    public function setTokenSecret(?string $tokenSecret): static
-    {
-        $this->tokenSecret = $tokenSecret;
 
         return $this;
     }

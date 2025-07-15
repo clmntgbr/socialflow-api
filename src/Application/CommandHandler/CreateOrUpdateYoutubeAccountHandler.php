@@ -5,10 +5,12 @@ namespace App\Application\CommandHandler;
 use App\Application\Command\CreateOrUpdateYoutubeAccount;
 use App\Application\Command\RemoveSocialAccount;
 use App\Entity\Organization;
+use App\Entity\SocialAccount\TokenSocialAccount;
 use App\Entity\SocialAccount\YoutubeSocialAccount;
 use App\Enum\SocialAccountStatus;
 use App\Exception\OrganizationNotFoundException;
 use App\Repository\OrganizationRepository;
+use App\Repository\SocialAccount\TokenSocialAccountRepository;
 use App\Repository\SocialAccount\YoutubeSocialAccountRepository;
 use App\Repository\UserRepository;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
@@ -22,6 +24,7 @@ final class CreateOrUpdateYoutubeAccountHandler extends CreateOrUpdateAccountHan
     public function __construct(
         private UserRepository $userRepository,
         private OrganizationRepository $organizationRepository,
+        private TokenSocialAccountRepository $tokenSocialAccountRepository,
         private YoutubeSocialAccountRepository $youtubeSocialAccountRepository,
         private MessageBusInterface $messageBus,
     ) {
@@ -46,6 +49,17 @@ final class CreateOrUpdateYoutubeAccountHandler extends CreateOrUpdateAccountHan
         $date = new \DateTime();
         $date->modify(sprintf('+%s seconds', $message->youtubeToken->expiresIn));
 
+        $token = $this->tokenSocialAccountRepository->findOneBy(['socialAccountId' => $message->youtubeAccount->id]);
+
+        if (null === $token) {
+            $token = new TokenSocialAccount();
+        }
+    
+        $token
+            ->setSocialAccountId($message->youtubeAccount->id)
+            ->setToken($message->youtubeToken->token)
+            ->setRefreshTokenAndExpireAt($message->youtubeToken->refreshToken, $date);
+
         $youtubeAccount
             ->setDescription($message->youtubeAccount->description)
             ->setName($message->youtubeAccount->name)
@@ -54,9 +68,8 @@ final class CreateOrUpdateYoutubeAccountHandler extends CreateOrUpdateAccountHan
             ->setOrganization($organization)
             ->setFollowers($message->youtubeAccount->publicMetrics->followers)
             ->setAvatarUrl($message->youtubeAccount->picture)
-            ->setIsVerified($message->youtubeAccount->verified)
-            ->setToken($message->youtubeToken->token)
-            ->setRefreshTokenAndExpireAt($message->youtubeToken->refreshToken, $date);
+            ->setTokenSocialAccount($token)
+            ->setIsVerified($message->youtubeAccount->verified);
 
         $this->youtubeSocialAccountRepository->save($youtubeAccount, true);
 

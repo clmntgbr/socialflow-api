@@ -5,10 +5,12 @@ namespace App\Application\CommandHandler;
 use App\Application\Command\CreateOrUpdateTwitterAccount;
 use App\Application\Command\RemoveSocialAccount;
 use App\Entity\Organization;
+use App\Entity\SocialAccount\TokenSocialAccount;
 use App\Entity\SocialAccount\TwitterSocialAccount;
 use App\Enum\SocialAccountStatus;
 use App\Exception\OrganizationNotFoundException;
 use App\Repository\OrganizationRepository;
+use App\Repository\SocialAccount\TokenSocialAccountRepository;
 use App\Repository\SocialAccount\TwitterSocialAccountRepository;
 use App\Repository\UserRepository;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
@@ -22,6 +24,7 @@ final class CreateOrUpdateTwitterAccountHandler extends CreateOrUpdateAccountHan
     public function __construct(
         private UserRepository $userRepository,
         private OrganizationRepository $organizationRepository,
+        private TokenSocialAccountRepository $tokenSocialAccountRepository,
         private TwitterSocialAccountRepository $twitterSocialAccountRepository,
         private MessageBusInterface $messageBus,
     ) {
@@ -44,6 +47,17 @@ final class CreateOrUpdateTwitterAccountHandler extends CreateOrUpdateAccountHan
             class: TwitterSocialAccount::class
         );
 
+        $token = $this->tokenSocialAccountRepository->findOneBy(['socialAccountId' => $message->twitterAccount->id]);
+
+        if (null === $token) {
+            $token = new TokenSocialAccount();
+        }
+    
+        $token
+            ->setSocialAccountId($message->twitterAccount->id)
+            ->setToken($message->twitterToken->oauthToken)
+            ->setTokenSecret($message->twitterToken->oauthTokenSecret);
+
         $twitterAccount
             ->setUsername($message->twitterAccount->username)
             ->setSocialAccountId($message->twitterAccount->id)
@@ -53,10 +67,9 @@ final class CreateOrUpdateTwitterAccountHandler extends CreateOrUpdateAccountHan
             ->setLikes($message->twitterAccount->publicMetrics->likes)
             ->setTweets($message->twitterAccount->publicMetrics->tweets)
             ->setName($message->twitterAccount->name)
+            ->setTokenSocialAccount($token)
             ->setAvatarUrl($message->twitterAccount->profileImageUrl)
-            ->setIsVerified($message->twitterAccount->verified)
-            ->setToken($message->twitterToken->oauthToken)
-            ->setTokenSecret($message->twitterToken->oauthTokenSecret);
+            ->setIsVerified($message->twitterAccount->verified);
 
         $this->twitterSocialAccountRepository->save($twitterAccount, true);
 

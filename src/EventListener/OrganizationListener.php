@@ -32,6 +32,10 @@ final class OrganizationListener
         /** @var User $user */
         $user = $this->security->getUser();
 
+        if (null === $user) {
+            return;
+        }
+
         if ((string) $organization->getAdmin()->getId() === (string) $user->getId()) {
             $organization->markAsAdmin();
         }

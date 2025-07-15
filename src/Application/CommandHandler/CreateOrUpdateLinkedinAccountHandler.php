@@ -6,10 +6,12 @@ use App\Application\Command\CreateOrUpdateLinkedinAccount;
 use App\Application\Command\RemoveSocialAccount;
 use App\Entity\Organization;
 use App\Entity\SocialAccount\LinkedinSocialAccount;
+use App\Entity\SocialAccount\TokenSocialAccount;
 use App\Enum\SocialAccountStatus;
 use App\Exception\OrganizationNotFoundException;
 use App\Repository\OrganizationRepository;
 use App\Repository\SocialAccount\LinkedinSocialAccountRepository;
+use App\Repository\SocialAccount\TokenSocialAccountRepository;
 use App\Repository\UserRepository;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use Symfony\Component\Messenger\Bridge\Amqp\Transport\AmqpStamp;
@@ -22,6 +24,7 @@ final class CreateOrUpdateLinkedinAccountHandler extends CreateOrUpdateAccountHa
     public function __construct(
         private UserRepository $userRepository,
         private OrganizationRepository $organizationRepository,
+        private TokenSocialAccountRepository $tokenSocialAccountRepository,
         private LinkedinSocialAccountRepository $LinkedinSocialAccountRepository,
         private MessageBusInterface $messageBus,
     ) {
@@ -47,6 +50,17 @@ final class CreateOrUpdateLinkedinAccountHandler extends CreateOrUpdateAccountHa
         $date = new \DateTime();
         $date->modify(sprintf('+%s seconds', $message->linkedinToken->expiresIn));
 
+        $token = $this->tokenSocialAccountRepository->findOneBy(['socialAccountId' => $message->linkedinAccount->id]);
+
+        if (null === $token) {
+            $token = new TokenSocialAccount();
+        }
+    
+        $token
+            ->setSocialAccountId($message->linkedinAccount->id)
+            ->setExpireAt($date)
+            ->setToken($message->linkedinToken->token);
+
         $linkedinAccount
             ->setUsername($message->linkedinAccount->name)
             ->setSocialAccountId($message->linkedinAccount->id)
@@ -54,9 +68,8 @@ final class CreateOrUpdateLinkedinAccountHandler extends CreateOrUpdateAccountHa
             ->setName($message->linkedinAccount->familyName.' '.$message->linkedinAccount->givenName)
             ->setIsVerified($message->linkedinAccount->verified)
             ->setEmail($message->linkedinAccount->email)
-            ->setAvatarUrl($message->linkedinAccount->picture)
-            ->setExpireAt($date)
-            ->setToken($message->linkedinToken->token);
+            ->setTokenSocialAccount($token)
+            ->setAvatarUrl($message->linkedinAccount->picture);
 
         $this->LinkedinSocialAccountRepository->save($linkedinAccount, true);
 

@@ -4,6 +4,8 @@ namespace App\Entity;
 
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\Patch;
+use App\ApiResource\PatchUserController;
 use App\Entity\Trait\UuidTrait;
 use App\Repository\UserRepository;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -25,6 +27,12 @@ use Symfony\Component\Uid\Uuid;
             uriTemplate: '/me',
             normalizationContext: ['groups' => ['user.read']],
         ),
+        new Patch(
+            uriTemplate: '/me',
+            controller: PatchUserController::class,
+            normalizationContext: ['groups' => ['user.read']],
+            denormalizationContext: ['groups' => ['user.write']],
+        ),
     ]
 )]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
@@ -37,11 +45,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?string $email = null;
 
     #[ORM\Column(type: Types::STRING)]
-    #[Groups(['user.read', 'organization.read.full'])]
+    #[Groups(['user.read', 'organization.read.full', 'user.write'])]
     private string $firstname;
 
     #[ORM\Column(type: Types::STRING)]
-    #[Groups(['user.read', 'organization.read.full'])]
+    #[Groups(['user.read', 'organization.read.full', 'user.write'])]
     private string $lastname;
 
     /**
@@ -51,9 +59,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[Groups(['user.read', 'organization.read.full'])]
     private array $roles = [];
 
-    /**
-     * @var string The hashed password
-     */
     #[ORM\Column]
     private ?string $password = null;
 
@@ -64,6 +69,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[ORM\ManyToOne(targetEntity: Organization::class)]
     #[ORM\JoinColumn(nullable: true)]
+    #[Groups(['user.read', 'user.write'])]
     private ?Organization $activeOrganization = null;
 
     #[ORM\ManyToMany(targetEntity: Organization::class, mappedBy: 'members', cascade: ['persist', 'remove'])]
@@ -88,8 +94,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function setEmail(string $email): static
     {
-        $this->email = $email;
+        if ($this->email !== null && $this->email !== $email) {
+            return $this;
+        }
 
+        $this->email = $email;
         return $this;
     }
 
@@ -191,6 +200,15 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function getOrganizations(): Collection
     {
         return $this->organizations;
+    }
+
+    public function isMemberOfOrganization(?Organization $organization): bool
+    {
+        if ($organization === null) {
+            return false;
+        }
+
+        return $this->organizations->contains($organization);
     }
 
     public function addOrganization(Organization $organization): static
