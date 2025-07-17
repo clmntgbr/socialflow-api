@@ -93,7 +93,7 @@ class YoutubeSocialAccountService implements SocialAccountServiceInterface
 
             foreach ($accounts->youtubeAccounts as $youtubeAccount) {
                 $this->bus->dispatch(new CreateOrUpdateYoutubeAccount(
-                    organizationId: $user->getActiveOrganization()->getId(),
+                    groupId: $user->getActiveGroup()->getId(),
                     youtubeToken: $accessToken,
                     youtubeAccount: $youtubeAccount,
                 ));

@@ -43,14 +43,14 @@ framework:
                             binding_keys: [async-low]
                 retry_strategy:
                     max_retries: 1
-            sync: 'sync://'
+            sync: "sync://"
 
         routing:
             App\Application\Command\CreateOrUpdateFacebookAccount: sync
             App\Application\Command\CreateOrUpdateTwitterAccount: sync
             App\Application\Command\CreateOrUpdateLinkedinAccount: sync
             App\Application\Command\CreateOrUpdateYoutubeAccount: sync
-            App\Application\Command\CreateOrganization: sync
+            App\Application\Command\CreateGroup: sync
             App\Application\Command\DeletePost: sync
             App\Application\Command\UpdateTwitterSocialAccount: sync
             App\Application\Command\ValidateCluster: sync
@@ -58,11 +58,11 @@ framework:
             App\Application\Command\ValidatePost: sync
             App\Application\Command\UpdateMediaPostStatus: sync
             App\Application\Command\UpdateUser: sync
-            
+
             App\Application\Command\UploadLinkedinMediaPost: sync
             App\Application\Command\UploadFacebookMediaPost: sync
             App\Application\Command\UploadTwitterMediaPost: sync
-            
+
             App\Application\Command\RemoveSocialAccount: async-low
             App\Application\Command\ExpireSocialAccount: async-high
             App\Application\Command\PublishCluster: async-medium

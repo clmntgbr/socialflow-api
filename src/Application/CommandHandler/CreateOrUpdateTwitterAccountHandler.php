@@ -4,12 +4,12 @@ namespace App\Application\CommandHandler;
 
 use App\Application\Command\CreateOrUpdateTwitterAccount;
 use App\Application\Command\RemoveSocialAccount;
-use App\Entity\Organization;
+use App\Entity\Group;
 use App\Entity\SocialAccount\TokenSocialAccount;
 use App\Entity\SocialAccount\TwitterSocialAccount;
 use App\Enum\SocialAccountStatus;
-use App\Exception\OrganizationNotFoundException;
-use App\Repository\OrganizationRepository;
+use App\Exception\GroupNotFoundException;
+use App\Repository\GroupRepository;
 use App\Repository\SocialAccount\TokenSocialAccountRepository;
 use App\Repository\SocialAccount\TwitterSocialAccountRepository;
 use App\Repository\UserRepository;
@@ -23,7 +23,7 @@ final class CreateOrUpdateTwitterAccountHandler extends CreateOrUpdateAccountHan
 {
     public function __construct(
         private UserRepository $userRepository,
-        private OrganizationRepository $organizationRepository,
+        private GroupRepository $groupRepository,
         private TokenSocialAccountRepository $tokenSocialAccountRepository,
         private TwitterSocialAccountRepository $twitterSocialAccountRepository,
         private MessageBusInterface $messageBus,
@@ -33,17 +33,17 @@ final class CreateOrUpdateTwitterAccountHandler extends CreateOrUpdateAccountHan
 
     public function __invoke(CreateOrUpdateTwitterAccount $message): void
     {
-        /** @var ?Organization $organization */
-        $organization = $this->organizationRepository->findOneBy(['id' => (string) $message->organizationId]);
+        /** @var ?Group $group */
+        $group = $this->groupRepository->findOneBy(['id' => (string) $message->groupId]);
 
-        if (null === $organization) {
-            throw new OrganizationNotFoundException((string) $message->organizationId);
+        if (null === $group) {
+            throw new GroupNotFoundException((string) $message->groupId);
         }
 
         /** @var TwitterSocialAccount $twitterAccount */
         $twitterAccount = $this->getAccount(
             socialAccountId: $message->twitterAccount->id,
-            organization: $organization,
+            group: $group,
             class: TwitterSocialAccount::class
         );
 
@@ -61,7 +61,7 @@ final class CreateOrUpdateTwitterAccountHandler extends CreateOrUpdateAccountHan
         $twitterAccount
             ->setUsername($message->twitterAccount->username)
             ->setSocialAccountId($message->twitterAccount->id)
-            ->setOrganization($organization)
+            ->setGroup($group)
             ->setFollowers($message->twitterAccount->publicMetrics->followers)
             ->setFollowings($message->twitterAccount->publicMetrics->followings)
             ->setLikes($message->twitterAccount->publicMetrics->likes)

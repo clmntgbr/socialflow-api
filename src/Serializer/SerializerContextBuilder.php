@@ -3,14 +3,14 @@
 namespace App\Serializer;
 
 use ApiPlatform\State\SerializerContextBuilderInterface;
-use App\Entity\Organization;
+use App\Entity\Group;
 use App\Service\ContextService;
 use Symfony\Component\HttpFoundation\Request;
 
-class GroupsContextBuilder implements SerializerContextBuilderInterface
+class SerializerContextBuilder implements SerializerContextBuilderInterface
 {
     private array $allowedEntity = [
-        Organization::class,
+        Group::class,
     ];
 
     public function __construct(
@@ -28,7 +28,7 @@ class GroupsContextBuilder implements SerializerContextBuilderInterface
             return $context;
         }
 
-        $data = $request->query->get('groups', '');
+        $data = $request->query->get('serializer', '');
         $groups = $this->contextService->getGroups($data);
 
         if (is_null($groups)) {

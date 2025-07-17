@@ -5,10 +5,10 @@ namespace App\Entity;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
-use App\ApiResource\GetActiveOrganizationController;
+use App\ApiResource\GetActiveGroupController;
 use App\Entity\SocialAccount\SocialAccount;
 use App\Entity\Trait\UuidTrait;
-use App\Repository\OrganizationRepository;
+use App\Repository\GroupRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
@@ -17,46 +17,47 @@ use Gedmo\Timestampable\Traits\TimestampableEntity;
 use Symfony\Component\Serializer\Attribute\Groups;
 use Symfony\Component\Uid\Uuid;
 
-#[ORM\Entity(repositoryClass: OrganizationRepository::class)]
+#[ORM\Table(name: '`group`')]
+#[ORM\Entity(repositoryClass: GroupRepository::class)]
 #[ApiResource(
     order: ['updatedAt' => 'DESC'],
     operations: [
         new GetCollection(
-            normalizationContext: ['skip_null_values' => false, 'groups' => ['organization.read']],
+            normalizationContext: ['skip_null_values' => false, 'groups' => ['group.read']],
         ),
         new Get(
-            uriTemplate: '/organization',
-            controller: GetActiveOrganizationController::class,
-            normalizationContext: ['groups' => ['organization.read']],
+            uriTemplate: '/group',
+            controller: GetActiveGroupController::class,
+            normalizationContext: ['groups' => ['group.read']],
         ),
     ]
 )]
-class Organization
+class Group
 {
     use UuidTrait;
     use TimestampableEntity;
 
     #[ORM\Column(type: Types::STRING)]
-    #[Groups(['organization.read', 'organization.read.full'])]
+    #[Groups(['group.read', 'group.read.full'])]
     private string $name;
 
-    #[ORM\OneToMany(targetEntity: SocialAccount::class, mappedBy: 'organization', cascade: ['remove'])]
-    #[Groups(['organization.read.full'])]
+    #[ORM\OneToMany(targetEntity: SocialAccount::class, mappedBy: 'group', cascade: ['remove'])]
+    #[Groups(['group.read.full'])]
     private Collection $socialAccounts;
 
-    #[ORM\ManyToMany(targetEntity: User::class, inversedBy: 'organizations')]
-    #[Groups(['organization.read.full'])]
+    #[ORM\ManyToMany(targetEntity: User::class, inversedBy: 'groups')]
+    #[Groups(['group.read.full'])]
     private Collection $members;
 
     #[ORM\ManyToOne(targetEntity: User::class)]
     #[ORM\JoinColumn()]
-    #[Groups(['organization.read.full'])]
+    #[Groups(['group.read.full'])]
     private User $admin;
 
-    #[Groups(['organization.read', 'organization.read.full'])]
+    #[Groups(['group.read', 'group.read.full'])]
     private string $role = 'member';
 
-    #[Groups(['organization.read', 'organization.read.full'])]
+    #[Groups(['group.read', 'group.read.full'])]
     private bool $isAdmin = false;
 
     public function __construct()
@@ -66,13 +67,13 @@ class Organization
         $this->members = new ArrayCollection();
     }
 
-    #[Groups(['organization.read', 'organization.read.full'])]
+    #[Groups(['group.read', 'group.read.full'])]
     public function getCreatedAt()
     {
         return $this->createdAt;
     }
 
-    #[Groups(['organization.read', 'organization.read.full'])]
+    #[Groups(['group.read', 'group.read.full'])]
     public function getUpdatedAt()
     {
         return $this->updatedAt;
@@ -106,7 +107,7 @@ class Organization
     {
         if (!$this->socialAccounts->contains($socialAccount)) {
             $this->socialAccounts->add($socialAccount);
-            $socialAccount->setOrganization($this);
+            $socialAccount->setGroup($this);
         }
 
         return $this;
@@ -116,8 +117,8 @@ class Organization
     {
         if ($this->socialAccounts->removeElement($socialAccount)) {
             // set the owning side to null (unless already changed)
-            if ($socialAccount->getOrganization() === $this) {
-                $socialAccount->setOrganization(null);
+            if ($socialAccount->getGroup() === $this) {
+                $socialAccount->setGroup(null);
             }
         }
 

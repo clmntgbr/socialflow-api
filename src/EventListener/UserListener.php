@@ -2,7 +2,7 @@
 
 namespace App\EventListener;
 
-use App\Application\Command\CreateOrganization;
+use App\Application\Command\CreateGroup;
 use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Attribute\AsDoctrineListener;
 use Doctrine\ORM\Event\PostPersistEventArgs;
@@ -40,7 +40,7 @@ final class UserListener
             return;
         }
 
-        $this->createOrganization($entity);
+        $this->createGroup($entity);
     }
 
     public function preUpdate(PreUpdateEventArgs $preUpdateEventArgs): void
@@ -63,9 +63,9 @@ final class UserListener
         $user->eraseCredentials();
     }
 
-    private function createOrganization(User $user): void
+    private function createGroup(User $user): void
     {
-        $this->bus->dispatch(new CreateOrganization(
+        $this->bus->dispatch(new CreateGroup(
             userId: $user->getId(),
         ));
     }

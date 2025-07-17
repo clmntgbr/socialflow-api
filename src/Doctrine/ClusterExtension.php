@@ -43,8 +43,8 @@ final readonly class ClusterExtension implements QueryCollectionExtensionInterfa
 
         $rootAlias = $queryBuilder->getRootAliases()[0];
         $queryBuilder->join(sprintf('%s.socialAccount', $rootAlias), 's');
-        $queryBuilder->andWhere('s.organization = :organization');
-        $queryBuilder->setParameter('organization', $user->getActiveOrganization());
+        $queryBuilder->andWhere('s.group = :group');
+        $queryBuilder->setParameter('group', $user->getActiveGroup());
     }
 
     /**

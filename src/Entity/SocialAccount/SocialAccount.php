@@ -8,7 +8,7 @@ use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Delete;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
-use App\Entity\Organization;
+use App\Entity\Group;
 use App\Entity\Post\Cluster;
 use App\Entity\Trait\UuidTrait;
 use App\Enum\SocialAccountStatus;
@@ -60,48 +60,48 @@ class SocialAccount implements SocialAccountInterface
     use TimestampableEntity;
 
     #[ORM\Column(type: Types::STRING)]
-    #[Groups(['social_account.read', 'organization.read.full'])]
+    #[Groups(['social_account.read', 'group.read.full'])]
     private string $socialAccountId;
 
     #[ORM\Column(type: Types::STRING)]
-    #[Groups(['social_account.read', 'organization.read.full'])]
+    #[Groups(['social_account.read', 'group.read.full'])]
     private string $username;
 
     #[ORM\Column(type: Types::STRING, nullable: true)]
-    #[Groups(['social_account.read', 'organization.read.full'])]
+    #[Groups(['social_account.read', 'group.read.full'])]
     private ?string $email = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
-    #[Groups(['social_account.read', 'organization.read.full'])]
+    #[Groups(['social_account.read', 'group.read.full'])]
     private ?string $avatarUrl = null;
 
     #[ORM\Column(type: Types::BOOLEAN)]
-    #[Groups(['social_account.read', 'organization.read.full'])]
+    #[Groups(['social_account.read', 'group.read.full'])]
     private bool $isVerified = false;
 
     #[ORM\Column(type: Types::INTEGER)]
-    #[Groups(['social_account.read', 'organization.read.full'])]
+    #[Groups(['social_account.read', 'group.read.full'])]
     private int $followers = 0;
 
     #[ORM\Column(type: Types::INTEGER)]
-    #[Groups(['social_account.read', 'organization.read.full'])]
+    #[Groups(['social_account.read', 'group.read.full'])]
     private int $followings = 0;
 
     #[ORM\Column(type: Types::INTEGER)]
-    #[Groups(['social_account.read', 'organization.read.full'])]
+    #[Groups(['social_account.read', 'group.read.full'])]
     private int $likes = 0;
 
     #[ORM\Column(type: Types::STRING, nullable: true)]
-    #[Groups(['social_account.read', 'organization.read.full'])]
+    #[Groups(['social_account.read', 'group.read.full'])]
     private ?string $website = null;
 
     #[ORM\Column(type: Types::STRING)]
-    #[Groups(['social_account.read', 'organization.read.full'])]
+    #[Groups(['social_account.read', 'group.read.full'])]
     private string $status;
 
-    #[ORM\ManyToOne(targetEntity: Organization::class, inversedBy: 'socialAccounts')]
+    #[ORM\ManyToOne(targetEntity: Group::class, inversedBy: 'socialAccounts')]
     #[ORM\JoinColumn(nullable: false)]
-    private Organization $organization;
+    private Group $group;
 
     #[ORM\ManyToOne(targetEntity: TokenSocialAccount::class, cascade: ['persist'])]
     #[ORM\JoinColumn(nullable: false)]
@@ -187,14 +187,14 @@ class SocialAccount implements SocialAccountInterface
         return $this;
     }
 
-    public function getOrganization(): ?Organization
+    public function getGroup(): ?Group
     {
-        return $this->organization;
+        return $this->group;
     }
 
-    public function setOrganization(?Organization $organization): static
+    public function setGroup(?Group $group): static
     {
-        $this->organization = $organization;
+        $this->group = $group;
 
         return $this;
     }

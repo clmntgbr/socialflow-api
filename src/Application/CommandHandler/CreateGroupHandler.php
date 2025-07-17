@@ -2,22 +2,22 @@
 
 namespace App\Application\CommandHandler;
 
-use App\Application\Command\CreateOrganization;
-use App\Entity\Organization;
+use App\Application\Command\CreateGroup;
+use App\Entity\Group;
 use App\Entity\User;
 use App\Exception\UserNotFoundException;
 use App\Repository\UserRepository;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
 #[AsMessageHandler]
-final class CreateOrganizationHandler
+final class CreateGroupHandler
 {
     public function __construct(
         private UserRepository $userRepository,
     ) {
     }
 
-    public function __invoke(CreateOrganization $message): void
+    public function __invoke(CreateGroup $message): void
     {
         /** @var ?User $user */
         $user = $this->userRepository->findOneBy(['id' => (string) $message->userId]);
@@ -26,13 +26,13 @@ final class CreateOrganizationHandler
             throw new UserNotFoundException((string) $message->userId);
         }
 
-        $organization = (new Organization())
+        $group = (new Group())
             ->addMember($user)
-            ->setName($user->getFirstname() . "'s organization")
+            ->setName($user->getFirstname() . "'s group")
             ->setAdmin($user);
 
-        $user->setActiveOrganization($organization);
-        $user->addOrganization($organization);
+        $user->setActiveGroup($group);
+        $user->addGroup($group);
 
         $this->userRepository->save($user, true);
     }

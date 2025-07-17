@@ -144,7 +144,7 @@ class TwitterSocialAccountService implements SocialAccountServiceInterface
             $accounts = $this->getAccounts($accessToken);
 
             $this->bus->dispatch(new CreateOrUpdateTwitterAccount(
-                organizationId: $user->getActiveOrganization()->getId(),
+                groupId: $user->getActiveGroup()->getId(),
                 twitterAccount: $accounts->twitterAccount,
                 twitterToken: $accessToken,
             ));

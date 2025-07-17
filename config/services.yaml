@@ -5,29 +5,33 @@ services:
         autowire: true
         autoconfigure: true
         bind:
-            string $apiUrl: '%env(resolve:API_URL)%'
-            string $frontUrl: '%env(resolve:FRONT_URL)%'
-            string $facebookClientId: '%env(resolve:FACEBOOK_CLIENT_ID)%'
-            string $facebookClientSecret: '%env(resolve:FACEBOOK_CLIENT_SECRET)%'
-            string $twitterApiKey: '%env(resolve:TWITTER_API_KEY)%'
-            string $twitterApiSecret: '%env(resolve:TWITTER_API_SECRET)%'
-            string $linkedinClientId: '%env(resolve:LINKEDIN_CLIENT_ID)%'
-            string $linkedinClientSecret: '%env(resolve:LINKEDIN_CLIENT_SECRET)%'
-            string $threadClientId: '%env(resolve:THREAD_CLIENT_ID)%'
-            string $youtubeClientId: '%env(resolve:YOUTUBE_CLIENT_ID)%'
-            string $youtubeClientSecret: '%env(resolve:YOUTUBE_CLIENT_SECRET)%'
-            string $projectDir: '%kernel.project_dir%'
+            string $apiUrl: "%env(resolve:API_URL)%"
+            string $frontUrl: "%env(resolve:FRONT_URL)%"
+            string $facebookClientId: "%env(resolve:FACEBOOK_CLIENT_ID)%"
+            string $facebookClientSecret: "%env(resolve:FACEBOOK_CLIENT_SECRET)%"
+            string $twitterApiKey: "%env(resolve:TWITTER_API_KEY)%"
+            string $twitterApiSecret: "%env(resolve:TWITTER_API_SECRET)%"
+            string $linkedinClientId: "%env(resolve:LINKEDIN_CLIENT_ID)%"
+            string $linkedinClientSecret: "%env(resolve:LINKEDIN_CLIENT_SECRET)%"
+            string $threadClientId: "%env(resolve:THREAD_CLIENT_ID)%"
+            string $youtubeClientId: "%env(resolve:YOUTUBE_CLIENT_ID)%"
+            string $youtubeClientSecret: "%env(resolve:YOUTUBE_CLIENT_SECRET)%"
+            string $projectDir: "%kernel.project_dir%"
     App\:
-        resource: '../src/'
+        resource: "../src/"
         exclude:
-            - '../src/DependencyInjection/'
-            - '../src/Entity/'
-            - '../src/Kernel.php'
+            - "../src/DependencyInjection/"
+            - "../src/Entity/"
+            - "../src/Kernel.php"
 
     app.event.authentication_success_listener:
         class: App\EventListener\AuthenticationSuccessListener
         tags:
-            - { name: kernel.event_listener, event: lexik_jwt_authentication.on_authentication_success, method: onAuthenticationSuccessResponse }
+            - {
+                  name: kernel.event_listener,
+                  event: lexik_jwt_authentication.on_authentication_success,
+                  method: onAuthenticationSuccessResponse,
+              }
 
     App\EventListener\ContentValidationExceptionListener:
         tags:
@@ -35,15 +39,15 @@ services:
 
     Aws\S3\S3Client:
         arguments:
-            -   version: 'latest'
-                region: '%env(S3_REGION)%'
-                endpoint: '%env(S3_ENDPOINT)%'
-                use_path_style_endpoint: true
-                credentials:
-                    key: '%env(S3_ACCESS_KEY)%'
-                    secret: '%env(S3_SECRET_KEY)%'
-    
-    App\Serializer\GroupsContextBuilder:
-        decorates: 'api_platform.serializer.context_builder'
-        arguments: [ '@App\Serializer\GroupsContextBuilder.inner' ]
+            - version: "latest"
+              region: "%env(S3_REGION)%"
+              endpoint: "%env(S3_ENDPOINT)%"
+              use_path_style_endpoint: true
+              credentials:
+                  key: "%env(S3_ACCESS_KEY)%"
+                  secret: "%env(S3_SECRET_KEY)%"
+
+    App\Serializer\SerializerContextBuilder:
+        decorates: "api_platform.serializer.context_builder"
+        arguments: ['@App\Serializer\SerializerContextBuilder.inner']
         autoconfigure: false

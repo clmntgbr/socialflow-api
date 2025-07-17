@@ -4,9 +4,9 @@ namespace App\ApiResource;
 
 use App\Application\Command\UpdateUser;
 use App\Dto\User\PatchUser;
-use App\Entity\Organization;
+use App\Entity\Group;
 use App\Entity\User;
-use App\Repository\OrganizationRepository;
+use App\Repository\GroupRepository;
 use App\Repository\UserRepository;
 use App\Service\ContextService;
 use Symfony\Bundle\SecurityBundle\Security;
@@ -28,7 +28,7 @@ class PatchUserController
         private Security $security,
         private readonly SerializerInterface $serializer,
         private ContextService $contextService,
-        private OrganizationRepository $organizationRepository,
+        private GroupRepository $groupRepository,
         private UserRepository $userRepository,
         private MessageBusInterface $messageBus
     ) {}

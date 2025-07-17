@@ -10,5 +10,5 @@ class PatchUser
 
     public ?string $lastname = null;
 
-    public ?string $activeOrganizationId = null;
+    public ?string $activeGroupId = null;
 }

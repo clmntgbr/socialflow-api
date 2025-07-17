@@ -8,7 +8,7 @@ use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Delete;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
-use App\Entity\Organization;
+use App\Entity\Group;
 use App\Entity\Post\Cluster;
 use App\Entity\Trait\UuidTrait;
 use App\Enum\SocialAccountStatus;
@@ -29,7 +29,7 @@ class TokenSocialAccount
     use TimestampableEntity;
 
     #[ORM\Column(type: Types::STRING)]
-    #[Groups(['social_account.read', 'organization.read.full'])]
+    #[Groups(['social_account.read', 'group.read.full'])]
     private string $socialAccountId;
     
     #[ORM\Column(type: Types::TEXT, nullable: true)]
@@ -42,7 +42,7 @@ class TokenSocialAccount
     private ?string $tokenSecret = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
-    #[Groups(['social_account.read', 'organization.read.full'])]
+    #[Groups(['social_account.read', 'group.read.full'])]
     private ?\DateTime $expireAt = null;
 
     public function __construct()

@@ -2,7 +2,7 @@
 
 namespace App\ApiResource;
 
-use App\Entity\Organization;
+use App\Entity\Group;
 use App\Entity\User;
 use App\Service\ContextService;
 use Symfony\Bundle\SecurityBundle\Security;
@@ -15,7 +15,7 @@ use Symfony\Component\Serializer\Context\Normalizer\ObjectNormalizerContextBuild
 use Symfony\Component\Serializer\SerializerInterface;
 
 #[AsController]
-class GetActiveOrganizationController
+class GetActiveGroupController
 {
     public function __construct(
         private Security $security,
@@ -31,7 +31,7 @@ class GetActiveOrganizationController
             throw new \RuntimeException('User not authenticated.');
         }
 
-        $groupsParam = $request->query->get('groups', 'organization.read');
+        $groupsParam = $request->query->get('groups', 'group.read');
         $groups = $this->contextService->getGroups($groupsParam);
 
         $context = (new ObjectNormalizerContextBuilder())
@@ -39,7 +39,7 @@ class GetActiveOrganizationController
             ->toArray();
 
         return new JsonResponse(
-            data: $this->serializer->serialize($user->getActiveOrganization(), 'json', $context),
+            data: $this->serializer->serialize($user->getActiveGroup(), 'json', $context),
             status: Response::HTTP_OK,
             json: true
         );

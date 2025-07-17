@@ -86,7 +86,7 @@ class LinkedinSocialAccountService implements SocialAccountServiceInterface
             $accounts = $this->getAccounts($accessToken);
 
             $this->bus->dispatch(new CreateOrUpdateLinkedinAccount(
-                organizationId: $user->getActiveOrganization()->getId(),
+                groupId: $user->getActiveGroup()->getId(),
                 linkedinAccount: $accounts->linkedinAccount,
                 linkedinToken: $accessToken,
             ));

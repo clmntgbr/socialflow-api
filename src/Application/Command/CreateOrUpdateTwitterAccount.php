@@ -9,7 +9,7 @@ use Symfony\Component\Uid\Uuid;
 final class CreateOrUpdateTwitterAccount implements CreateOrUpdateAccountInterface
 {
     public function __construct(
-        public Uuid $organizationId,
+        public Uuid $groupId,
         public TwitterAccount $twitterAccount,
         public TwitterAccessToken $twitterToken,
     ) {

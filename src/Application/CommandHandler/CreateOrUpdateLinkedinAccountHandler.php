@@ -4,12 +4,12 @@ namespace App\Application\CommandHandler;
 
 use App\Application\Command\CreateOrUpdateLinkedinAccount;
 use App\Application\Command\RemoveSocialAccount;
-use App\Entity\Organization;
+use App\Entity\Group;
 use App\Entity\SocialAccount\LinkedinSocialAccount;
 use App\Entity\SocialAccount\TokenSocialAccount;
 use App\Enum\SocialAccountStatus;
-use App\Exception\OrganizationNotFoundException;
-use App\Repository\OrganizationRepository;
+use App\Exception\GroupNotFoundException;
+use App\Repository\GroupRepository;
 use App\Repository\SocialAccount\LinkedinSocialAccountRepository;
 use App\Repository\SocialAccount\TokenSocialAccountRepository;
 use App\Repository\UserRepository;
@@ -23,7 +23,7 @@ final class CreateOrUpdateLinkedinAccountHandler extends CreateOrUpdateAccountHa
 {
     public function __construct(
         private UserRepository $userRepository,
-        private OrganizationRepository $organizationRepository,
+        private GroupRepository $groupRepository,
         private TokenSocialAccountRepository $tokenSocialAccountRepository,
         private LinkedinSocialAccountRepository $LinkedinSocialAccountRepository,
         private MessageBusInterface $messageBus,
@@ -33,17 +33,17 @@ final class CreateOrUpdateLinkedinAccountHandler extends CreateOrUpdateAccountHa
 
     public function __invoke(CreateOrUpdateLinkedinAccount $message): void
     {
-        /** @var ?Organization $organization */
-        $organization = $this->organizationRepository->findOneBy(['id' => (string) $message->organizationId]);
+        /** @var ?Group $group */
+        $group = $this->groupRepository->findOneBy(['id' => (string) $message->groupId]);
 
-        if (null === $organization) {
-            throw new OrganizationNotFoundException((string) $message->organizationId);
+        if (null === $group) {
+            throw new GroupNotFoundException((string) $message->groupId);
         }
 
         /** @var LinkedinSocialAccount $linkedinAccount */
         $linkedinAccount = $this->getAccount(
             socialAccountId: $message->linkedinAccount->id,
-            organization: $organization,
+            group: $group,
             class: LinkedinSocialAccount::class
         );
 
@@ -64,7 +64,7 @@ final class CreateOrUpdateLinkedinAccountHandler extends CreateOrUpdateAccountHa
         $linkedinAccount
             ->setUsername($message->linkedinAccount->name)
             ->setSocialAccountId($message->linkedinAccount->id)
-            ->setOrganization($organization)
+            ->setGroup($group)
             ->setName($message->linkedinAccount->familyName.' '.$message->linkedinAccount->givenName)
             ->setIsVerified($message->linkedinAccount->verified)
             ->setEmail($message->linkedinAccount->email)

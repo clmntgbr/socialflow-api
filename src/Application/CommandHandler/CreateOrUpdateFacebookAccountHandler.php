@@ -4,12 +4,12 @@ namespace App\Application\CommandHandler;
 
 use App\Application\Command\CreateOrUpdateFacebookAccount;
 use App\Application\Command\RemoveSocialAccount;
-use App\Entity\Organization;
+use App\Entity\Group;
 use App\Entity\SocialAccount\FacebookSocialAccount;
 use App\Entity\SocialAccount\TokenSocialAccount;
 use App\Enum\SocialAccountStatus;
-use App\Exception\OrganizationNotFoundException;
-use App\Repository\OrganizationRepository;
+use App\Exception\GroupNotFoundException;
+use App\Repository\GroupRepository;
 use App\Repository\SocialAccount\FacebookSocialAccountRepository;
 use App\Repository\SocialAccount\TokenSocialAccountRepository;
 use App\Repository\UserRepository;
@@ -23,7 +23,7 @@ final class CreateOrUpdateFacebookAccountHandler extends CreateOrUpdateAccountHa
 {
     public function __construct(
         private UserRepository $userRepository,
-        private OrganizationRepository $organizationRepository,
+        private GroupRepository $groupRepository,
         private TokenSocialAccountRepository $tokenSocialAccountRepository,
         private FacebookSocialAccountRepository $facebookSocialAccountRepository,
         private MessageBusInterface $messageBus,
@@ -33,17 +33,17 @@ final class CreateOrUpdateFacebookAccountHandler extends CreateOrUpdateAccountHa
 
     public function __invoke(CreateOrUpdateFacebookAccount $message): void
     {
-        /** @var ?Organization $organization */
-        $organization = $this->organizationRepository->findOneBy(['id' => (string) $message->organizationId]);
+        /** @var ?Group $group */
+        $group = $this->groupRepository->findOneBy(['id' => (string) $message->groupId]);
 
-        if (null === $organization) {
-            throw new OrganizationNotFoundException((string) $message->organizationId);
+        if (null === $group) {
+            throw new GroupNotFoundException((string) $message->groupId);
         }
 
         /** @var FacebookSocialAccount $facebookAccount */
         $facebookAccount = $this->getAccount(
             socialAccountId: $message->facebookAccount->id,
-            organization: $organization,
+            group: $group,
             class: FacebookSocialAccount::class
         );
 
@@ -65,7 +65,7 @@ final class CreateOrUpdateFacebookAccountHandler extends CreateOrUpdateAccountHa
             ->setLink($message->facebookAccount->link)
             ->setUsername($message->facebookAccount->username)
             ->setSocialAccountId($message->facebookAccount->id)
-            ->setOrganization($organization)
+            ->setGroup($group)
             ->setFollowers($message->facebookAccount->followers)
             ->setFollowings($message->facebookAccount->followings)
             ->setWebsite($message->facebookAccount->website)

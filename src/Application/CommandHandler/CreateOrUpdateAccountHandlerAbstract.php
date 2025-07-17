@@ -2,7 +2,7 @@
 
 namespace App\Application\CommandHandler;
 
-use App\Entity\Organization;
+use App\Entity\Group;
 use App\Entity\SocialAccount\SocialAccount;
 use App\Enum\SocialAccountStatus;
 use App\Repository\SocialAccount\SocialAccountRepositoryInterface;
@@ -14,11 +14,11 @@ abstract class CreateOrUpdateAccountHandlerAbstract
     ) {
     }
 
-    public function getAccount(string $socialAccountId, Organization $organization, string $class): SocialAccount
+    public function getAccount(string $socialAccountId, Group $group, string $class): SocialAccount
     {
         /** @var ?SocialAccount $account */
         $account = $this->socialAccountRepository->findOneBy([
-            'organization' => $organization,
+            'group' => $group,
             'socialAccountId' => $socialAccountId,
         ]);
 

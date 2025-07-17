@@ -4,12 +4,12 @@ namespace App\Application\CommandHandler;
 
 use App\Application\Command\CreateOrUpdateYoutubeAccount;
 use App\Application\Command\RemoveSocialAccount;
-use App\Entity\Organization;
+use App\Entity\Group;
 use App\Entity\SocialAccount\TokenSocialAccount;
 use App\Entity\SocialAccount\YoutubeSocialAccount;
 use App\Enum\SocialAccountStatus;
-use App\Exception\OrganizationNotFoundException;
-use App\Repository\OrganizationRepository;
+use App\Exception\GroupNotFoundException;
+use App\Repository\GroupRepository;
 use App\Repository\SocialAccount\TokenSocialAccountRepository;
 use App\Repository\SocialAccount\YoutubeSocialAccountRepository;
 use App\Repository\UserRepository;
@@ -23,7 +23,7 @@ final class CreateOrUpdateYoutubeAccountHandler extends CreateOrUpdateAccountHan
 {
     public function __construct(
         private UserRepository $userRepository,
-        private OrganizationRepository $organizationRepository,
+        private GroupRepository $groupRepository,
         private TokenSocialAccountRepository $tokenSocialAccountRepository,
         private YoutubeSocialAccountRepository $youtubeSocialAccountRepository,
         private MessageBusInterface $messageBus,
@@ -33,17 +33,17 @@ final class CreateOrUpdateYoutubeAccountHandler extends CreateOrUpdateAccountHan
 
     public function __invoke(CreateOrUpdateYoutubeAccount $message): void
     {
-        /** @var ?Organization $organization */
-        $organization = $this->organizationRepository->findOneBy(['id' => (string) $message->organizationId]);
+        /** @var ?Group $group */
+        $group = $this->groupRepository->findOneBy(['id' => (string) $message->groupId]);
 
-        if (null === $organization) {
-            throw new OrganizationNotFoundException((string) $message->organizationId);
+        if (null === $group) {
+            throw new GroupNotFoundException((string) $message->groupId);
         }
 
         /** @var YoutubeSocialAccount $youtubeAccount */
         $youtubeAccount = $this->getAccount(
             socialAccountId: $message->youtubeAccount->id,
-            organization: $organization, class: YoutubeSocialAccount::class
+            group: $group, class: YoutubeSocialAccount::class
         );
 
         $date = new \DateTime();
@@ -65,7 +65,7 @@ final class CreateOrUpdateYoutubeAccountHandler extends CreateOrUpdateAccountHan
             ->setName($message->youtubeAccount->name)
             ->setUsername($message->youtubeAccount->username)
             ->setSocialAccountId($message->youtubeAccount->id)
-            ->setOrganization($organization)
+            ->setGroup($group)
             ->setFollowers($message->youtubeAccount->publicMetrics->followers)
             ->setAvatarUrl($message->youtubeAccount->picture)
             ->setTokenSocialAccount($token)

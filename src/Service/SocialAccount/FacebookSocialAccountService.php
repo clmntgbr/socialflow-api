@@ -97,7 +97,7 @@ class FacebookSocialAccountService implements SocialAccountServiceInterface
                 $longAccessToken = $this->getLongAccessToken($facebookAccount->token);
 
                 $this->bus->dispatch(new CreateOrUpdateFacebookAccount(
-                    organizationId: $user->getActiveOrganization()->getId(),
+                    groupId: $user->getActiveGroup()->getId(),
                     facebookToken: $longAccessToken,
                     facebookAccount: $facebookAccount,
                 ));

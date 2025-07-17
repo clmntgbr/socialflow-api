@@ -9,7 +9,7 @@ use App\Application\Command\UpdateUser;
 use App\Entity\Post\Post;
 use App\Entity\User;
 use App\Enum\MediaStatus;
-use App\Repository\OrganizationRepository;
+use App\Repository\GroupRepository;
 use App\Repository\Post\PostRepository;
 use App\Repository\UserRepository;
 use Psr\Log\LoggerInterface;
@@ -22,7 +22,7 @@ final class UpdateUserHandler
 {
     public function __construct(
         private UserRepository $userRepository,
-        private OrganizationRepository $organizationRepository,
+        private GroupRepository $groupRepository,
         private LoggerInterface $logger,
         private MessageBusInterface $messageBus,
     ) {
@@ -49,10 +49,10 @@ final class UpdateUserHandler
             $user->setLastname($message->patchUser->lastname);
         }
 
-        if ($message->patchUser->activeOrganizationId) {
-            $organization = $this->organizationRepository->find($message->patchUser->activeOrganizationId);
-            if ($user->isMemberOfOrganization($organization)) {
-                $user->setActiveOrganization($organization);
+        if ($message->patchUser->activeGroupId) {
+            $group = $this->groupRepository->find($message->patchUser->activeGroupId);
+            if ($user->isMemberOfGroup($group)) {
+                $user->setActiveGroup($group);
             }
         }
 

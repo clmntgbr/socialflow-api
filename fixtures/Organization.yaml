@@ -1,5 +1,0 @@
-App\Entity\Organization:
-  organization_{1..50}:
-    name: <sentence(1)>
-    admin: '@user_*'
-    members: ['@user_*', '@user_*', '@user_*', '@user_*', '@user_*']

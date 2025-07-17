@@ -50,7 +50,7 @@ final readonly class SocialAccountExtension implements QueryCollectionExtensionI
         }
 
         $rootAlias = $queryBuilder->getRootAliases()[0];
-        $queryBuilder->andWhere(sprintf('%s.organization = :organization', $rootAlias));
-        $queryBuilder->setParameter('organization', $user->getActiveOrganization());
+        $queryBuilder->andWhere(sprintf('%s.group = :group', $rootAlias));
+        $queryBuilder->setParameter('group', $user->getActiveGroup());
     }
 }

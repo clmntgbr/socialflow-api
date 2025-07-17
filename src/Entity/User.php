@@ -41,22 +41,22 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     use TimestampableEntity;
 
     #[ORM\Column(length: 180)]
-    #[Groups(['user.read', 'organization.read.full'])]
+    #[Groups(['user.read', 'group.read.full'])]
     private ?string $email = null;
 
     #[ORM\Column(type: Types::STRING)]
-    #[Groups(['user.read', 'organization.read.full', 'user.write'])]
+    #[Groups(['user.read', 'group.read.full', 'user.write'])]
     private string $firstname;
 
     #[ORM\Column(type: Types::STRING)]
-    #[Groups(['user.read', 'organization.read.full', 'user.write'])]
+    #[Groups(['user.read', 'group.read.full', 'user.write'])]
     private string $lastname;
 
     /**
      * @var list<string> The user roles
      */
     #[ORM\Column]
-    #[Groups(['user.read', 'organization.read.full'])]
+    #[Groups(['user.read', 'group.read.full'])]
     private array $roles = [];
 
     #[ORM\Column]
@@ -67,18 +67,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: Types::STRING, nullable: true)]
     private ?string $state;
 
-    #[ORM\ManyToOne(targetEntity: Organization::class)]
+    #[ORM\ManyToOne(targetEntity: Group::class)]
     #[ORM\JoinColumn(nullable: true)]
     #[Groups(['user.read', 'user.write'])]
-    private ?Organization $activeOrganization = null;
+    private ?Group $activeGroup = null;
 
-    #[ORM\ManyToMany(targetEntity: Organization::class, mappedBy: 'members', cascade: ['persist', 'remove'])]
-    private Collection $organizations;
+    #[ORM\ManyToMany(targetEntity: Group::class, mappedBy: 'members', cascade: ['persist', 'remove'])]
+    private Collection $groups;
 
     public function __construct()
     {
         $this->id = Uuid::v4();
-        $this->organizations = new ArrayCollection();
+        $this->groups = new ArrayCollection();
     }
 
     public function getEmail(): ?string
@@ -86,7 +86,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->email;
     }
 
-    #[Groups(['user.read', 'organization.read.full'])]
+    #[Groups(['user.read', 'group.read.full'])]
     public function getName(): ?string
     {
         return $this->firstname . ' ' . $this->lastname;
@@ -182,49 +182,49 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    public function getActiveOrganization(): ?Organization
+    public function getActiveGroup(): ?Group
     {
-        return $this->activeOrganization;
+        return $this->activeGroup;
     }
 
-    public function setActiveOrganization(?Organization $activeOrganization): static
+    public function setActiveGroup(?Group $activeGroup): static
     {
-        $this->activeOrganization = $activeOrganization;
+        $this->activeGroup = $activeGroup;
 
         return $this;
     }
 
     /**
-     * @return Collection<int, Organization>
+     * @return Collection<int, Group>
      */
-    public function getOrganizations(): Collection
+    public function getGroups(): Collection
     {
-        return $this->organizations;
+        return $this->groups;
     }
 
-    public function isMemberOfOrganization(?Organization $organization): bool
+    public function isMemberOfGroup(?Group $group): bool
     {
-        if ($organization === null) {
+        if ($group === null) {
             return false;
         }
 
-        return $this->organizations->contains($organization);
+        return $this->groups->contains($group);
     }
 
-    public function addOrganization(Organization $organization): static
+    public function addGroup(Group $group): static
     {
-        if (!$this->organizations->contains($organization)) {
-            $this->organizations->add($organization);
-            $organization->addMember($this);
+        if (!$this->groups->contains($group)) {
+            $this->groups->add($group);
+            $group->addMember($this);
         }
 
         return $this;
     }
 
-    public function removeOrganization(Organization $organization): static
+    public function removeGroup(Group $group): static
     {
-        if ($this->organizations->removeElement($organization)) {
-            $organization->removeMember($this);
+        if ($this->groups->removeElement($group)) {
+            $group->removeMember($this);
         }
 
         return $this;

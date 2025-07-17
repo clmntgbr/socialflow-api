@@ -4,7 +4,7 @@ namespace App\EventListener;
 
 use App\Application\Command\PublishCluster;
 use App\Application\Command\ValidateCluster;
-use App\Entity\Organization;
+use App\Entity\Group;
 use App\Entity\Post\Cluster;
 use Doctrine\Bundle\DoctrineBundle\Attribute\AsDoctrineListener;
 use Doctrine\ORM\Event\PostLoadEventArgs;
@@ -15,7 +15,7 @@ use Symfony\Component\Messenger\Bridge\Amqp\Transport\AmqpStamp;
 use Symfony\Component\Messenger\MessageBusInterface;
 
 #[AsDoctrineListener(event: Events::postLoad)]
-final class OrganizationListener
+final class GroupListener
 {
     public function __construct(
         private Security $security
@@ -24,8 +24,8 @@ final class OrganizationListener
 
     public function postLoad(PostLoadEventArgs $postLoadEventArgs): void
     {
-        $organization = $postLoadEventArgs->getObject();
-        if (!$organization instanceof Organization) {
+        $group = $postLoadEventArgs->getObject();
+        if (!$group instanceof Group) {
             return;
         }
 
@@ -36,8 +36,8 @@ final class OrganizationListener
             return;
         }
 
-        if ((string) $organization->getAdmin()->getId() === (string) $user->getId()) {
-            $organization->markAsAdmin();
+        if ((string) $group->getAdmin()->getId() === (string) $user->getId()) {
+            $group->markAsAdmin();
         }
     }
 }
