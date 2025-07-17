@@ -4,14 +4,13 @@ namespace App\Serializer;
 
 use ApiPlatform\State\SerializerContextBuilderInterface;
 use App\Entity\Group;
+use App\Entity\User;
 use App\Service\ContextService;
 use Symfony\Component\HttpFoundation\Request;
 
 class SerializerContextBuilder implements SerializerContextBuilderInterface
 {
-    private array $allowedEntity = [
-        Group::class,
-    ];
+    private array $disabledEntity = [];
 
     public function __construct(
         private readonly SerializerContextBuilderInterface $serializerContextBuilder,
@@ -24,11 +23,11 @@ class SerializerContextBuilder implements SerializerContextBuilderInterface
         $context = $this->serializerContextBuilder->createFromRequest($request, $normalization, $extractedAttributes);
         $resourceClass = $context['resource_class'] ?? null;
 
-        if (!in_array($resourceClass, $this->allowedEntity, true)) {
+        if (in_array($resourceClass, $this->disabledEntity, true)) {
             return $context;
         }
 
-        $data = $request->query->get('serializer', '');
+        $data = $request->query->get('serializer', 'none');
         $groups = $this->contextService->getGroups($data);
 
         if (is_null($groups)) {

@@ -2,9 +2,8 @@
 
 namespace App\Dto\User;
 
-class PatchUser
+class PatchUserName
 {
     public ?string $firstname = null;
     public ?string $lastname = null;
-    public ?string $activeGroupId = null;
 }

@@ -3,6 +3,8 @@
 namespace App\Application\CommandHandler;
 
 use App\Application\Command\UpdateUser;
+use App\Application\Command\UpdateUserActiveGroup;
+use App\Application\Command\UpdateUserName;
 use App\Entity\User;
 use App\Repository\GroupRepository;
 use App\Repository\UserRepository;
@@ -11,7 +13,7 @@ use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use Symfony\Component\Messenger\MessageBusInterface;
 
 #[AsMessageHandler]
-final class UpdateUserHandler
+final class UpdateUserActiveGroupHandler
 {
     public function __construct(
         private UserRepository $userRepository,
@@ -21,7 +23,7 @@ final class UpdateUserHandler
     ) {
     }
 
-    public function __invoke(UpdateUser $message): void
+    public function __invoke(UpdateUserActiveGroup $message): void
     {
         /** @var ?User $user */
         $user = $this->userRepository->findOneBy([
@@ -34,16 +36,8 @@ final class UpdateUserHandler
             return;
         }
 
-        if (null !== $message->patchUser->firstname) {
-            $user->setFirstname($message->patchUser->firstname);
-        }
-
-        if (null !== $message->patchUser->lastname) {
-            $user->setLastname($message->patchUser->lastname);
-        }
-
-        if ($message->patchUser->activeGroupId) {
-            $group = $this->groupRepository->find($message->patchUser->activeGroupId);
+        if ($message->patchUserActiveGroup->activeGroupId) {
+            $group = $this->groupRepository->find($message->patchUserActiveGroup->activeGroupId);
             if ($user->isMemberOfGroup($group)) {
                 $user->setActiveGroup($group);
             }

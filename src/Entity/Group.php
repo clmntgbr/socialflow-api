@@ -67,13 +67,13 @@ class Group
         $this->members = new ArrayCollection();
     }
 
-    #[Groups(['group.read', 'group.read.full'])]
+    #[Groups(['group.read.full'])]
     public function getCreatedAt()
     {
         return $this->createdAt;
     }
 
-    #[Groups(['group.read', 'group.read.full'])]
+    #[Groups(['group.read.full'])]
     public function getUpdatedAt()
     {
         return $this->updatedAt;

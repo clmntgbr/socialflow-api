@@ -5,7 +5,11 @@ namespace App\Entity;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\Patch;
+use App\ApiResource\PatchUserActiveGroupController;
 use App\ApiResource\PatchUserController;
+use App\ApiResource\PatchUserNameController;
+use App\Dto\User\PatchUserActiveGroup;
+use App\Dto\User\PatchUserName;
 use App\Entity\Trait\UuidTrait;
 use App\Repository\UserRepository;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -25,13 +29,14 @@ use Symfony\Component\Uid\Uuid;
     operations: [
         new Get(
             uriTemplate: '/me',
-            normalizationContext: ['groups' => ['user.read']],
         ),
         new Patch(
-            uriTemplate: '/me',
-            controller: PatchUserController::class,
-            normalizationContext: ['groups' => ['user.read']],
-            denormalizationContext: ['groups' => ['user.write']],
+            uriTemplate: '/me/name',
+            controller: PatchUserNameController::class,
+        ),
+        new Patch(
+            uriTemplate: '/me/active-group',
+            controller: PatchUserActiveGroupController::class,
         ),
     ]
 )]
@@ -45,11 +50,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?string $email = null;
 
     #[ORM\Column(type: Types::STRING)]
-    #[Groups(['user.read', 'group.read.full', 'user.write'])]
+    #[Groups(['user.read', 'group.read.full'])]
     private string $firstname;
 
     #[ORM\Column(type: Types::STRING)]
-    #[Groups(['user.read', 'group.read.full', 'user.write'])]
+    #[Groups(['user.read', 'group.read.full'])]
     private string $lastname;
 
     /**
@@ -69,7 +74,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[ORM\ManyToOne(targetEntity: Group::class)]
     #[ORM\JoinColumn(nullable: true)]
-    #[Groups(['user.read', 'user.write'])]
+    #[Groups(['user.read'])]
     private ?Group $activeGroup = null;
 
     #[ORM\ManyToMany(targetEntity: Group::class, mappedBy: 'members', cascade: ['persist', 'remove'])]

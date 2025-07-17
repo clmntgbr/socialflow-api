@@ -3,7 +3,10 @@
 namespace App\ApiResource;
 
 use App\Application\Command\UpdateUser;
+use App\Application\Command\UpdateUserName;
+use App\Dto\Context;
 use App\Dto\User\PatchUser;
+use App\Dto\User\PatchUserName;
 use App\Entity\User;
 use App\Repository\GroupRepository;
 use App\Repository\UserRepository;
@@ -19,7 +22,7 @@ use Symfony\Component\Serializer\Context\Normalizer\ObjectNormalizerContextBuild
 use Symfony\Component\Serializer\SerializerInterface;
 
 #[AsController]
-class PatchUserController
+class PatchUserNameController
 {
     public function __construct(
         private Security $security,
@@ -32,8 +35,8 @@ class PatchUserController
     }
 
     public function __invoke(
-        #[MapRequestPayload] PatchUser $data,
-        Request $request,
+        #[MapRequestPayload] PatchUserName $data,
+        Context $context,
     ): JsonResponse {
         $user = $this->security->getUser();
 
@@ -41,20 +44,13 @@ class PatchUserController
             throw new \RuntimeException('User not authenticated.');
         }
 
-        $this->messageBus->dispatch(new UpdateUser(
+        $this->messageBus->dispatch(new UpdateUserName(
             userId: $user->getId(),
-            patchUser: $data
+            patchUserName: $data
         ));
 
-        $groupsParam = $request->query->get('groups', 'user.read');
-        $groups = $this->contextService->getGroups($groupsParam);
-
-        $context = (new ObjectNormalizerContextBuilder())
-            ->withGroups($groups)
-            ->toArray();
-
         return new JsonResponse(
-            data: $this->serializer->serialize($user, 'json', $context),
+            data: $this->serializer->serialize($user, 'json', $context->getGroups()),
             status: Response::HTTP_OK,
             json: true
         );

@@ -4,7 +4,7 @@ namespace App\Service;
 
 class ContextService
 {
-    public function getGroups(string $groups): ?array
+    public function getGroups(?string $groups): ?array
     {
         if (empty($groups)) {
             return null;
