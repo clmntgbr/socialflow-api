@@ -28,7 +28,7 @@ final class CreateGroupHandler
 
         $group = (new Group())
             ->addMember($user)
-            ->setName($user->getFirstname() . "'s group")
+            ->setName($user->getFirstname()."'s group")
             ->setAdmin($user);
 
         $user->setActiveGroup($group);

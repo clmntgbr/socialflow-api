@@ -36,6 +36,7 @@ class SerializerContextBuilder implements SerializerContextBuilderInterface
         }
 
         $context['groups'] = $groups;
+
         return $context;
     }
 }

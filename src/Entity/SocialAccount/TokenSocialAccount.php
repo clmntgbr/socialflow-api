@@ -2,20 +2,8 @@
 
 namespace App\Entity\SocialAccount;
 
-use ApiPlatform\Doctrine\Orm\Filter\SearchFilter;
-use ApiPlatform\Metadata\ApiFilter;
-use ApiPlatform\Metadata\ApiResource;
-use ApiPlatform\Metadata\Delete;
-use ApiPlatform\Metadata\Get;
-use ApiPlatform\Metadata\GetCollection;
-use App\Entity\Group;
-use App\Entity\Post\Cluster;
 use App\Entity\Trait\UuidTrait;
-use App\Enum\SocialAccountStatus;
-use App\Repository\SocialAccount\SocialAccountRepository;
 use App\Repository\SocialAccount\TokenSocialAccountRepository;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Timestampable\Traits\TimestampableEntity;
@@ -31,7 +19,7 @@ class TokenSocialAccount
     #[ORM\Column(type: Types::STRING)]
     #[Groups(['social_account.read', 'group.read.full'])]
     private string $socialAccountId;
-    
+
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $token = null;
 

@@ -55,7 +55,7 @@ final class CreateOrUpdateFacebookAccountHandler extends CreateOrUpdateAccountHa
         if (null === $token) {
             $token = new TokenSocialAccount();
         }
-    
+
         $token
             ->setSocialAccountId($message->facebookAccount->id)
             ->setExpireAt($date)

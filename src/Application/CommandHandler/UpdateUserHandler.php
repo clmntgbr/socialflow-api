@@ -2,19 +2,12 @@
 
 namespace App\Application\CommandHandler;
 
-use App\Application\Command\CleanPost;
-use App\Application\Command\RemoveMediaPost;
-use App\Application\Command\UpdateMediaPostStatus;
 use App\Application\Command\UpdateUser;
-use App\Entity\Post\Post;
 use App\Entity\User;
-use App\Enum\MediaStatus;
 use App\Repository\GroupRepository;
-use App\Repository\Post\PostRepository;
 use App\Repository\UserRepository;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
-use Symfony\Component\Messenger\Bridge\Amqp\Transport\AmqpStamp;
 use Symfony\Component\Messenger\MessageBusInterface;
 
 #[AsMessageHandler]
@@ -40,7 +33,7 @@ final class UpdateUserHandler
 
             return;
         }
-        
+
         if (null !== $message->patchUser->firstname) {
             $user->setFirstname($message->patchUser->firstname);
         }

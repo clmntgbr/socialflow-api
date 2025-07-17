@@ -89,16 +89,17 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[Groups(['user.read', 'group.read.full'])]
     public function getName(): ?string
     {
-        return $this->firstname . ' ' . $this->lastname;
+        return $this->firstname.' '.$this->lastname;
     }
 
     public function setEmail(string $email): static
     {
-        if ($this->email !== null && $this->email !== $email) {
+        if (null !== $this->email && $this->email !== $email) {
             return $this;
         }
 
         $this->email = $email;
+
         return $this;
     }
 
@@ -204,7 +205,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function isMemberOfGroup(?Group $group): bool
     {
-        if ($group === null) {
+        if (null === $group) {
             return false;
         }
 

@@ -52,7 +52,7 @@ final class CreateOrUpdateTwitterAccountHandler extends CreateOrUpdateAccountHan
         if (null === $token) {
             $token = new TokenSocialAccount();
         }
-    
+
         $token
             ->setSocialAccountId($message->twitterAccount->id)
             ->setToken($message->twitterToken->oauthToken)

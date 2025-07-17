@@ -4,7 +4,6 @@ namespace App\ApiResource;
 
 use App\Application\Command\UpdateUser;
 use App\Dto\User\PatchUser;
-use App\Entity\Group;
 use App\Entity\User;
 use App\Repository\GroupRepository;
 use App\Repository\UserRepository;
@@ -15,9 +14,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\AsController;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Messenger\MessageBusInterface;
-use Symfony\Component\Serializer\Attribute\Context;
 use Symfony\Component\Serializer\Context\Normalizer\ObjectNormalizerContextBuilder;
 use Symfony\Component\Serializer\SerializerInterface;
 
@@ -30,19 +27,20 @@ class PatchUserController
         private ContextService $contextService,
         private GroupRepository $groupRepository,
         private UserRepository $userRepository,
-        private MessageBusInterface $messageBus
-    ) {}
+        private MessageBusInterface $messageBus,
+    ) {
+    }
 
     public function __invoke(
         #[MapRequestPayload] PatchUser $data,
-        Request $request
+        Request $request,
     ): JsonResponse {
         $user = $this->security->getUser();
 
         if (!$user instanceof User) {
             throw new \RuntimeException('User not authenticated.');
         }
-        
+
         $this->messageBus->dispatch(new UpdateUser(
             userId: $user->getId(),
             patchUser: $data

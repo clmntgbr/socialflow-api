@@ -55,7 +55,7 @@ final class CreateOrUpdateLinkedinAccountHandler extends CreateOrUpdateAccountHa
         if (null === $token) {
             $token = new TokenSocialAccount();
         }
-    
+
         $token
             ->setSocialAccountId($message->linkedinAccount->id)
             ->setExpireAt($date)

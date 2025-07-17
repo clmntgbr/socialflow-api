@@ -2,7 +2,6 @@
 
 namespace App\ApiResource;
 
-use App\Entity\Group;
 use App\Entity\User;
 use App\Service\ContextService;
 use Symfony\Bundle\SecurityBundle\Security;
@@ -10,7 +9,6 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\AsController;
-use Symfony\Component\Serializer\Attribute\Context;
 use Symfony\Component\Serializer\Context\Normalizer\ObjectNormalizerContextBuilder;
 use Symfony\Component\Serializer\SerializerInterface;
 
@@ -20,8 +18,9 @@ class GetActiveGroupController
     public function __construct(
         private Security $security,
         private readonly SerializerInterface $serializer,
-        private ContextService $contextService
-    ) {}
+        private ContextService $contextService,
+    ) {
+    }
 
     public function __invoke(Request $request): JsonResponse
     {

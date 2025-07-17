@@ -9,7 +9,7 @@ final class UpdateUser
 {
     public function __construct(
         public Uuid $userId,
-        public PatchUser $patchUser
+        public PatchUser $patchUser,
     ) {
     }
 }

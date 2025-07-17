@@ -54,7 +54,7 @@ final class CreateOrUpdateYoutubeAccountHandler extends CreateOrUpdateAccountHan
         if (null === $token) {
             $token = new TokenSocialAccount();
         }
-    
+
         $token
             ->setSocialAccountId($message->youtubeAccount->id)
             ->setToken($message->youtubeToken->token)
