@@ -26,7 +26,7 @@ class SocialAccountController extends AbstractController
     ) {
     }
 
-    #[Route('/social_account/{provider}/connect_url',
+    #[Route('/social_accounts/{provider}/connect_url',
         name: 'social_account_connect_url',
         methods: ['GET'],
         requirements: ['provider' => 'facebook|linkedin|twitter|thread|youtube|instagram']
