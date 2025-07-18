@@ -115,8 +115,8 @@ class TwitterSocialAccountService implements SocialAccountServiceInterface
     public function getMe(SocialAccount $twitterSocialAccount): void
     {
         $account = $this->getAccounts(new TwitterAccessToken(
-            oauthToken: $twitterSocialAccount->getToken(),
-            oauthTokenSecret: $twitterSocialAccount->getTokenSecret(),
+            oauthToken: $twitterSocialAccount->getTokenSocialAccount()->getToken(),
+            oauthTokenSecret: $twitterSocialAccount->getTokenSocialAccount()->getTokenSecret(),
         ));
 
         $this->bus->dispatch(new UpdateTwitterSocialAccount(
@@ -150,7 +150,7 @@ class TwitterSocialAccountService implements SocialAccountServiceInterface
             ));
 
             return new RedirectResponse($this->frontUrl.'/validation');
-        } catch (\Exception $exception) {
+        } catch (\Exception) {
             return new RedirectResponse(sprintf('%s?error=true&message=3', $this->frontUrl));
         }
     }

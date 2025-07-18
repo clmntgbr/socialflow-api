@@ -46,7 +46,7 @@ class SocialAccountController extends AbstractController
         );
     }
 
-    #[Route('/social_account/{provider}/callback',
+    #[Route('/social_accounts/{provider}/callback',
         name: 'social_account_callback',
         methods: ['GET'],
         requirements: ['provider' => 'facebook|linkedin|twitter|thread|youtube|instagram']

@@ -24,7 +24,7 @@ security:
             jwt: ~
     access_control:
         - { path: ^/api/docs, roles: PUBLIC_ACCESS, methods: GET }
-        - { path: '^/api/social_account/[^/]+/callback', roles: PUBLIC_ACCESS, methods: GET }
+        - { path: '^/api/social_accounts/[^/]+/callback', roles: PUBLIC_ACCESS, methods: GET }
         - { path: ^/api/token, roles: PUBLIC_ACCESS, methods: POST }
         - { path: ^/api/status, roles: PUBLIC_ACCESS, methods: GET }
         - { path: ^/api, roles: ROLE_USER }

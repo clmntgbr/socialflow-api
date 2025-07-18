@@ -12,12 +12,12 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 
 interface SocialAccountServiceInterface
 {
-    public const FACEBOOK_CALLBACK_URL = '/social_account/facebook/callback';
-    public const TWITTER_CALLBACK_URL = '/social_account/twitter/callback';
-    public const INSTAGRAM_CALLBACK_URL = '/social_account/instagram/callback';
-    public const YOUTUBE_CALLBACK_URL = '/social_account/youtube/callback';
-    public const THREAD_CALLBACK_URL = '/social_account/thread/callback';
-    public const LINKEDIN_CALLBACK_URL = '/social_account/linkedin/callback';
+    public const FACEBOOK_CALLBACK_URL = '/social_accounts/facebook/callback';
+    public const TWITTER_CALLBACK_URL = '/social_accounts/twitter/callback';
+    public const INSTAGRAM_CALLBACK_URL = '/social_accounts/instagram/callback';
+    public const YOUTUBE_CALLBACK_URL = '/social_accounts/youtube/callback';
+    public const THREAD_CALLBACK_URL = '/social_accounts/thread/callback';
+    public const LINKEDIN_CALLBACK_URL = '/social_accounts/linkedin/callback';
 
     public function getConnectUrl(User $user): string;
 
