@@ -99,7 +99,7 @@ class YoutubeSocialAccountService implements SocialAccountServiceInterface
                 ));
             }
 
-            return new RedirectResponse($this->frontUrl.'/validation');
+            return new RedirectResponse($this->frontUrl.'/social-accounts/validation');
         } catch (\Exception $exception) {
             return new RedirectResponse(sprintf('%s?error=true&message=3', $this->frontUrl));
         }

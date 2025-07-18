@@ -91,7 +91,7 @@ class LinkedinSocialAccountService implements SocialAccountServiceInterface
                 linkedinToken: $accessToken,
             ));
 
-            return new RedirectResponse($this->frontUrl.'/validation');
+            return new RedirectResponse($this->frontUrl.'/social-accounts/validation');
         } catch (\Exception) {
             return new RedirectResponse(sprintf('%s?error=true&message=3', $this->frontUrl));
         }

@@ -149,7 +149,7 @@ class TwitterSocialAccountService implements SocialAccountServiceInterface
                 twitterToken: $accessToken,
             ));
 
-            return new RedirectResponse($this->frontUrl.'/validation');
+            return new RedirectResponse($this->frontUrl.'/social-accounts/validation');
         } catch (\Exception) {
             return new RedirectResponse(sprintf('%s?error=true&message=3', $this->frontUrl));
         }
