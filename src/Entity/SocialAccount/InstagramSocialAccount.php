@@ -13,7 +13,6 @@ use Symfony\Component\Serializer\Attribute\Groups;
 )]
 class InstagramSocialAccount extends SocialAccount implements SocialAccountInterface
 {
-    #[Groups(['social_account.read'])]
     public function getType(): string
     {
         return 'instagram';

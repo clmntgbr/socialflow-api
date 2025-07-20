@@ -20,7 +20,6 @@ class LinkedinSocialAccount extends SocialAccount implements SocialAccountInterf
     #[Groups(['social_account.read'])]
     private string $name;
 
-    #[Groups(['social_account.read'])]
     public function getType(): string
     {
         return 'linkedin';
@@ -38,7 +37,6 @@ class LinkedinSocialAccount extends SocialAccount implements SocialAccountInterf
         return $this;
     }
 
-    #[Groups(['social_account.read'])]
     public function getRestrictions(): RestrictionInterface
     {
         return new LinkedinRestrictions($this);

@@ -30,7 +30,6 @@ class YoutubeSocialAccount extends SocialAccount implements SocialAccountInterfa
     #[Groups(['social_account.read'])]
     private ?string $description = null;
 
-    #[Groups(['social_account.read'])]
     public function getType(): string
     {
         return 'youtube';

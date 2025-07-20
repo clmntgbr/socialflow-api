@@ -113,10 +113,11 @@ class SocialAccount implements SocialAccountInterface
     public function __construct()
     {
         $this->id = Uuid::v4();
-        $this->status = SocialAccountStatus::PENDING_VALIDATION->value;
+        $this->status = SocialAccountStatus::PENDING_ACTIVATION->value;
         $this->clusters = new ArrayCollection();
     }
 
+    #[Groups(['social_account.read'])]
     public function getType(): string
     {
         return '';

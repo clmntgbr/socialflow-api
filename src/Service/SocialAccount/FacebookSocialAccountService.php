@@ -103,7 +103,7 @@ class FacebookSocialAccountService implements SocialAccountServiceInterface
                 ));
             }
 
-            return new RedirectResponse($this->frontUrl.'/social-accounts/validation');
+            return new RedirectResponse($this->frontUrl.'/social-accounts/activation');
         } catch (\Exception) {
             return new RedirectResponse(sprintf('%s?error=true&message=3', $this->frontUrl));
         }

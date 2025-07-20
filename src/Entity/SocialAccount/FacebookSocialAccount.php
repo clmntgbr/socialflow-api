@@ -20,7 +20,6 @@ class FacebookSocialAccount extends SocialAccount implements SocialAccountInterf
     #[Groups(['social_account.read'])]
     private ?string $link = null;
 
-    #[Groups(['social_account.read'])]
     public function getType(): string
     {
         return 'facebook';
@@ -43,7 +42,6 @@ class FacebookSocialAccount extends SocialAccount implements SocialAccountInterf
         return $this;
     }
 
-    #[Groups(['social_account.read'])]
     public function getRestrictions(): RestrictionInterface
     {
         return new FacebookRestrictions($this);

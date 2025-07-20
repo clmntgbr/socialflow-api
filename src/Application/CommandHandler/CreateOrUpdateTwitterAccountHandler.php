@@ -73,11 +73,11 @@ final class CreateOrUpdateTwitterAccountHandler extends CreateOrUpdateAccountHan
 
         $this->twitterSocialAccountRepository->save($twitterAccount, true);
 
-        if ($twitterAccount->getStatus() !== SocialAccountStatus::PENDING_VALIDATION->value) {
+        if ($twitterAccount->getStatus() !== SocialAccountStatus::PENDING_ACTIVATION->value) {
             return;
         }
 
-        $this->messageBus->dispatch(new RemoveSocialAccount(socialAccountId: $twitterAccount->getId(), status: SocialAccountStatus::PENDING_VALIDATION), [
+        $this->messageBus->dispatch(new RemoveSocialAccount(socialAccountId: $twitterAccount->getId(), status: SocialAccountStatus::PENDING_ACTIVATION), [
             new DelayStamp(360000000),
             new AmqpStamp('async-low'),
         ]);

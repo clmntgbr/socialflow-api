@@ -29,7 +29,6 @@ class TwitterSocialAccount extends SocialAccount implements SocialAccountInterfa
         parent::__construct();
     }
 
-    #[Groups(['social_account.read'])]
     public function getType(): string
     {
         return 'twitter';
@@ -59,7 +58,6 @@ class TwitterSocialAccount extends SocialAccount implements SocialAccountInterfa
         return $this;
     }
 
-    #[Groups(['social_account.read'])]
     public function getRestrictions(): RestrictionInterface
     {
         return new TwitterRestrictions($this);
