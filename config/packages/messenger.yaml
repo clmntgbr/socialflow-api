@@ -75,3 +75,5 @@ framework:
             App\Application\Command\RemoveMediaPost: async-medium
             App\Application\Command\DeleteDraftPost: async-medium
             App\Application\Command\CleanPost: async-medium
+            App\Application\Command\SocialAccountOnDelete: async-medium
+            App\Application\Command\SocialAccountOnActivation: async-medium
