@@ -123,6 +123,12 @@ class SocialAccount implements SocialAccountInterface
         return '';
     }
 
+    public function markAsActive(): static
+    {
+        $this->status = SocialAccountStatus::ACTIVE->value;
+        return $this;
+    }
+
     public function isActive(): bool
     {
         return $this->status === SocialAccountStatus::ACTIVE->value;

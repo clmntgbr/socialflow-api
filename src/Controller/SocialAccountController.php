@@ -3,13 +3,16 @@
 namespace App\Controller;
 
 use App\Dto\SocialAccount\GetSocialAccountCallback;
+use App\Dto\SocialAccount\SocialAccountActivate;
 use App\Entity\User;
+use App\Service\SocialAccount\SocialAccountService;
 use App\Service\SocialAccount\SocialAccountServiceFactory;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\MapQueryString;
+use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\CurrentUser;
 use Symfony\Component\Serializer\SerializerInterface;
@@ -20,6 +23,7 @@ class SocialAccountController extends AbstractController
 {
     public function __construct(
         private readonly SocialAccountServiceFactory $socialAccountServiceFactory,
+        private readonly SocialAccountService $socialAccountService,
         private readonly SerializerInterface $serializer,
         private readonly ValidatorInterface $validator,
         private string $frontUrl,
@@ -67,5 +71,21 @@ class SocialAccountController extends AbstractController
         }
 
         return $service->create($getSocialAccountCallback);
+    }
+
+    #[Route('/social_accounts/activate',
+        name: 'social_account_activate',
+        methods: ['POST'],
+    )]
+    public function activate(
+        #[MapRequestPayload(type: SocialAccountActivate::class)] array $socialAccountActivate,
+    ): JsonResponse {
+        $this->socialAccountService->activate($socialAccountActivate);
+
+        return new JsonResponse(
+            data: $this->serializer->serialize([], 'json'),
+            status: Response::HTTP_OK,
+            json: true
+        );
     }
 }

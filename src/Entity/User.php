@@ -10,6 +10,7 @@ use App\ApiResource\PatchUserController;
 use App\ApiResource\PatchUserNameController;
 use App\Dto\User\PatchUserActiveGroup;
 use App\Dto\User\PatchUserName;
+use App\Entity\SocialAccount\SocialAccount;
 use App\Entity\Trait\UuidTrait;
 use App\Repository\UserRepository;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -258,5 +259,14 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->lastname = $lastname;
 
         return $this;
+    }
+
+    public function isSocialAccountInActiveGroup(SocialAccount $socialAccount): bool
+    {
+        if (null === $this->activeGroup || null === $socialAccount->getGroup()) {
+            return false;
+        }
+
+        return $socialAccount->getGroup()->getId() === $this->activeGroup->getId();
     }
 }
