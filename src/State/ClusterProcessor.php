@@ -31,7 +31,6 @@ class ClusterProcessor implements ProcessorInterface
 
         $request = $context['request'] ?? null;
         $payload = json_decode($request->getContent(), true);
-
         $posts = $this->denormalizer->denormalize(
             data: $payload['posts'] ?? [],
             type: $this->getPostEntityClass($data->getSocialAccount()),
@@ -39,7 +38,6 @@ class ClusterProcessor implements ProcessorInterface
         );
 
         $data->initializePosts($posts);
-
         return $this->persistProcessor->process($data, $operation, $uriVariables, $context);
     }
 

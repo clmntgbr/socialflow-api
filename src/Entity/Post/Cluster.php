@@ -6,7 +6,7 @@ use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Delete;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
-use ApiPlatform\Metadata\Post as PostOperation;
+use ApiPlatform\Metadata\Post as PostCluster;
 use App\Entity\SocialAccount\FacebookSocialAccount;
 use App\Entity\SocialAccount\InstagramSocialAccount;
 use App\Entity\SocialAccount\LinkedinSocialAccount;
@@ -40,7 +40,7 @@ use Symfony\Component\Uid\Uuid;
         new Delete(
             processor: DeleteClusterProcessor::class,
         ),
-        new PostOperation(
+        new PostCluster(
             processor: ClusterProcessor::class,
             normalizationContext: ['groups' => ['cluster.read']],
             denormalizationContext: ['groups' => ['cluster.write']],
@@ -55,6 +55,10 @@ class Cluster
     #[ORM\Column(type: Types::STRING)]
     #[Groups(['cluster.read', 'cluster.write'])]
     private string $status;
+
+    #[ORM\Column(type: Types::STRING)]
+    #[Groups(['cluster.read', 'cluster.write'])]
+    private string $name;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     #[Groups(['cluster.read', 'cluster.write'])]
@@ -75,6 +79,7 @@ class Cluster
         $this->id = Uuid::v4();
         $this->status = ClusterStatus::DRAFT->value;
         $this->posts = new ArrayCollection();
+        $this->programmedAt = new \DateTime();
     }
 
     public function initializePosts(array $posts)
@@ -168,6 +173,18 @@ class Cluster
     public function setProgrammedAt(?\DateTime $programmedAt): static
     {
         $this->programmedAt = $programmedAt;
+
+        return $this;
+    }
+
+    public function getName(): ?string
+    {
+        return $this->name;
+    }
+
+    public function setName(?string $name): static
+    {
+        $this->name = $name;
 
         return $this;
     }

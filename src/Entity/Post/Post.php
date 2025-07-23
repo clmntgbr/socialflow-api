@@ -4,6 +4,8 @@ namespace App\Entity\Post;
 
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Delete;
+use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\GetCollection;
 use App\Entity\Trait\UuidTrait;
 use App\Enum\MediaStatus;
 use App\Enum\PostStatus;

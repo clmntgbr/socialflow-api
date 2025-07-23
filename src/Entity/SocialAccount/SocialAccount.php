@@ -60,43 +60,43 @@ class SocialAccount implements SocialAccountInterface
     use TimestampableEntity;
 
     #[ORM\Column(type: Types::STRING)]
-    #[Groups(['social_account.read', 'group.read.full'])]
+    #[Groups(['social_account.read', 'group.read.full', 'cluster.read'])]
     private string $socialAccountId;
 
     #[ORM\Column(type: Types::STRING)]
-    #[Groups(['social_account.read', 'group.read.full'])]
+    #[Groups(['social_account.read', 'group.read.full', 'cluster.read'])]
     private string $username;
 
     #[ORM\Column(type: Types::STRING, nullable: true)]
-    #[Groups(['social_account.read', 'group.read.full'])]
+    #[Groups(['social_account.read', 'group.read.full', 'cluster.read'])]
     private ?string $email = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
-    #[Groups(['social_account.read', 'group.read.full'])]
+    #[Groups(['social_account.read', 'group.read.full', 'cluster.read'])]
     private ?string $avatarUrl = null;
 
     #[ORM\Column(type: Types::BOOLEAN)]
-    #[Groups(['social_account.read', 'group.read.full'])]
+    #[Groups(['social_account.read', 'group.read.full', 'cluster.read'])]
     private bool $isVerified = false;
 
     #[ORM\Column(type: Types::INTEGER)]
-    #[Groups(['social_account.read', 'group.read.full'])]
+    #[Groups(['social_account.read', 'group.read.full', 'cluster.read'])]
     private int $followers = 0;
 
     #[ORM\Column(type: Types::INTEGER)]
-    #[Groups(['social_account.read', 'group.read.full'])]
+    #[Groups(['social_account.read', 'group.read.full', 'cluster.read'])]
     private int $followings = 0;
 
     #[ORM\Column(type: Types::INTEGER)]
-    #[Groups(['social_account.read', 'group.read.full'])]
+    #[Groups(['social_account.read', 'group.read.full', 'cluster.read'])]
     private int $likes = 0;
 
     #[ORM\Column(type: Types::STRING, nullable: true)]
-    #[Groups(['social_account.read', 'group.read.full'])]
+    #[Groups(['social_account.read', 'group.read.full', 'cluster.read'])]
     private ?string $website = null;
 
     #[ORM\Column(type: Types::STRING)]
-    #[Groups(['social_account.read', 'group.read.full'])]
+    #[Groups(['social_account.read', 'group.read.full', 'cluster.read'])]
     private string $status;
 
     #[ORM\ManyToOne(targetEntity: Group::class, inversedBy: 'socialAccounts')]
@@ -117,7 +117,7 @@ class SocialAccount implements SocialAccountInterface
         $this->clusters = new ArrayCollection();
     }
 
-    #[Groups(['social_account.read'])]
+    #[Groups(['social_account.read', 'cluster.read'])]
     public function getType(): string
     {
         return '';
@@ -153,7 +153,7 @@ class SocialAccount implements SocialAccountInterface
 
     public function setUsername(string $username): static
     {
-        $this->username = $username;
+        $this->username = str_replace('@', '', $username);
 
         return $this;
     }
